@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Gallery</string>
+    <string name="no_address_message">Local IP address not set</string>
+    <string name="no_address_icon_description">No address</string>
 </resources>
