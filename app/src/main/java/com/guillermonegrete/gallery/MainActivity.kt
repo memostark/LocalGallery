@@ -9,12 +9,16 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.guillermonegrete.gallery.data.source.DefaultFilesRepository
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var loadingIcon: ProgressBar
     private lateinit var folderListContainer: View
     private lateinit var messageContainer: View
+    private lateinit var folderList: RecyclerView
+
+    private lateinit var adapter: FolderAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,12 +27,8 @@ class MainActivity : AppCompatActivity() {
         val rootFolderName: TextView = findViewById(R.id.textView_root_folder)
         rootFolderName.text = "Root folder name"
 
-        val folderList: RecyclerView = findViewById(R.id.folders_list)
-        val items = listOf("Person", "Another", "Stuff")
-
-        val adapter = FolderAdapter(items)
+        folderList = findViewById(R.id.folders_list)
         folderList.layoutManager = GridLayoutManager(this, 2)
-        folderList.adapter = adapter
 
         loadingIcon = findViewById(R.id.folders_progress_bar)
         folderListContainer = findViewById(R.id.folders_linear_layout)
@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setViewModel() {
-        val factory = ViewModelFactory(SettingsRepository())
+        val factory = ViewModelFactory(SettingsRepository(), DefaultFilesRepository())
         val viewModel = ViewModelProvider(this, factory).get(FoldersViewModel::class.java).apply {
 
             dataLoading.observe(this@MainActivity, Observer {
@@ -48,6 +48,11 @@ class MainActivity : AppCompatActivity() {
             hasUrl.observe(this@MainActivity, Observer {
                 folderListContainer.visibility = if(it) View.VISIBLE else View.GONE
                 messageContainer.visibility = if(it) View.GONE else View.VISIBLE
+            })
+
+            folders.observe(this@MainActivity, Observer {
+                adapter = FolderAdapter(it)
+                folderList.adapter = adapter
             })
             loadFolders()
         }

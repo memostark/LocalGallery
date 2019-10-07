@@ -2,20 +2,22 @@ package com.guillermonegrete.gallery
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.guillermonegrete.gallery.data.source.FilesRepository
 
 /**
  * Factory for all ViewModels.
  */
 @Suppress("UNCHECKED_CAST")
 class ViewModelFactory constructor(
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val filesRepository: FilesRepository
 ) : ViewModelProvider.NewInstanceFactory() {
 
     override fun <T : ViewModel> create(modelClass: Class<T>) =
         with(modelClass) {
             when {
                 isAssignableFrom(FoldersViewModel::class.java) ->
-                    FoldersViewModel(settingsRepository)
+                    FoldersViewModel(settingsRepository, filesRepository)
                 else ->
                     throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
             }

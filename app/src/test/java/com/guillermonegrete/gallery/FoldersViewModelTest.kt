@@ -1,7 +1,9 @@
 package com.guillermonegrete.gallery
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import org.junit.Assert
+import com.guillermonegrete.gallery.data.source.FakeFilesRepository
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -11,6 +13,7 @@ class FoldersViewModelTest {
     private lateinit var viewModel: FoldersViewModel
 
     private lateinit var settingsRepository: SettingsRepository
+    private lateinit var filesRepository: FakeFilesRepository
 
     @get:Rule
     var instantExecutorRule = InstantTaskExecutorRule()
@@ -18,7 +21,10 @@ class FoldersViewModelTest {
     @Before
     fun setUp(){
         settingsRepository = SettingsRepository()
-        viewModel = FoldersViewModel(settingsRepository)
+        filesRepository = FakeFilesRepository()
+        viewModel = FoldersViewModel(settingsRepository, filesRepository)
+
+        filesRepository.addFolders("first", "second")
     }
 
     @Test
@@ -27,6 +33,16 @@ class FoldersViewModelTest {
 
         viewModel.loadFolders()
 
-        Assert.assertFalse(LiveDataTestUtil.getValue(viewModel.hasUrl))
+        assertFalse(LiveDataTestUtil.getValue(viewModel.hasUrl))
+    }
+
+    @Test
+    fun loads_folders(){
+        settingsRepository.serverUrl = "url"
+
+        viewModel.loadFolders()
+
+        val folders = LiveDataTestUtil.getValue(viewModel.folders)
+        assertEquals(folders.size, 2)
     }
 }
