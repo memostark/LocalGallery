@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.guillermonegrete.gallery.data.source.FilesRepository
+import com.guillermonegrete.gallery.data.source.SettingsRepository
 
 class FoldersViewModel(
     private val settings: SettingsRepository,

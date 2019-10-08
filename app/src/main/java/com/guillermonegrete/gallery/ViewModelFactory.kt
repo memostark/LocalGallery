@@ -2,6 +2,7 @@ package com.guillermonegrete.gallery
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.guillermonegrete.gallery.data.source.DefaultSettingsRepository
 import com.guillermonegrete.gallery.data.source.FilesRepository
 
 /**
@@ -9,7 +10,7 @@ import com.guillermonegrete.gallery.data.source.FilesRepository
  */
 @Suppress("UNCHECKED_CAST")
 class ViewModelFactory constructor(
-    private val settingsRepository: SettingsRepository,
+    private val settingsRepository: DefaultSettingsRepository,
     private val filesRepository: FilesRepository
 ) : ViewModelProvider.NewInstanceFactory() {
 

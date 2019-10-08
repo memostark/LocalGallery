@@ -2,6 +2,7 @@ package com.guillermonegrete.gallery
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.guillermonegrete.gallery.data.source.FakeFilesRepository
+import com.guillermonegrete.gallery.data.source.FakeSettingsRepository
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Before
@@ -12,7 +13,7 @@ class FoldersViewModelTest {
 
     private lateinit var viewModel: FoldersViewModel
 
-    private lateinit var settingsRepository: SettingsRepository
+    private lateinit var settingsRepository: FakeSettingsRepository
     private lateinit var filesRepository: FakeFilesRepository
 
     @get:Rule
@@ -20,7 +21,7 @@ class FoldersViewModelTest {
 
     @Before
     fun setUp(){
-        settingsRepository = SettingsRepository()
+        settingsRepository = FakeSettingsRepository()
         filesRepository = FakeFilesRepository()
         viewModel = FoldersViewModel(settingsRepository, filesRepository)
 

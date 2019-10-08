@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.guillermonegrete.gallery.data.source.DefaultFilesRepository
+import com.guillermonegrete.gallery.data.source.DefaultSettingsRepository
 
 class MainActivity : AppCompatActivity() {
 
@@ -38,7 +39,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setViewModel() {
-        val factory = ViewModelFactory(SettingsRepository(), DefaultFilesRepository())
+        val factory = ViewModelFactory(DefaultSettingsRepository(this), DefaultFilesRepository())
         val viewModel = ViewModelProvider(this, factory).get(FoldersViewModel::class.java).apply {
 
             dataLoading.observe(this@MainActivity, Observer {
