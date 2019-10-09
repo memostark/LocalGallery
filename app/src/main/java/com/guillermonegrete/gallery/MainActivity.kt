@@ -2,9 +2,14 @@ package com.guillermonegrete.gallery
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
+import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
@@ -36,6 +41,38 @@ class MainActivity : AppCompatActivity() {
         messageContainer = findViewById(R.id.folders_message_container)
 
         setViewModel()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        return when(item?.itemId){
+            R.id.set_server_menu_item -> {
+                showServerDialog()
+                true
+            }
+
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun showServerDialog() {
+        val dialogLayout = layoutInflater.inflate(R.layout.dialog_set_server_address, null)
+        val addressText: EditText = dialogLayout.findViewById(R.id.server_address_edit)
+
+        val builder = AlertDialog.Builder(this)
+        builder.setMessage("Set server address")
+            .setView(dialogLayout)
+            .setPositiveButton(R.string.ok) { _, _ ->
+                Toast.makeText(this, "Address set ${addressText.text}", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton(R.string.cancel) { _, _ ->}
+
+        builder.create().show()
+
     }
 
     private fun setViewModel() {
