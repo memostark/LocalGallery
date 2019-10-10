@@ -46,4 +46,28 @@ class FoldersViewModelTest {
         val folders = LiveDataTestUtil.getValue(viewModel.folders)
         assertEquals(folders.size, 2)
     }
+
+    @Test
+    fun load_set_address_dialog_data(){
+        val savedURL = "preset-url"
+        settingsRepository.serverUrl = savedURL
+
+        viewModel.loadDialogData()
+
+        val data = LiveDataTestUtil.getValue(viewModel.openDialog)
+        assertEquals(savedURL, data)
+    }
+
+    @Test
+    fun when_server_changed_reload_folders(){
+        // save new server address
+        val newURL = "new-url"
+        viewModel.updateUrl(newURL)
+
+        assertEquals(settingsRepository.serverUrl, newURL)
+
+        // load folders with new address
+        val folders = LiveDataTestUtil.getValue(viewModel.folders)
+        assertEquals(folders.size, 2)
+    }
 }

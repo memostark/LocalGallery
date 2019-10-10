@@ -11,7 +11,13 @@ class DefaultSettingsRepository(context: Context): SettingsRepository {
         return preferences.getString(SERVER_URL_KEY, "") ?: ""
     }
 
+    override fun saveServerURL(url: String) {
+        val editor = preferences.edit()
+        editor.putString(SERVER_URL_KEY, url)
+        editor.apply()
+    }
+
     companion object{
-        val SERVER_URL_KEY = "server_url"
+        const val SERVER_URL_KEY = "server_url"
     }
 }

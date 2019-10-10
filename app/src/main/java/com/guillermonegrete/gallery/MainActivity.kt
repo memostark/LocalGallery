@@ -26,6 +26,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var adapter: FolderAdapter
 
+    private lateinit var viewModel: FoldersViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -51,7 +53,7 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         return when(item?.itemId){
             R.id.set_server_menu_item -> {
-                showServerDialog()
+                viewModel.loadDialogData()
                 true
             }
 
@@ -59,15 +61,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showServerDialog() {
+    private fun showServerDialog(presetData: String) {
         val dialogLayout = layoutInflater.inflate(R.layout.dialog_set_server_address, null)
         val addressText: EditText = dialogLayout.findViewById(R.id.server_address_edit)
+        addressText.setText(presetData)
+        addressText.setSelection(presetData.length)
 
         val builder = AlertDialog.Builder(this)
         builder.setMessage("Set server address")
             .setView(dialogLayout)
             .setPositiveButton(R.string.ok) { _, _ ->
-                Toast.makeText(this, "Address set ${addressText.text}", Toast.LENGTH_SHORT).show()
+                viewModel.updateUrl(addressText.text.toString())
             }
             .setNegativeButton(R.string.cancel) { _, _ ->}
 
@@ -77,7 +81,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setViewModel() {
         val factory = ViewModelFactory(DefaultSettingsRepository(this), DefaultFilesRepository())
-        val viewModel = ViewModelProvider(this, factory).get(FoldersViewModel::class.java).apply {
+        viewModel = ViewModelProvider(this, factory).get(FoldersViewModel::class.java).apply {
 
             dataLoading.observe(this@MainActivity, Observer {
                 loadingIcon.visibility = if(it) View.VISIBLE else View.GONE
@@ -86,6 +90,10 @@ class MainActivity : AppCompatActivity() {
             hasUrl.observe(this@MainActivity, Observer {
                 folderListContainer.visibility = if(it) View.VISIBLE else View.GONE
                 messageContainer.visibility = if(it) View.GONE else View.VISIBLE
+            })
+
+            openDialog.observe(this@MainActivity, Observer {
+                showServerDialog(it)
             })
 
             folders.observe(this@MainActivity, Observer {

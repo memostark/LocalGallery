@@ -20,16 +20,30 @@ class FoldersViewModel(
     private val _folders = MutableLiveData<List<String>>()
     val folders: LiveData<List<String>> = _folders
 
+    private val _openDialog = MutableLiveData<String>()
+    val openDialog: LiveData<String> = _openDialog
+
+    fun loadDialogData(){
+        val serverUrl = settings.getServerURL()
+        _openDialog.value = serverUrl
+    }
+
+    fun updateUrl(url: String){
+        settings.saveServerURL(url)
+        loadFolders()
+    }
+
     fun loadFolders(){
         _dataLoading.value = true
 
         val serverUrl = settings.getServerURL()
         if(serverUrl.isEmpty()){
-            _dataLoading.value = false
             _hasUrl.value = false
         }else{
             val items = filesRepository.getFolders()
+            _hasUrl.value = true
             _folders.value = items
         }
+        _dataLoading.value = false
     }
 }

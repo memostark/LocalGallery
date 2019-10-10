@@ -7,4 +7,8 @@ class FakeSettingsRepository: SettingsRepository {
     override fun getServerURL(): String{
         return serverUrl
     }
+
+    override fun saveServerURL(url: String) {
+        serverUrl = url
+    }
 }
