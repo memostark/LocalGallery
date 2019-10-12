@@ -6,6 +6,12 @@ class FakeFilesRepository: FilesRepository {
 
     var filesServiceData = arrayListOf<String>()
 
+    var repoUrl = ""
+
+    override fun updateRepoURL(newURL: String) {
+        repoUrl = newURL
+    }
+
     override fun getFolders(): List<String> {
         return filesServiceData
     }

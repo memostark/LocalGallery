@@ -23,12 +23,18 @@ class FoldersViewModel(
     private val _openDialog = MutableLiveData<String>()
     val openDialog: LiveData<String> = _openDialog
 
+    init {
+        val url = settings.getServerURL()
+        filesRepository.updateRepoURL(url)
+    }
+
     fun loadDialogData(){
         val serverUrl = settings.getServerURL()
         _openDialog.value = serverUrl
     }
 
     fun updateUrl(url: String){
+        filesRepository.updateRepoURL(url)
         settings.saveServerURL(url)
         loadFolders()
     }

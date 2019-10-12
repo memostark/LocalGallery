@@ -64,7 +64,9 @@ class FoldersViewModelTest {
         val newURL = "new-url"
         viewModel.updateUrl(newURL)
 
+        // Assert new url set
         assertEquals(settingsRepository.serverUrl, newURL)
+        assertEquals(filesRepository.repoUrl, newURL)
 
         // load folders with new address
         val folders = LiveDataTestUtil.getValue(viewModel.folders)
