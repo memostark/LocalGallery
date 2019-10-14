@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/folders_fragment_dest">
+
+    <fragment
+        android:name="com.guillermonegrete.gallery.FoldersListFragment"
+        android:id="@+id/folders_fragment_dest"
+        android:label="Folders list"
+        tools:layout="@layout/fragment_folders_list"/>
+
+</navigation>

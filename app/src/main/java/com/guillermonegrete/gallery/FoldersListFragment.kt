@@ -32,7 +32,7 @@ class FoldersListFragment: Fragment(){
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val root = inflater.inflate(R.layout.fragment_folders_list, container)
+        val root = inflater.inflate(R.layout.fragment_folders_list, container, false)
 
         val rootFolderName: TextView = root.findViewById(R.id.textView_root_folder)
         rootFolderName.text = "Root folder name"
