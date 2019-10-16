@@ -1,6 +1,7 @@
 package com.guillermonegrete.gallery.data.source
 
 import androidx.annotation.VisibleForTesting
+import io.reactivex.Single
 
 class FakeFilesRepository: FilesRepository {
 
@@ -14,6 +15,10 @@ class FakeFilesRepository: FilesRepository {
 
     override fun getFolders(): List<String> {
         return filesServiceData
+    }
+
+    override fun getObservableFolders(): Single<List<String>> {
+        return Single.just(filesServiceData)
     }
 
     @VisibleForTesting

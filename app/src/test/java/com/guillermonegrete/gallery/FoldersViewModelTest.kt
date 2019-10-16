@@ -19,13 +19,15 @@ class FoldersViewModelTest {
     @get:Rule
     var instantExecutorRule = InstantTaskExecutorRule()
 
+    private val defaultFolders = listOf("first", "second")
+
     @Before
     fun setUp(){
         settingsRepository = FakeSettingsRepository()
         filesRepository = FakeFilesRepository()
         viewModel = FoldersViewModel(settingsRepository, filesRepository)
 
-        filesRepository.addFolders("first", "second")
+        filesRepository.addFolders(*defaultFolders.toTypedArray())
     }
 
     @Test
@@ -71,5 +73,33 @@ class FoldersViewModelTest {
         // load folders with new address
         val folders = LiveDataTestUtil.getValue(viewModel.folders)
         assertEquals(folders.size, 2)
+    }
+
+    @Test
+    fun show_message_observable_when_no_url_set(){
+        settingsRepository.serverUrl = ""
+
+        viewModel.getFolders().test()
+            .assertComplete()
+            .assertValue(emptyList())
+
+        // Url not set
+        viewModel.urlAvailable.test()
+            .assertValues(false)
+    }
+
+    @Test
+    fun load_folders_with_observables(){
+        // Has url set
+        settingsRepository.serverUrl = "url"
+
+        // Return list correctly
+        viewModel.getFolders().test()
+            .assertComplete()
+            .assertValue(defaultFolders)
+
+        // Url is set
+        viewModel.urlAvailable.test()
+            .assertValues(true)
     }
 }

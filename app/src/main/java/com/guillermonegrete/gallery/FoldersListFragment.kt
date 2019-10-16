@@ -5,6 +5,7 @@ import android.view.*
 import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -13,6 +14,9 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.guillermonegrete.gallery.data.source.DefaultFilesRepository
 import com.guillermonegrete.gallery.data.source.DefaultSettingsRepository
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 
 class FoldersListFragment: Fragment(){
 
@@ -24,6 +28,8 @@ class FoldersListFragment: Fragment(){
     private lateinit var adapter: FolderAdapter
 
     private lateinit var viewModel: FoldersViewModel
+
+    private val disposable = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,6 +53,11 @@ class FoldersListFragment: Fragment(){
         setViewModel()
 
         return root
+    }
+
+    override fun onStop() {
+        super.onStop()
+        disposable.dispose()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -104,7 +115,31 @@ class FoldersListFragment: Fragment(){
                 adapter = FolderAdapter(it)
                 folderList.adapter = adapter
             })
-            loadFolders()
+
+            // RxJava
+            disposable.add(loadingIndicator
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {loadingIcon.visibility = if(it) View.VISIBLE else View.GONE}
+            )
+
+            disposable.add(urlAvailable
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe{
+                    folderListContainer.visibility = if(it) View.VISIBLE else View.GONE
+                    messageContainer.visibility = if(it) View.GONE else View.VISIBLE
+                }
+            )
+
+            disposable.add(getFolders()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    {data -> folderList.adapter = FolderAdapter(data)},
+                    {error -> Toast.makeText(context, "Error: ${error.message}", Toast.LENGTH_SHORT).show()}
+                )
+            )
         }
     }
 
