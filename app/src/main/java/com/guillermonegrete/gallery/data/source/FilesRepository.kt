@@ -6,7 +6,5 @@ interface FilesRepository {
 
     fun updateRepoURL(newURL: String)
 
-    fun getFolders(): List<String>
-
-    fun getObservableFolders(): Single<List<String>>
+    fun getFolders(): Single<List<String>>
 }

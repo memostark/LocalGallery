@@ -2,6 +2,7 @@ package com.guillermonegrete.gallery.data.source
 
 import android.content.Context
 import android.preference.PreferenceManager
+import io.reactivex.Single
 
 class DefaultSettingsRepository(context: Context): SettingsRepository {
 
@@ -9,6 +10,10 @@ class DefaultSettingsRepository(context: Context): SettingsRepository {
 
     override fun getServerURL(): String{
         return preferences.getString(SERVER_URL_KEY, "") ?: ""
+    }
+
+    override fun getServerUrl(): Single<String> {
+        return Single.just(preferences.getString(SERVER_URL_KEY, "") ?: "")
     }
 
     override fun saveServerURL(url: String) {

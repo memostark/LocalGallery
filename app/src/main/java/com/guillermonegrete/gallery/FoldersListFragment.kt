@@ -68,7 +68,8 @@ class FoldersListFragment: Fragment(){
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId){
             R.id.set_server_menu_item -> {
-                viewModel.loadDialogData()
+//                viewModel.loadDialogData()
+                loadDialogData()
                 true
             }
 
@@ -86,7 +87,8 @@ class FoldersListFragment: Fragment(){
         builder.setMessage("Set server address")
             .setView(dialogLayout)
             .setPositiveButton(R.string.ok) { _, _ ->
-                viewModel.updateUrl(addressText.text.toString())
+                viewModel.updateServerUrl(addressText.text.toString())
+                loadFoldersData()
             }
             .setNegativeButton(R.string.cancel) { _, _ ->}
 
@@ -98,25 +100,6 @@ class FoldersListFragment: Fragment(){
         val factory = ViewModelFactory(DefaultSettingsRepository(requireContext()), DefaultFilesRepository())
         viewModel = ViewModelProvider(this, factory).get(FoldersViewModel::class.java).apply {
 
-            dataLoading.observe(viewLifecycleOwner, Observer {
-                loadingIcon.visibility = if(it) View.VISIBLE else View.GONE
-            })
-
-            hasUrl.observe(viewLifecycleOwner, Observer {
-                folderListContainer.visibility = if(it) View.VISIBLE else View.GONE
-                messageContainer.visibility = if(it) View.GONE else View.VISIBLE
-            })
-
-            openDialog.observe(viewLifecycleOwner, Observer {
-                showServerDialog(it)
-            })
-
-            folders.observe(viewLifecycleOwner, Observer {
-                adapter = FolderAdapter(it)
-                folderList.adapter = adapter
-            })
-
-            // RxJava
             disposable.add(loadingIndicator
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -131,16 +114,30 @@ class FoldersListFragment: Fragment(){
                     messageContainer.visibility = if(it) View.GONE else View.VISIBLE
                 }
             )
-
-            disposable.add(getFolders()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                    {data -> folderList.adapter = FolderAdapter(data)},
-                    {error -> Toast.makeText(context, "Error: ${error.message}", Toast.LENGTH_SHORT).show()}
-                )
-            )
         }
+        loadFoldersData()
+    }
+
+    private fun loadFoldersData(){
+        disposable.add(viewModel.getFolders()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                {data -> folderList.adapter = FolderAdapter(data)},
+                {error -> Toast.makeText(context, "Error: ${error.message}", Toast.LENGTH_SHORT).show()}
+            )
+        )
+    }
+
+    private fun loadDialogData(){
+        disposable.add(viewModel.getDialogData()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { showServerDialog(it) },
+                { error -> println("Unable to log dialog data $error") }
+            )
+        )
     }
 
 }

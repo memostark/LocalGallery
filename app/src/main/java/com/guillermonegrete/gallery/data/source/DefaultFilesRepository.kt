@@ -36,16 +36,7 @@ class DefaultFilesRepository: FilesRepository {
         fileAPI = retrofit.create(FilesServerAPI::class.java)
     }
 
-    override fun getFolders(): List<String> {
-        val mapList = fileAPI.getFolders()
-            .subscribeOn(Schedulers.io())
-            .doOnError { println("Error found stop") }
-            .onErrorReturn { emptyList() }
-            .blockingGet()
-        return mapList.map { it["name"] ?: "" }
-    }
-
-    override fun getObservableFolders(): Single<List<String>> {
+    override fun getFolders(): Single<List<String>> {
         /*
          * FileServerAPI.getFolders() returns list of maps e.g [{"name": "Folder name"}, ..],
          * we need to map it to list of strings e.g. ["Folder name", ...]

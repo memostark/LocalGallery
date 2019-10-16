@@ -13,11 +13,7 @@ class FakeFilesRepository: FilesRepository {
         repoUrl = newURL
     }
 
-    override fun getFolders(): List<String> {
-        return filesServiceData
-    }
-
-    override fun getObservableFolders(): Single<List<String>> {
+    override fun getFolders(): Single<List<String>> {
         return Single.just(filesServiceData)
     }
 
