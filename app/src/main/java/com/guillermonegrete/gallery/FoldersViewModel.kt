@@ -17,6 +17,8 @@ class FoldersViewModel(
 
     val networkError: BehaviorSubject<Boolean> = BehaviorSubject.create()
 
+    val openFolder: BehaviorSubject<String> = BehaviorSubject.create()
+
     init {
         val url = settings.getServerURL()
         filesRepository.updateRepoURL(url)
@@ -51,5 +53,9 @@ class FoldersViewModel(
                 loadingIndicator.onNext(false)
                 networkError.onNext(true)
             }
+    }
+
+    fun openFolder(folder: String){
+        openFolder.onNext(folder)
     }
 }

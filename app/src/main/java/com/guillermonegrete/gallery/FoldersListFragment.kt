@@ -6,10 +6,12 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.guillermonegrete.gallery.data.source.DefaultFilesRepository
 import com.guillermonegrete.gallery.data.source.DefaultSettingsRepository
+import com.guillermonegrete.gallery.files.FilesListFragment
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -117,6 +119,12 @@ class FoldersListFragment: Fragment(){
                 }
             )
 
+            disposable.add(openFolder
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe{ openFileFragment(it) }
+            )
+
             disposable.add(networkError
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -138,7 +146,7 @@ class FoldersListFragment: Fragment(){
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
-                {data -> folderList.adapter = FolderAdapter(data)},
+                {data -> folderList.adapter = FolderAdapter(data, viewModel)},
                 {error -> println("Error loading folders: ${error.message}")}
             )
         )
@@ -153,6 +161,14 @@ class FoldersListFragment: Fragment(){
                 { error -> println("Unable to log dialog data $error") }
             )
         )
+    }
+
+    private fun openFileFragment(folder: String){
+//        val action = FoldersListFragmentDi
+        Toast.makeText(context, "Item clicked: $folder", Toast.LENGTH_SHORT).show()
+        val bundle = Bundle()
+        bundle.putString(FilesListFragment.FOLDER_KEY, folder)
+        findNavController().navigate(R.id.files_fragment_dest, bundle)
     }
 
 }
