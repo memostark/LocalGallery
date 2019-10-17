@@ -2,13 +2,9 @@ package com.guillermonegrete.gallery
 
 import android.os.Bundle
 import android.view.*
-import android.widget.EditText
-import android.widget.ProgressBar
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,9 +19,9 @@ class FoldersListFragment: Fragment(){
     private lateinit var loadingIcon: ProgressBar
     private lateinit var folderListContainer: View
     private lateinit var messageContainer: View
+    private lateinit var messageIcon: ImageView
+    private lateinit var messageText: TextView
     private lateinit var folderList: RecyclerView
-
-    private lateinit var adapter: FolderAdapter
 
     private lateinit var viewModel: FoldersViewModel
 
@@ -48,7 +44,10 @@ class FoldersListFragment: Fragment(){
 
         loadingIcon = root.findViewById(R.id.folders_progress_bar)
         folderListContainer = root.findViewById(R.id.folders_linear_layout)
+
         messageContainer = root.findViewById(R.id.folders_message_container)
+        messageIcon = root.findViewById(R.id.foldersMessageIcon)
+        messageText = root.findViewById(R.id.foldersMessageMain)
 
         setViewModel()
 
@@ -68,7 +67,6 @@ class FoldersListFragment: Fragment(){
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId){
             R.id.set_server_menu_item -> {
-//                viewModel.loadDialogData()
                 loadDialogData()
                 true
             }
@@ -110,8 +108,25 @@ class FoldersListFragment: Fragment(){
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe{
+                    if(!it){
+                        messageText.text = resources.getString(R.string.no_address_message)
+                        messageIcon.setImageResource(R.drawable.ic_settings_input_antenna_black_24dp)
+                    }
                     folderListContainer.visibility = if(it) View.VISIBLE else View.GONE
                     messageContainer.visibility = if(it) View.GONE else View.VISIBLE
+                }
+            )
+
+            disposable.add(networkError
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {
+                    if(it){
+                        messageText.text = resources.getString(R.string.error_message)
+                        messageIcon.setImageResource(R.drawable.ic_error_outline_black_24dp)
+                    }
+                    folderListContainer.visibility = if (it) View.GONE else View.VISIBLE
+                    messageContainer.visibility = if (it) View.VISIBLE else View.GONE
                 }
             )
         }
@@ -124,7 +139,7 @@ class FoldersListFragment: Fragment(){
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 {data -> folderList.adapter = FolderAdapter(data)},
-                {error -> Toast.makeText(context, "Error: ${error.message}", Toast.LENGTH_SHORT).show()}
+                {error -> println("Error loading folders: ${error.message}")}
             )
         )
     }

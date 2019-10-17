@@ -2,6 +2,7 @@ package com.guillermonegrete.gallery.data.source
 
 import androidx.annotation.VisibleForTesting
 import io.reactivex.Single
+import java.lang.RuntimeException
 
 class FakeFilesRepository: FilesRepository {
 
@@ -9,11 +10,18 @@ class FakeFilesRepository: FilesRepository {
 
     var repoUrl = ""
 
+    private var shouldReturnError = false
+
+    fun setReturnError(value: Boolean) {
+        shouldReturnError = value
+    }
+
     override fun updateRepoURL(newURL: String) {
         repoUrl = newURL
     }
 
     override fun getFolders(): Single<List<String>> {
+        if(shouldReturnError) return Single.error(RuntimeException())
         return Single.just(filesServiceData)
     }
 

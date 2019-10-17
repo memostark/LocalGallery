@@ -7,6 +7,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.lang.RuntimeException
 
 class FoldersViewModelTest {
 
@@ -81,5 +82,19 @@ class FoldersViewModelTest {
         viewModel.getFolders().test()
             .assertComplete()
             .assertValue(defaultFolders)
+    }
+
+    @Test
+    fun show_error_layout_when_loading(){
+        filesRepository.setReturnError(true)
+
+        val savedURL = "preset-url"
+        settingsRepository.serverUrl = savedURL
+
+        viewModel.getFolders().test()
+            .assertError(RuntimeException::class.java)
+
+        viewModel.networkError.test()
+            .assertValues(true)
     }
 }

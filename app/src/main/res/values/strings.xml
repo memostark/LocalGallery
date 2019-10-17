@@ -1,9 +1,10 @@
 <resources>
     <string name="app_name">Gallery</string>
     <string name="no_address_message">Local IP address not set</string>
+    <string name="error_message">Error connecting with server</string>
     <string name="no_address_icon_description">No address</string>
     <string name="set_server_menu_title">Set server address</string>
-    <string name="ok">Ok</string>
+    <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="server_address_hint">E.g. 172.16.254.1:5000</string>
 </resources>
