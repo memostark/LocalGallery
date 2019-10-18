@@ -5,6 +5,8 @@ import com.guillermonegrete.gallery.data.source.FilesRepository
 import com.guillermonegrete.gallery.data.source.SettingsRepository
 import io.reactivex.Single
 import io.reactivex.subjects.BehaviorSubject
+import io.reactivex.subjects.PublishSubject
+import io.reactivex.subjects.Subject
 
 class FoldersViewModel(
     private val settings: SettingsRepository,
@@ -17,7 +19,7 @@ class FoldersViewModel(
 
     val networkError: BehaviorSubject<Boolean> = BehaviorSubject.create()
 
-    val openFolder: BehaviorSubject<String> = BehaviorSubject.create()
+    val openFolder: Subject<String> = PublishSubject.create()
 
     init {
         val url = settings.getServerURL()

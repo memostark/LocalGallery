@@ -51,14 +51,20 @@ class FoldersListFragment: Fragment(){
         messageIcon = root.findViewById(R.id.foldersMessageIcon)
         messageText = root.findViewById(R.id.foldersMessageMain)
 
-        setViewModel()
+        val factory = ViewModelFactory(DefaultSettingsRepository(requireContext()), DefaultFilesRepository())
+        viewModel = ViewModelProvider(this, factory).get(FoldersViewModel::class.java)
 
         return root
     }
 
+    override fun onStart() {
+        super.onStart()
+        setViewModel()
+    }
+
     override fun onStop() {
+        disposable.clear()
         super.onStop()
-        disposable.dispose()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -97,8 +103,7 @@ class FoldersListFragment: Fragment(){
     }
 
     private fun setViewModel() {
-        val factory = ViewModelFactory(DefaultSettingsRepository(requireContext()), DefaultFilesRepository())
-        viewModel = ViewModelProvider(this, factory).get(FoldersViewModel::class.java).apply {
+        viewModel.apply {
 
             disposable.add(loadingIndicator
                 .subscribeOn(Schedulers.computation())
