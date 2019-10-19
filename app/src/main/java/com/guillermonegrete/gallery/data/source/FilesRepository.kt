@@ -7,4 +7,6 @@ interface FilesRepository {
     fun updateRepoURL(newURL: String)
 
     fun getFolders(): Single<List<String>>
+
+    fun getFiles(folder: String): Single<List<String>>
 }

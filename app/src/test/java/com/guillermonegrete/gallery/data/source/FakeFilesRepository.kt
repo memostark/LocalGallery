@@ -6,7 +6,9 @@ import java.lang.RuntimeException
 
 class FakeFilesRepository: FilesRepository {
 
-    var filesServiceData = arrayListOf<String>()
+    var foldersServiceData = arrayListOf<String>()
+
+    var filesServiceData: LinkedHashMap<String, MutableList<String>> = LinkedHashMap()
 
     var repoUrl = ""
 
@@ -22,13 +24,27 @@ class FakeFilesRepository: FilesRepository {
 
     override fun getFolders(): Single<List<String>> {
         if(shouldReturnError) return Single.error(RuntimeException())
-        return Single.just(filesServiceData)
+        return Single.just(foldersServiceData)
+    }
+
+    override fun getFiles(folder: String): Single<List<String>> {
+        return Single.just(filesServiceData[folder])
     }
 
     @VisibleForTesting
     fun addFolders(vararg folders: String) {
         for (folder in folders) {
-            filesServiceData.add(folder)
+            foldersServiceData.add(folder)
+        }
+    }
+
+    @VisibleForTesting
+    fun addFiles(folder: String, vararg files: String) {
+        val fileList = filesServiceData[folder]
+        if(fileList == null){
+            filesServiceData[folder] = files.toMutableList()
+        }else{
+            fileList.addAll(files)
         }
     }
 }

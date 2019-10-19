@@ -5,7 +5,6 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.guillermonegrete.gallery.data.source.remote.FilesServerAPI
 import io.reactivex.Single
-import io.reactivex.schedulers.Schedulers
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
@@ -43,6 +42,16 @@ class DefaultFilesRepository: FilesRepository {
          */
         return fileAPI.getFolders()
             .flatMap { s ->  Single.just(s.map { it["name"] ?: "" })}
+    }
+
+    override fun getFiles(folder: String): Single<List<String>> {
+        return Single.just(listOf(
+            "https://google.com",
+            "https://twitter.com",
+            "https://youtube.com",
+            "https://github.com",
+            "https://bing.com"
+        ))
     }
 
     companion object{
