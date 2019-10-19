@@ -45,13 +45,7 @@ class DefaultFilesRepository: FilesRepository {
     }
 
     override fun getFiles(folder: String): Single<List<String>> {
-        return Single.just(listOf(
-            "https://google.com",
-            "https://twitter.com",
-            "https://youtube.com",
-            "https://github.com",
-            "https://bing.com"
-        ))
+        return fileAPI.getFiles(folder)
     }
 
     companion object{
