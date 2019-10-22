@@ -28,6 +28,7 @@ class FakeFilesRepository: FilesRepository {
     }
 
     override fun getFiles(folder: String): Single<List<String>> {
+        if(shouldReturnError) return Single.error(RuntimeException())
         return Single.just(filesServiceData[folder])
     }
 

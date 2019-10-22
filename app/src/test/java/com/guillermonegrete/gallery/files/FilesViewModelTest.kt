@@ -4,6 +4,7 @@ import com.guillermonegrete.gallery.data.source.FakeFilesRepository
 import com.guillermonegrete.gallery.data.source.FakeSettingsRepository
 import org.junit.Before
 import org.junit.Test
+import java.lang.RuntimeException
 
 class FilesViewModelTest {
 
@@ -32,5 +33,19 @@ class FilesViewModelTest {
         viewModel.loadFiles(defaultFolder).test()
             .assertComplete()
             .assertValue(defaultFiles)
+    }
+
+    @Test
+    fun show_error_layout_when_exception_loading(){
+        filesRepository.setReturnError(true)
+
+        val savedURL = "preset-url"
+        settingsRepository.serverUrl = savedURL
+
+        viewModel.loadFiles(defaultFolder).test()
+            .assertError(RuntimeException::class.java)
+
+        viewModel.networkError.test()
+            .assertValues(true)
     }
 }

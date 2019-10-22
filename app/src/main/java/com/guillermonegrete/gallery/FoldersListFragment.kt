@@ -169,8 +169,6 @@ class FoldersListFragment: Fragment(){
     }
 
     private fun openFileFragment(folder: String){
-//        val action = FoldersListFragmentDi
-        Toast.makeText(context, "Item clicked: $folder", Toast.LENGTH_SHORT).show()
         val bundle = Bundle()
         bundle.putString(FilesListFragment.FOLDER_KEY, folder)
         findNavController().navigate(R.id.files_fragment_dest, bundle)

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -19,6 +20,8 @@ import io.reactivex.schedulers.Schedulers
 
 class FilesListFragment: Fragment() {
 
+    private lateinit var loadingIcon: ProgressBar
+    private lateinit var messageContainer: View
     private lateinit var filesList: RecyclerView
 
     private lateinit var viewModel: FilesViewModel
@@ -42,6 +45,10 @@ class FilesListFragment: Fragment() {
         filesList = root.findViewById(R.id.files_list)
         filesList.layoutManager = LinearLayoutManager(context)
 
+        loadingIcon = root.findViewById(R.id.files_progress_bar)
+
+        messageContainer = root.findViewById(R.id.files_message_container)
+
         bindViewModel(folder)
 
         return root
@@ -53,8 +60,7 @@ class FilesListFragment: Fragment() {
     }
 
     private fun bindViewModel(folder: String){
-        disposable.add(viewModel
-            .loadFiles(folder)
+        disposable.add(viewModel.loadFiles(folder)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
@@ -62,6 +68,17 @@ class FilesListFragment: Fragment() {
                 { error -> println("Error loading files: ${error.message}") }
             )
         )
+
+        disposable.add(viewModel.loadingIndicator
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe{ loadingIcon.visibility = if(it) View.VISIBLE else View.GONE }
+        )
+
+        disposable.add(viewModel.networkError
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe{ messageContainer.visibility = if(it) View.VISIBLE else View.GONE })
     }
 
 
