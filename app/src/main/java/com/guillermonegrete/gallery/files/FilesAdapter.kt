@@ -1,10 +1,13 @@
 package com.guillermonegrete.gallery.files
 
+import android.content.Intent
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.guillermonegrete.gallery.R
 
 class FilesAdapter(private val files: List<String>): RecyclerView.Adapter<FilesAdapter.ViewHolder>() {
@@ -25,10 +28,22 @@ class FilesAdapter(private val files: List<String>): RecyclerView.Adapter<FilesA
         item: View
     ): RecyclerView.ViewHolder(item){
 
-        private val name: TextView = itemView.findViewById(R.id.name_text)
+        private val image: ImageView = itemView.findViewById(R.id.file_view)
 
         fun bind(item: String){
-            name.text = item
+            image.setOnClickListener { openLink(item) }
+
+            Glide.with(itemView)
+                .load(item)
+                .into(image)
+        }
+
+        private fun openLink(item: String){
+            val intent = Intent().apply {
+                action = Intent.ACTION_VIEW
+                data = Uri.parse(item)
+            }
+            itemView.context.startActivity(intent)
         }
     }
 }

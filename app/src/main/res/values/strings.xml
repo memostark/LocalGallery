@@ -7,4 +7,5 @@
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="server_address_hint">E.g. 172.16.254.1:5000</string>
+    <string name="file_item">File item</string>
 </resources>

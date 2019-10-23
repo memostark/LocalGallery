@@ -5,11 +5,12 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="16dp">
-    <TextView
-        android:id="@+id/name_text"
+
+    <ImageView
+        android:id="@+id/file_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:autoLink="web"
-        tools:text="Link"/>
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/file_item"
+        tools:srcCompat="@tools:sample/avatars" />
 
 </LinearLayout>
