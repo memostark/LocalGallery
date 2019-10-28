@@ -7,8 +7,9 @@ import io.reactivex.Single
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
+import javax.inject.Inject
 
-class FoldersViewModel(
+class FoldersViewModel @Inject constructor(
     private val settings: SettingsRepository,
     private val filesRepository: FilesRepository
 ): ViewModel() {

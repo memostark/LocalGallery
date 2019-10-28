@@ -6,6 +6,7 @@ import android.view.*
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
@@ -27,9 +28,8 @@ class FoldersListFragment: Fragment(){
     private lateinit var messageText: TextView
     private lateinit var folderList: RecyclerView
 
-    @Inject lateinit var filesRepository: DefaultFilesRepository
-    @Inject lateinit var settingsRepository: DefaultSettingsRepository
-    private lateinit var viewModel: FoldersViewModel
+    @Inject lateinit var viewModelFactory: ViewModelProvider.Factory
+    private val viewModel by viewModels<FoldersViewModel> { viewModelFactory }
 
     private val disposable = CompositeDisposable()
 
@@ -59,9 +59,6 @@ class FoldersListFragment: Fragment(){
         messageContainer = root.findViewById(R.id.folders_message_container)
         messageIcon = root.findViewById(R.id.foldersMessageIcon)
         messageText = root.findViewById(R.id.foldersMessageMain)
-
-        val factory = ViewModelFactory(settingsRepository, filesRepository)
-        viewModel = ViewModelProvider(this, factory).get(FoldersViewModel::class.java)
 
         return root
     }

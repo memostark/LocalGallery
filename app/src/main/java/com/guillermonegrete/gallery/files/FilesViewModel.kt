@@ -5,8 +5,9 @@ import com.guillermonegrete.gallery.data.source.FilesRepository
 import com.guillermonegrete.gallery.data.source.SettingsRepository
 import io.reactivex.Single
 import io.reactivex.subjects.BehaviorSubject
+import javax.inject.Inject
 
-class FilesViewModel(
+class FilesViewModel @Inject constructor(
     settings: SettingsRepository,
     private val filesRepository: FilesRepository
 ): ViewModel() {

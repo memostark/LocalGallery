@@ -8,14 +8,12 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
-import com.guillermonegrete.gallery.ViewModelFactory
-import com.guillermonegrete.gallery.data.source.DefaultFilesRepository
-import com.guillermonegrete.gallery.data.source.DefaultSettingsRepository
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -27,9 +25,8 @@ class FilesListFragment: Fragment() {
     private lateinit var messageContainer: View
     private lateinit var filesList: RecyclerView
 
-    @Inject lateinit var filesRepository: DefaultFilesRepository
-    @Inject lateinit var settingsRepository: DefaultSettingsRepository
-    private lateinit var viewModel: FilesViewModel
+    @Inject lateinit var viewModelFactory: ViewModelProvider.Factory
+    private val viewModel by viewModels<FilesViewModel> { viewModelFactory }
 
     private val disposable = CompositeDisposable()
 
@@ -48,9 +45,6 @@ class FilesListFragment: Fragment() {
         val folder = arguments?.getString(FOLDER_KEY) ?: ""
         val folderName: TextView = root.findViewById(R.id.folder_name_text)
         folderName.text = folder
-
-        val factory = ViewModelFactory(settingsRepository, filesRepository)
-        viewModel = ViewModelProvider(this, factory).get(FilesViewModel::class.java)
 
         filesList = root.findViewById(R.id.files_list)
         filesList.layoutManager = LinearLayoutManager(context)
