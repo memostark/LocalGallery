@@ -1,5 +1,6 @@
 package com.guillermonegrete.gallery
 
+import android.content.Context
 import android.os.Bundle
 import android.view.*
 import android.widget.*
@@ -15,6 +16,7 @@ import com.guillermonegrete.gallery.files.FilesListFragment
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import javax.inject.Inject
 
 class FoldersListFragment: Fragment(){
 
@@ -25,9 +27,16 @@ class FoldersListFragment: Fragment(){
     private lateinit var messageText: TextView
     private lateinit var folderList: RecyclerView
 
+    @Inject lateinit var filesRepository: DefaultFilesRepository
+    @Inject lateinit var settingsRepository: DefaultSettingsRepository
     private lateinit var viewModel: FoldersViewModel
 
     private val disposable = CompositeDisposable()
+
+    override fun onAttach(context: Context) {
+        (context.applicationContext as MyApplication).appComponent.inject(this)
+        super.onAttach(context)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,7 +60,7 @@ class FoldersListFragment: Fragment(){
         messageIcon = root.findViewById(R.id.foldersMessageIcon)
         messageText = root.findViewById(R.id.foldersMessageMain)
 
-        val factory = ViewModelFactory(DefaultSettingsRepository(requireContext()), DefaultFilesRepository())
+        val factory = ViewModelFactory(settingsRepository, filesRepository)
         viewModel = ViewModelProvider(this, factory).get(FoldersViewModel::class.java)
 
         return root

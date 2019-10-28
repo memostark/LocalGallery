@@ -1,5 +1,6 @@
 package com.guillermonegrete.gallery.files
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.ViewModelFactory
 import com.guillermonegrete.gallery.data.source.DefaultFilesRepository
@@ -17,6 +19,7 @@ import com.guillermonegrete.gallery.data.source.DefaultSettingsRepository
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import javax.inject.Inject
 
 class FilesListFragment: Fragment() {
 
@@ -24,9 +27,16 @@ class FilesListFragment: Fragment() {
     private lateinit var messageContainer: View
     private lateinit var filesList: RecyclerView
 
+    @Inject lateinit var filesRepository: DefaultFilesRepository
+    @Inject lateinit var settingsRepository: DefaultSettingsRepository
     private lateinit var viewModel: FilesViewModel
 
     private val disposable = CompositeDisposable()
+
+    override fun onAttach(context: Context) {
+        (context.applicationContext as MyApplication).appComponent.inject(this)
+        super.onAttach(context)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -39,7 +49,7 @@ class FilesListFragment: Fragment() {
         val folderName: TextView = root.findViewById(R.id.folder_name_text)
         folderName.text = folder
 
-        val factory = ViewModelFactory(DefaultSettingsRepository(requireContext()), DefaultFilesRepository())
+        val factory = ViewModelFactory(settingsRepository, filesRepository)
         viewModel = ViewModelProvider(this, factory).get(FilesViewModel::class.java)
 
         filesList = root.findViewById(R.id.files_list)

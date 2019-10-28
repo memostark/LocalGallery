@@ -3,8 +3,9 @@ package com.guillermonegrete.gallery.data.source
 import android.content.Context
 import android.preference.PreferenceManager
 import io.reactivex.Single
+import javax.inject.Inject
 
-class DefaultSettingsRepository(context: Context): SettingsRepository {
+class DefaultSettingsRepository @Inject constructor(context: Context): SettingsRepository {
 
     private val preferences = PreferenceManager.getDefaultSharedPreferences(context)
 

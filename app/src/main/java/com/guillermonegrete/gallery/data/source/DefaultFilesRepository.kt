@@ -8,8 +8,9 @@ import io.reactivex.Single
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
+import javax.inject.Inject
 
-class DefaultFilesRepository: FilesRepository {
+class DefaultFilesRepository @Inject constructor(): FilesRepository {
 
     private var fileAPI: FilesServerAPI
     private val gson: Gson = GsonBuilder()
