@@ -3,6 +3,7 @@ package com.guillermonegrete.gallery.data.source
 import android.util.Patterns
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.source.remote.FilesServerAPI
 import io.reactivex.Single
 import retrofit2.Retrofit
@@ -36,17 +37,21 @@ class DefaultFilesRepository @Inject constructor(): FilesRepository {
         fileAPI = retrofit.create(FilesServerAPI::class.java)
     }
 
-    override fun getFolders(): Single<List<String>> {
+    override fun getFolders(): Single<List<Folder>> {
         /*
          * FileServerAPI.getFolders() returns list of maps e.g [{"name": "Folder name"}, ..],
          * we need to map it to list of strings e.g. ["Folder name", ...]
          */
         return fileAPI.getFolders()
-            .flatMap { s ->  Single.just(s.map { it["name"] ?: "" })}
+            .flatMap { s ->  Single.just(s.map { createFolder(it["name"] ?: "") })}
     }
 
     override fun getFiles(folder: String): Single<List<String>> {
         return fileAPI.getFiles(folder)
+    }
+
+    private fun createFolder(name: String): Folder{
+        return Folder(name, "", 0)
     }
 
     companion object{

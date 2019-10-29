@@ -1,12 +1,13 @@
 package com.guillermonegrete.gallery.data.source
 
 import androidx.annotation.VisibleForTesting
+import com.guillermonegrete.gallery.data.Folder
 import io.reactivex.Single
 import java.lang.RuntimeException
 
 class FakeFilesRepository: FilesRepository {
 
-    var foldersServiceData = arrayListOf<String>()
+    var foldersServiceData = arrayListOf<Folder>()
 
     var filesServiceData: LinkedHashMap<String, MutableList<String>> = LinkedHashMap()
 
@@ -22,7 +23,7 @@ class FakeFilesRepository: FilesRepository {
         repoUrl = newURL
     }
 
-    override fun getFolders(): Single<List<String>> {
+    override fun getFolders(): Single<List<Folder>> {
         if(shouldReturnError) return Single.error(RuntimeException())
         return Single.just(foldersServiceData)
     }
@@ -33,7 +34,7 @@ class FakeFilesRepository: FilesRepository {
     }
 
     @VisibleForTesting
-    fun addFolders(vararg folders: String) {
+    fun addFolders(vararg folders: Folder) {
         for (folder in folders) {
             foldersServiceData.add(folder)
         }

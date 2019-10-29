@@ -1,6 +1,7 @@
 package com.guillermonegrete.gallery.folders
 
 import androidx.lifecycle.ViewModel
+import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.source.FilesRepository
 import com.guillermonegrete.gallery.data.source.SettingsRepository
 import io.reactivex.Single
@@ -36,7 +37,7 @@ class FoldersViewModel @Inject constructor(
         settings.saveServerURL(url)
     }
 
-    fun getFolders(): Single<List<String>>{
+    fun getFolders(): Single<List<Folder>>{
         loadingIndicator.onNext(true)
         val serverUrl = settings.getServerURL()
 

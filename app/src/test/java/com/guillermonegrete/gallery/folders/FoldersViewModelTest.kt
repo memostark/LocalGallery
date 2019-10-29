@@ -1,6 +1,7 @@
 package com.guillermonegrete.gallery.folders
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.source.FakeFilesRepository
 import com.guillermonegrete.gallery.data.source.FakeSettingsRepository
 import org.junit.Assert.assertEquals
@@ -19,7 +20,10 @@ class FoldersViewModelTest {
     @get:Rule
     var instantExecutorRule = InstantTaskExecutorRule()
 
-    private val defaultFolders = listOf("first", "second")
+    private val defaultFolders = listOf(
+        Folder("first", "", 0),
+        Folder("second", "", 0)
+    )
 
     @Before
     fun setUp(){

@@ -4,11 +4,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.guillermonegrete.gallery.R
+import com.guillermonegrete.gallery.data.Folder
 
 class FolderAdapter(
-    private val folders: List<String>,
+    private val folders: List<Folder>,
     private val viewModel: FoldersViewModel
 ): RecyclerView.Adapter<FolderAdapter.ViewHolder>() {
 
@@ -28,12 +30,15 @@ class FolderAdapter(
         private val viewModel: FoldersViewModel,
         item: View
     ): RecyclerView.ViewHolder(item){
-        private val name: Button = itemView.findViewById(R.id.name_text)
+        private val name: TextView = itemView.findViewById(R.id.name_text)
+        private val itemCount: TextView = itemView.findViewById(R.id.items_count_text)
 
-        fun bind(item: String){
-            name.text = item
-            name.setOnClickListener {
-                viewModel.openFolder(item)
+        fun bind(item: Folder){
+            name.text = item.name
+            itemCount.text = itemView.resources.getQuantityString(R.plurals.folder_item_count_text, item.count, item.count)
+
+            itemView.setOnClickListener {
+                viewModel.openFolder(item.name)
             }
         }
     }
