@@ -38,20 +38,11 @@ class DefaultFilesRepository @Inject constructor(): FilesRepository {
     }
 
     override fun getFolders(): Single<List<Folder>> {
-        /*
-         * FileServerAPI.getFolders() returns list of maps e.g [{"name": "Folder name"}, ..],
-         * we need to map it to list of strings e.g. ["Folder name", ...]
-         */
         return fileAPI.getFolders()
-            .flatMap { s ->  Single.just(s.map { createFolder(it["name"] ?: "") })}
     }
 
     override fun getFiles(folder: String): Single<List<String>> {
         return fileAPI.getFiles(folder)
-    }
-
-    private fun createFolder(name: String): Folder{
-        return Folder(name, "", 0)
     }
 
     companion object{
