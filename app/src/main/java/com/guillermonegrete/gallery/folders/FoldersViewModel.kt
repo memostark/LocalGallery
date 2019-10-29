@@ -1,4 +1,4 @@
-package com.guillermonegrete.gallery
+package com.guillermonegrete.gallery.folders
 
 import androidx.lifecycle.ViewModel
 import com.guillermonegrete.gallery.data.source.FilesRepository

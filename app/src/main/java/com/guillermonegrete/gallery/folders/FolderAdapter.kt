@@ -1,10 +1,11 @@
-package com.guillermonegrete.gallery
+package com.guillermonegrete.gallery.folders
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import androidx.recyclerview.widget.RecyclerView
+import com.guillermonegrete.gallery.R
 
 class FolderAdapter(
     private val folders: List<String>,

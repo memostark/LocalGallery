@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/folders_fragment_dest"
-        android:name="com.guillermonegrete.gallery.FoldersListFragment"
+        android:name="com.guillermonegrete.gallery.folders.FoldersListFragment"
         android:label="Folders list"
         tools:layout="@layout/fragment_folders_list">
         <action

@@ -1,6 +1,7 @@
-package com.guillermonegrete.gallery
+package com.guillermonegrete.gallery.folders
 
 import androidx.lifecycle.ViewModel
+import com.guillermonegrete.gallery.ViewModelKey
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap

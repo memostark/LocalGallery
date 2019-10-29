@@ -1,4 +1,4 @@
-package com.guillermonegrete.gallery
+package com.guillermonegrete.gallery.folders
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.guillermonegrete.gallery.data.source.FakeFilesRepository
@@ -25,7 +25,10 @@ class FoldersViewModelTest {
     fun setUp(){
         settingsRepository = FakeSettingsRepository()
         filesRepository = FakeFilesRepository()
-        viewModel = FoldersViewModel(settingsRepository, filesRepository)
+        viewModel = FoldersViewModel(
+            settingsRepository,
+            filesRepository
+        )
 
         filesRepository.addFolders(*defaultFolders.toTypedArray())
     }

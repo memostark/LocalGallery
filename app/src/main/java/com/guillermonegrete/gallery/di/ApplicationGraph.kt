@@ -1,8 +1,8 @@
 package com.guillermonegrete.gallery.di
 
 import android.content.Context
-import com.guillermonegrete.gallery.FoldersListFragment
-import com.guillermonegrete.gallery.FoldersModule
+import com.guillermonegrete.gallery.folders.FoldersListFragment
+import com.guillermonegrete.gallery.folders.FoldersModule
 import com.guillermonegrete.gallery.ViewModelBuilder
 import com.guillermonegrete.gallery.files.FilesListFragment
 import com.guillermonegrete.gallery.files.FilesModule

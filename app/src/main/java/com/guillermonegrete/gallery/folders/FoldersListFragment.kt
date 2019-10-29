@@ -1,4 +1,4 @@
-package com.guillermonegrete.gallery
+package com.guillermonegrete.gallery.folders
 
 import android.content.Context
 import android.os.Bundle
@@ -11,8 +11,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.guillermonegrete.gallery.data.source.DefaultFilesRepository
-import com.guillermonegrete.gallery.data.source.DefaultSettingsRepository
+import com.guillermonegrete.gallery.MyApplication
+import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.files.FilesListFragment
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -157,7 +157,9 @@ class FoldersListFragment: Fragment(){
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
-                {data -> folderList.adapter = FolderAdapter(data, viewModel)},
+                {data -> folderList.adapter =
+                    FolderAdapter(data, viewModel)
+                },
                 {error -> println("Error loading folders: ${error.message}")}
             )
         )
