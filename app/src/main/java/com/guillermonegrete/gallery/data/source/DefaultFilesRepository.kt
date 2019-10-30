@@ -11,21 +11,11 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Inject
 
-class DefaultFilesRepository @Inject constructor(): FilesRepository {
+class DefaultFilesRepository @Inject constructor(private var fileAPI: FilesServerAPI): FilesRepository {
 
-    private var fileAPI: FilesServerAPI
     private val gson: Gson = GsonBuilder()
         .setLenient()
         .create()
-
-    init {
-        val retrofit = Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create(gson))
-            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .build()
-        fileAPI = retrofit.create(FilesServerAPI::class.java)
-    }
 
     override fun updateRepoURL(newURL: String) {
         val url = if(Patterns.WEB_URL.matcher(newURL).matches()) newURL else BASE_URL
