@@ -7,9 +7,12 @@ import retrofit2.http.Path
 
 interface FilesServerAPI{
 
-    @GET("folders")
-    fun getFolders(): Single<List<Folder>>
+    @GET("{baseUrl}folders")
+    fun getFolders(@Path(value="baseUrl", encoded = true)  baseUrl: String): Single<List<Folder>>
 
-    @GET("folders/{path}")
-    fun getFiles(@Path(value="path", encoded = false)  path: String): Single<List<String>>
+    @GET("{baseUrl}folders/{path}")
+    fun getFiles(
+        @Path(value="baseUrl", encoded = true)  baseUrl: String,
+        @Path(value="path", encoded = false)  path: String
+    ): Single<List<String>>
 }

@@ -23,7 +23,7 @@ object RepositoryModule {
             .setLenient()
             .create()
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://localhost")
+            .baseUrl("http://localhost/")
             .addConverterFactory(GsonConverterFactory.create(gson))
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .build()

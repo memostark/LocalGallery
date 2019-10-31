@@ -19,7 +19,7 @@ class FoldersViewModel @Inject constructor(
 
     val urlAvailable: BehaviorSubject<Boolean> = BehaviorSubject.createDefault(false)
 
-    val networkError: BehaviorSubject<Boolean> = BehaviorSubject.create()
+    val networkError: Subject<Boolean> = PublishSubject.create()
 
     val openFolder: Subject<String> = PublishSubject.create()
 
