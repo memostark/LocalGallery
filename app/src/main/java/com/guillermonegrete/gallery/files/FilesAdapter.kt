@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.guillermonegrete.gallery.R
 
 class FilesAdapter(private val files: List<String>): RecyclerView.Adapter<FilesAdapter.ViewHolder>() {
@@ -35,6 +36,8 @@ class FilesAdapter(private val files: List<String>): RecyclerView.Adapter<FilesA
 
             Glide.with(itemView)
                 .load(item)
+                .placeholder(R.drawable.ic_image_24dp)
+                .transition(DrawableTransitionOptions.withCrossFade())
                 .into(image)
         }
 

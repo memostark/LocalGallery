@@ -12,6 +12,7 @@
         android:layout_height="wrap_content"
         android:contentDescription="@string/file_item"
         android:adjustViewBounds="true"
-        tools:srcCompat="@tools:sample/avatars" />
+        android:background="#DADADA"
+        tools:srcCompat="@drawable/ic_image_24dp" />
 
 </LinearLayout>

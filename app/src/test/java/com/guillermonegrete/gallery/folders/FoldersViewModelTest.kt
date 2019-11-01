@@ -93,16 +93,17 @@ class FoldersViewModelTest {
 
     @Test
     fun show_error_layout_when_loading(){
+        val networkTest = viewModel.networkError.test()
+
         filesRepository.setReturnError(true)
 
+        // Set valid URL
         val savedURL = "preset-url"
         settingsRepository.serverUrl = savedURL
 
         viewModel.getFolders().test()
             .assertError(RuntimeException::class.java)
 
-        // Fix this
-        /*viewModel.networkError.test()
-            .assertValue(true)*/
+        networkTest.assertValue(true)
     }
 }
