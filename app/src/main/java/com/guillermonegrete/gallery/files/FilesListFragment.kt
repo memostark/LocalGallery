@@ -10,10 +10,13 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.guillermonegrete.gallery.FileDetailsFragment.Companion.FILE_KEY
 import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
+import com.guillermonegrete.gallery.data.File
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -68,7 +71,7 @@ class FilesListFragment: Fragment() {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
-                { filesList.adapter = FilesAdapter(it) },
+                { filesList.adapter = FilesAdapter(it, viewModel) },
                 { error -> println("Error loading files: ${error.message}") }
             )
         )
@@ -83,6 +86,18 @@ class FilesListFragment: Fragment() {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe{ messageContainer.visibility = if(it) View.VISIBLE else View.GONE })
+
+        disposable.add(viewModel.openFolder
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe{ openFileDetails(it) }
+        )
+    }
+
+    private fun openFileDetails(file: File){
+        val bundle = Bundle()
+        bundle.putString(FILE_KEY, file.name)
+        findNavController().navigate(R.id.fileDetailsFragment, bundle)
     }
 
 

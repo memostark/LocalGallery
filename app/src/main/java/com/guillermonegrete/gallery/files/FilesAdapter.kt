@@ -6,17 +6,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.guillermonegrete.gallery.R
+import com.guillermonegrete.gallery.data.File
 
-class FilesAdapter(private val files: List<String>): RecyclerView.Adapter<FilesAdapter.ViewHolder>() {
+class FilesAdapter(
+    private val files: List<String>,
+    private val viewModel: FilesViewModel
+): RecyclerView.Adapter<FilesAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val item = LayoutInflater.from(parent.context).inflate(R.layout.file_item, parent, false)
-        return ViewHolder(item)
+        return ViewHolder(viewModel, item)
     }
 
     override fun getItemCount() = files.size
@@ -27,27 +30,20 @@ class FilesAdapter(private val files: List<String>): RecyclerView.Adapter<FilesA
     }
 
     class ViewHolder(
+        private val viewModel: FilesViewModel,
         item: View
     ): RecyclerView.ViewHolder(item){
 
         private val image: ImageView = itemView.findViewById(R.id.file_view)
 
         fun bind(item: String){
-            image.setOnClickListener { itemView.findNavController().navigate(R.id.fileDetailsFragment, null) }
+            image.setOnClickListener { viewModel.openFilesDetails(File(item)) }
 
             Glide.with(itemView)
                 .load(item)
                 .placeholder(R.drawable.ic_image_24dp)
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .into(image)
-        }
-
-        private fun openLink(item: String){
-            val intent = Intent().apply {
-                action = Intent.ACTION_VIEW
-                data = Uri.parse(item)
-            }
-            itemView.context.startActivity(intent)
         }
     }
 }

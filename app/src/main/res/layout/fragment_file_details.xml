@@ -10,8 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:srcCompat="@tools:sample/avatars"
-        android:contentDescription="@string/file_image_view_desc"
-        android:background="@android:color/darker_gray"/>
+        android:background="@android:color/black"
+        android:contentDescription="@string/file_image_view_desc" />
 
     <include layout="@layout/file_details_bottom"/>
 
