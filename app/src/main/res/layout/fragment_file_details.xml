@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".FileDetailsFragment">
+
+    <ImageView
+        android:id="@+id/file_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:srcCompat="@tools:sample/avatars"
+        android:contentDescription="@string/file_image_view_desc"
+        android:background="@android:color/darker_gray"/>
+
+    <include layout="@layout/file_details_bottom"/>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

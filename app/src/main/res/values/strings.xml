@@ -9,10 +9,14 @@
     <string name="server_address_hint">E.g. 172.16.254.1:5000</string>
     <string name="file_item">File item</string>
     <string name="folder_cover_image">Folder cover image</string>
-    
+
     <plurals name="folder_item_count_text">
         <item quantity="one">%d element</item>
         <item quantity="other">%d elements</item>
     </plurals>
+
+    <string name="image_icon">Image icon</string>
+    <string name="open_in_browser">Open in browser</string>
+    <string name="file_image_view_desc">File</string>
 
 </resources>

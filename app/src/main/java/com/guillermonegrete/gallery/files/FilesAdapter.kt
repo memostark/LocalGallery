@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
@@ -32,7 +33,7 @@ class FilesAdapter(private val files: List<String>): RecyclerView.Adapter<FilesA
         private val image: ImageView = itemView.findViewById(R.id.file_view)
 
         fun bind(item: String){
-            image.setOnClickListener { openLink(item) }
+            image.setOnClickListener { itemView.findNavController().navigate(R.id.fileDetailsFragment, null) }
 
             Glide.with(itemView)
                 .load(item)
