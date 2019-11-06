@@ -64,6 +64,9 @@ dependencies {
     implementation "com.google.dagger:dagger:$dagger_version"
     kapt "com.google.dagger:dagger-compiler:$dagger_version"
 
+    // PhotoView
+    implementation 'com.github.chrisbanes:PhotoView:2.3.0'
+
     // Kotlin
     implementation "androidx.fragment:fragment-ktx:1.2.0-beta2"
 
