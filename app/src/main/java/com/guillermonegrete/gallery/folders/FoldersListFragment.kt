@@ -1,10 +1,15 @@
 package com.guillermonegrete.gallery.folders
 
+import android.app.SearchManager
 import android.content.Context
 import android.os.Bundle
 import android.view.*
-import android.widget.*
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
@@ -27,6 +32,9 @@ class FoldersListFragment: Fragment(){
     private lateinit var messageIcon: ImageView
     private lateinit var messageText: TextView
     private lateinit var folderList: RecyclerView
+    private lateinit var searchView: SearchView
+
+    private lateinit var adapter: FolderAdapter
 
     @Inject lateinit var viewModelFactory: ViewModelProvider.Factory
     private val viewModel by viewModels<FoldersViewModel> { viewModelFactory }
@@ -75,6 +83,8 @@ class FoldersListFragment: Fragment(){
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_folders_list_frag, menu)
+        setSearchViewConfig(menu)
+
         super.onCreateOptionsMenu(menu, inflater)
     }
 
@@ -157,8 +167,9 @@ class FoldersListFragment: Fragment(){
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
-                {data -> folderList.adapter =
-                    FolderAdapter(data, viewModel)
+                {
+                    adapter = FolderAdapter(it, viewModel)
+                    folderList.adapter = adapter
                 },
                 {error -> println("Error loading folders: ${error.message}")}
             )
@@ -182,4 +193,22 @@ class FoldersListFragment: Fragment(){
         findNavController().navigate(R.id.files_fragment_dest, bundle)
     }
 
+    private fun setSearchViewConfig(menu: Menu){
+        val searchManager = context?.getSystemService(Context.SEARCH_SERVICE) as SearchManager
+        searchView = menu.findItem(R.id.action_search).actionView as SearchView
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(activity?.componentName))
+        searchView.maxWidth = Int.MAX_VALUE
+
+        searchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener{
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                adapter.filter.filter(query)
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                adapter.filter.filter(newText)
+                return false
+            }
+        })
+    }
 }

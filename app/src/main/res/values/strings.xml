@@ -18,5 +18,7 @@
     <string name="image_icon">Image icon</string>
     <string name="open_in_browser">Open in browser</string>
     <string name="file_image_view_desc">File</string>
+    <string name="search_menu">Search</string>
+    <string name="search_hint">Search folders…</string>
 
 </resources>

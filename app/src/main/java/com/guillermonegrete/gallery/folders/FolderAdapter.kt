@@ -3,28 +3,53 @@ package com.guillermonegrete.gallery.folders
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Filter
+import android.widget.Filterable
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.Folder
+import java.util.*
 
 class FolderAdapter(
     private val folders: List<Folder>,
     private val viewModel: FoldersViewModel
-): RecyclerView.Adapter<FolderAdapter.ViewHolder>() {
+): RecyclerView.Adapter<FolderAdapter.ViewHolder>(), Filterable {
+
+    private var filteredFolders = folders
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val item = LayoutInflater.from(parent.context).inflate(R.layout.folder_item, parent, false)
         return ViewHolder(viewModel, item)
     }
 
-    override fun getItemCount() = folders.size
+    override fun getItemCount() = filteredFolders.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(folders[position])
+        holder.bind(filteredFolders[position])
+    }
 
+    override fun getFilter(): Filter {
+        return object: Filter(){
+            override fun performFiltering(constraint: CharSequence?): FilterResults {
+                filteredFolders = if(constraint.isNullOrBlank()){
+                    folders
+                }else{
+                    folders.filter { it.name.toLowerCase(Locale.getDefault()).contains(constraint) }
+                }
+
+                val filterResults = FilterResults()
+                filterResults.values = filteredFolders
+                return filterResults
+            }
+
+            override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
+                filteredFolders = results?.values as List<Folder>
+                notifyDataSetChanged()
+            }
+        }
     }
 
     class ViewHolder(
