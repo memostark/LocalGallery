@@ -149,12 +149,23 @@ class FoldersListFragment: Fragment(){
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
-                    if(it){
-                        messageText.text = resources.getString(R.string.error_message)
-                        messageIcon.setImageResource(R.drawable.ic_refresh_black_24dp)
-                    }
-                    folderListContainer.visibility = if (it) View.GONE else View.VISIBLE
-                    messageContainer.visibility = if (it) View.VISIBLE else View.GONE
+                    setMessageContainer(
+                        it,
+                        resources.getString(R.string.error_message),
+                        R.drawable.ic_refresh_black_24dp
+                    )
+                }
+            )
+
+            disposable.add(rootFolderEmpty
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {
+                    setMessageContainer(
+                        it,
+                        resources.getString(R.string.folder_empty_message),
+                        R.drawable.ic_folder_open_black_24dp
+                    )
                 }
             )
         }
@@ -209,5 +220,14 @@ class FoldersListFragment: Fragment(){
                 return false
             }
         })
+    }
+
+    private fun setMessageContainer(visible: Boolean, message: String, icon: Int){
+        if(visible){
+            messageText.text = message
+            messageIcon.setImageResource(icon)
+        }
+        folderListContainer.visibility = if (visible) View.GONE else View.VISIBLE
+        messageContainer.visibility = if (visible) View.VISIBLE else View.GONE
     }
 }

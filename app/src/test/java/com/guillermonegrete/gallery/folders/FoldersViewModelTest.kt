@@ -106,4 +106,21 @@ class FoldersViewModelTest {
 
         networkTest.assertValue(true)
     }
+
+    @Test
+    fun show_no_folders_in_root_folder_layout(){
+        val rootFolderEmptyTest = viewModel.rootFolderEmpty.test()
+
+        // Set folders list as empty
+        filesRepository.foldersServiceData = arrayListOf()
+
+        // Set valid URL
+        val savedURL = "preset-url"
+        settingsRepository.serverUrl = savedURL
+
+        viewModel.getFolders().test()
+            .assertValue(arrayListOf())
+
+        rootFolderEmptyTest.assertValue(true)
+    }
 }

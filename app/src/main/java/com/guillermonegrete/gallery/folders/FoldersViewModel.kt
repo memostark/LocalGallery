@@ -21,6 +21,8 @@ class FoldersViewModel @Inject constructor(
 
     val networkError: Subject<Boolean> = PublishSubject.create()
 
+    val rootFolderEmpty: Subject<Boolean> = PublishSubject.create()
+
     val openFolder: Subject<String> = PublishSubject.create()
 
     init {
@@ -52,7 +54,10 @@ class FoldersViewModel @Inject constructor(
                     it
                 }
             }
-            .doOnSuccess { loadingIndicator.onNext(false) }
+            .doOnSuccess {
+                if(it.isEmpty()) rootFolderEmpty.onNext(true)
+                loadingIndicator.onNext(false)
+            }
             .doOnError{
                 loadingIndicator.onNext(false)
                 networkError.onNext(true)
