@@ -4,10 +4,7 @@ import android.app.SearchManager
 import android.content.Context
 import android.os.Bundle
 import android.view.*
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
@@ -67,6 +64,8 @@ class FoldersListFragment: Fragment(){
         messageContainer = root.findViewById(R.id.folders_message_container)
         messageIcon = root.findViewById(R.id.foldersMessageIcon)
         messageText = root.findViewById(R.id.foldersMessageMain)
+
+        messageIcon.setOnClickListener { loadFoldersData() }
 
         return root
     }
@@ -152,7 +151,7 @@ class FoldersListFragment: Fragment(){
                 .subscribe {
                     if(it){
                         messageText.text = resources.getString(R.string.error_message)
-                        messageIcon.setImageResource(R.drawable.ic_error_outline_black_24dp)
+                        messageIcon.setImageResource(R.drawable.ic_refresh_black_24dp)
                     }
                     folderListContainer.visibility = if (it) View.GONE else View.VISIBLE
                     messageContainer.visibility = if (it) View.VISIBLE else View.GONE
