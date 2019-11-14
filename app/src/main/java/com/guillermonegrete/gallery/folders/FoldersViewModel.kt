@@ -2,6 +2,7 @@ package com.guillermonegrete.gallery.folders
 
 import androidx.lifecycle.ViewModel
 import com.guillermonegrete.gallery.data.Folder
+import com.guillermonegrete.gallery.data.GetFolderResponse
 import com.guillermonegrete.gallery.data.source.FilesRepository
 import com.guillermonegrete.gallery.data.source.SettingsRepository
 import io.reactivex.Single
@@ -39,7 +40,7 @@ class FoldersViewModel @Inject constructor(
         settings.saveServerURL(url)
     }
 
-    fun getFolders(): Single<List<Folder>>{
+    fun getFolders(): Single<GetFolderResponse>{
         loadingIndicator.onNext(true)
         val serverUrl = settings.getServerURL()
 
@@ -48,14 +49,14 @@ class FoldersViewModel @Inject constructor(
                 // Check if has url to show appropriate layout and folders list
                 if(serverUrl.isEmpty()) {
                     urlAvailable.onNext(false)
-                    Single.just(emptyList())
+                    Single.just(GetFolderResponse("", emptyList()))
                 } else {
                     urlAvailable.onNext(true)
                     it
                 }
             }
             .doOnSuccess {
-                if(it.isEmpty()) rootFolderEmpty.onNext(true)
+                if(it.folders.isEmpty()) rootFolderEmpty.onNext(true)
                 loadingIndicator.onNext(false)
             }
             .doOnError{

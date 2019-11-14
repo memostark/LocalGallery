@@ -2,6 +2,7 @@ package com.guillermonegrete.gallery.data.source.remote
 
 import androidx.annotation.VisibleForTesting
 import com.guillermonegrete.gallery.data.Folder
+import com.guillermonegrete.gallery.data.GetFolderResponse
 import io.reactivex.Single
 import retrofit2.http.Path
 
@@ -13,7 +14,7 @@ class FakeFileServerAPI(folderServiceData: LinkedHashMap<Folder, List<String>>):
 
     override fun getFolders(
         @Path(encoded = false, value = "baseUrl") baseUrl: String
-    ): Single<List<Folder>> = Single.just(folders.toList())
+    ): Single<GetFolderResponse> = Single.just(GetFolderResponse("Name", folders.toList()))
 
     override fun getFiles(
         @Path(encoded = true, value = "baseUrl") baseUrl: String,

@@ -2,6 +2,7 @@ package com.guillermonegrete.gallery.folders
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.guillermonegrete.gallery.data.Folder
+import com.guillermonegrete.gallery.data.GetFolderResponse
 import com.guillermonegrete.gallery.data.source.FakeFilesRepository
 import com.guillermonegrete.gallery.data.source.FakeSettingsRepository
 import org.junit.Assert.assertEquals
@@ -24,6 +25,8 @@ class FoldersViewModelTest {
         Folder("first", "", 0),
         Folder("second", "", 0)
     )
+    private val defaultGetFolderResponse = GetFolderResponse("Name", defaultFolders)
+    private val emptyGetFolderResponse = GetFolderResponse("", emptyList())
 
     @Before
     fun setUp(){
@@ -43,7 +46,7 @@ class FoldersViewModelTest {
 
         viewModel.getFolders().test()
             .assertComplete()
-            .assertValue(emptyList())
+            .assertValue(emptyGetFolderResponse)
 
         // Url not set
         viewModel.urlAvailable.test()
@@ -58,7 +61,7 @@ class FoldersViewModelTest {
         // Return list correctly
         viewModel.getFolders().test()
             .assertComplete()
-            .assertValue(defaultFolders)
+            .assertValue(defaultGetFolderResponse)
 
         // Url is set
         viewModel.urlAvailable.test()
@@ -88,7 +91,7 @@ class FoldersViewModelTest {
         // load folders with new address
         viewModel.getFolders().test()
             .assertComplete()
-            .assertValue(defaultFolders)
+            .assertValue(defaultGetFolderResponse)
     }
 
     @Test
@@ -119,7 +122,7 @@ class FoldersViewModelTest {
         settingsRepository.serverUrl = savedURL
 
         viewModel.getFolders().test()
-            .assertValue(arrayListOf())
+            .assertValue(GetFolderResponse("Name", emptyList()))
 
         rootFolderEmptyTest.assertValue(true)
     }

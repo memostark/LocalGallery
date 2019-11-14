@@ -28,6 +28,7 @@ class FoldersListFragment: Fragment(){
     private lateinit var messageContainer: View
     private lateinit var messageIcon: ImageView
     private lateinit var messageText: TextView
+    private lateinit var rootFolderName: TextView
     private lateinit var folderList: RecyclerView
     private lateinit var searchView: SearchView
 
@@ -52,8 +53,7 @@ class FoldersListFragment: Fragment(){
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val root = inflater.inflate(R.layout.fragment_folders_list, container, false)
 
-        val rootFolderName: TextView = root.findViewById(R.id.textView_root_folder)
-        rootFolderName.text = "Root folder name"
+        rootFolderName = root.findViewById(R.id.textView_root_folder)
 
         folderList = root.findViewById(R.id.folders_list)
         folderList.layoutManager = GridLayoutManager(requireContext(), 2)
@@ -178,7 +178,8 @@ class FoldersListFragment: Fragment(){
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 {
-                    adapter = FolderAdapter(it, viewModel)
+                    rootFolderName.text = it.name
+                    adapter = FolderAdapter(it.folders, viewModel)
                     folderList.adapter = adapter
                 },
                 {error -> println("Error loading folders: ${error.message}")}

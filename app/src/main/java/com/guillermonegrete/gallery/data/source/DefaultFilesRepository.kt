@@ -1,7 +1,7 @@
 package com.guillermonegrete.gallery.data.source
 
 import android.util.Patterns
-import com.guillermonegrete.gallery.data.Folder
+import com.guillermonegrete.gallery.data.GetFolderResponse
 import com.guillermonegrete.gallery.data.source.remote.FilesServerAPI
 import io.reactivex.Single
 import javax.inject.Inject
@@ -17,7 +17,7 @@ class DefaultFilesRepository @Inject constructor(private var fileAPI: FilesServe
         baseUrl = newURL
     }
 
-    override fun getFolders(): Single<List<Folder>> {
+    override fun getFolders(): Single<GetFolderResponse> {
         return fileAPI.getFolders(baseUrl)
     }
 

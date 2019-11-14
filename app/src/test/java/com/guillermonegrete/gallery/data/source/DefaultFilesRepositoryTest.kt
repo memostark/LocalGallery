@@ -1,6 +1,7 @@
 package com.guillermonegrete.gallery.data.source
 
 import com.guillermonegrete.gallery.data.Folder
+import com.guillermonegrete.gallery.data.GetFolderResponse
 import com.guillermonegrete.gallery.data.source.remote.FakeFileServerAPI
 import org.junit.Before
 import org.junit.Test
@@ -17,6 +18,7 @@ class DefaultFilesRepositoryTest {
         listOf("video.mp4", "file5.jpg"),
         listOf("file7.png", "file8.jpg")
     )
+    private val defaultGetFolderResponse = GetFolderResponse("Name", defaultFolders)
     private lateinit var repository: DefaultFilesRepository
 
     @Before
@@ -34,7 +36,7 @@ class DefaultFilesRepositoryTest {
     fun getFolders_first_time(){
         val folders = repository.getFolders()
         folders.test()
-            .assertValue(defaultFolders)
+            .assertValue(defaultGetFolderResponse)
     }
 
     @Test

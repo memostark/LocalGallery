@@ -2,6 +2,7 @@ package com.guillermonegrete.gallery.data.source
 
 import androidx.annotation.VisibleForTesting
 import com.guillermonegrete.gallery.data.Folder
+import com.guillermonegrete.gallery.data.GetFolderResponse
 import io.reactivex.Single
 import java.lang.RuntimeException
 
@@ -23,9 +24,9 @@ class FakeFilesRepository: FilesRepository {
         repoUrl = newURL
     }
 
-    override fun getFolders(): Single<List<Folder>> {
+    override fun getFolders(): Single<GetFolderResponse> {
         if(shouldReturnError) return Single.error(RuntimeException())
-        return Single.just(foldersServiceData)
+        return Single.just(GetFolderResponse("Name", foldersServiceData))
     }
 
     override fun getFiles(folder: String): Single<List<String>> {
