@@ -13,7 +13,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.guillermonegrete.gallery.FileDetailsFragment.Companion.FILE_KEY
+import com.guillermonegrete.gallery.files.details.FileDetailsFragment.Companion.FILE_KEY
 import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.File
