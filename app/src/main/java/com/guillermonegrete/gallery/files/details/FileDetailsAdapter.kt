@@ -32,8 +32,8 @@ class FileDetailsAdapter(val files : List<File>): RecyclerView.Adapter<FileDetai
     class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
 
         private val fileImage: ImageView = itemView.findViewById(R.id.file_image)
-        val nameText: TextView = itemView.findViewById(R.id.file_name_text)
-        val linkButton: ImageButton = itemView.findViewById(R.id.open_link_button)
+        private val nameText: TextView = itemView.findViewById(R.id.file_name_text)
+        private val linkButton: ImageButton = itemView.findViewById(R.id.open_link_button)
         private val bottomSheet: LinearLayout = itemView.findViewById(R.id.bottom_layout)
 
         init {

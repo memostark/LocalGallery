@@ -8,15 +8,14 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.guillermonegrete.gallery.files.details.FileDetailsFragment.Companion.FILE_KEY
 import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
-import com.guillermonegrete.gallery.data.File
+import com.guillermonegrete.gallery.files.details.FileDetailsFragment
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -29,7 +28,7 @@ class FilesListFragment: Fragment() {
     private lateinit var filesList: RecyclerView
 
     @Inject lateinit var viewModelFactory: ViewModelProvider.Factory
-    private val viewModel by viewModels<FilesViewModel> { viewModelFactory }
+    private val viewModel by activityViewModels<FilesViewModel> { viewModelFactory }
 
     private val disposable = CompositeDisposable()
 
@@ -94,9 +93,9 @@ class FilesListFragment: Fragment() {
         )
     }
 
-    private fun openFileDetails(file: File){
+    private fun openFileDetails(index: Int){
         val bundle = Bundle()
-        bundle.putString(FILE_KEY, file.name)
+        bundle.putInt(FileDetailsFragment.FILE_INDEX_KEY, index)
         findNavController().navigate(R.id.fileDetailsFragment, bundle)
     }
 

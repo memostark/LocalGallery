@@ -1,7 +1,5 @@
 package com.guillermonegrete.gallery.files
 
-import android.content.Intent
-import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,7 +35,7 @@ class FilesAdapter(
         private val image: ImageView = itemView.findViewById(R.id.file_view)
 
         fun bind(item: String){
-            image.setOnClickListener { viewModel.openFilesDetails(File(item)) }
+            image.setOnClickListener { viewModel.openFilesDetails(adapterPosition) }
 
             Glide.with(itemView)
                 .load(item)
