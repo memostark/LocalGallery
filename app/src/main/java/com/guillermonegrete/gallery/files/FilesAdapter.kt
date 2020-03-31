@@ -11,16 +11,24 @@ import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.File
 
 class FilesAdapter(
-    private val files: List<String>,
+    private val files: List<File>,
     private val viewModel: FilesViewModel
 ): RecyclerView.Adapter<FilesAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val item = LayoutInflater.from(parent.context).inflate(R.layout.file_item, parent, false)
+        val item = LayoutInflater.from(parent.context).inflate(viewType, parent, false)
         return ViewHolder(viewModel, item)
     }
 
     override fun getItemCount() = files.size
+
+    override fun getItemViewType(position: Int): Int {
+        return when(files[position].type){
+            "jpg", "jpeg" -> R.layout.file_image_item
+            "mp4" -> R.layout.file_video_item
+            else -> R.layout.file_image_item
+        }
+    }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = files[position]
@@ -34,11 +42,11 @@ class FilesAdapter(
 
         private val image: ImageView = itemView.findViewById(R.id.file_view)
 
-        fun bind(item: String){
+        fun bind(item: File){
             image.setOnClickListener { viewModel.openFilesDetails(adapterPosition) }
 
             Glide.with(itemView)
-                .load(item)
+                .load(item.name)
                 .placeholder(R.drawable.ic_image_24dp)
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .into(image)

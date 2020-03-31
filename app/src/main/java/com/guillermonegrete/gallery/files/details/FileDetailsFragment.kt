@@ -15,7 +15,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.ViewPager2
 import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
-import com.guillermonegrete.gallery.data.File
 import com.guillermonegrete.gallery.files.FilesViewModel
 import javax.inject.Inject
 
@@ -40,10 +39,7 @@ class FileDetailsFragment : Fragment() {
 
         val viewPager: ViewPager2 = root.findViewById(R.id.file_details_viewpager)
 
-        val fileList = viewModel.cachedFileList.map {
-            val type = it.split(".").last()
-            File(it, type)
-        }
+        val fileList = viewModel.cachedFileList
 
         viewPager.adapter = FileDetailsAdapter(fileList)
         viewPager.currentItem = index

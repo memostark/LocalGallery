@@ -1,6 +1,7 @@
 package com.guillermonegrete.gallery.files
 
 import androidx.lifecycle.ViewModel
+import com.guillermonegrete.gallery.data.File
 import com.guillermonegrete.gallery.data.source.FilesRepository
 import com.guillermonegrete.gallery.data.source.SettingsRepository
 import io.reactivex.Single
@@ -20,7 +21,7 @@ class FilesViewModel @Inject constructor(
 
     val openFolder: Subject<Int> = PublishSubject.create()
 
-    var cachedFileList = emptyList<String>()
+    var cachedFileList = emptyList<File>()
         private set
 
     init {
@@ -28,10 +29,17 @@ class FilesViewModel @Inject constructor(
         filesRepository.updateRepoURL(url)
     }
 
-    fun loadFiles(folder: String): Single<List<String>>{
+    fun loadFiles(folder: String): Single<List<File>> {
         loadingIndicator.onNext(true)
 
         return filesRepository.getFiles(folder)
+            // This map should not be necessary later because Moshi adapter should handle the file object creation
+            .map {list->
+                list.map {
+                    val type = it.split(".").last()
+                    File(it, type)
+                }
+            }
             .doOnSuccess {
                 loadingIndicator.onNext(false)
                 cachedFileList = it
