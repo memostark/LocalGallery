@@ -19,17 +19,25 @@ import com.guillermonegrete.gallery.data.File
 class FileDetailsAdapter(val files : List<File>): RecyclerView.Adapter<FileDetailsAdapter.ViewHolder>(){
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val layout = LayoutInflater.from(parent.context).inflate(R.layout.file_details_item, parent, false)
+        val layout = LayoutInflater.from(parent.context).inflate(viewType, parent, false)
         return ViewHolder(layout)
     }
 
     override fun getItemCount() = files.size
 
+    override fun getItemViewType(position: Int): Int {
+        return when(files[position].type){
+            "jpg", "jpeg" -> R.layout.file_details_image_item
+            "mp4" -> R.layout.file_details_video_item
+            else -> R.layout.file_details_image_item
+        }
+    }
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(files[position])
     }
 
-    class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
+    open class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
 
         private val fileImage: ImageView = itemView.findViewById(R.id.file_image)
         private val nameText: TextView = itemView.findViewById(R.id.file_name_text)

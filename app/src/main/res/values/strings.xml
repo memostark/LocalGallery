@@ -24,5 +24,7 @@
     <string name="file_image_view_desc">File</string>
     <string name="search_menu">Search</string>
     <string name="search_hint">Search folders…</string>
+    <string name="video_type">video</string>
+    <string name="video_length_placeholder">00:00</string>
 
 </resources>

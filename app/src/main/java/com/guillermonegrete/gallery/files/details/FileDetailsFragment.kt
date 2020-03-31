@@ -40,7 +40,10 @@ class FileDetailsFragment : Fragment() {
 
         val viewPager: ViewPager2 = root.findViewById(R.id.file_details_viewpager)
 
-        val fileList = viewModel.cachedFileList.map { File(it) }
+        val fileList = viewModel.cachedFileList.map {
+            val type = it.split(".").last()
+            File(it, type)
+        }
 
         viewPager.adapter = FileDetailsAdapter(fileList)
         viewPager.currentItem = index
