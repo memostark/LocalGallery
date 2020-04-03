@@ -20,7 +20,11 @@ class FileDetailsAdapter(val files : List<File>): RecyclerView.Adapter<FileDetai
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val layout = LayoutInflater.from(parent.context).inflate(viewType, parent, false)
-        return ViewHolder(layout)
+        return when(viewType){
+            R.layout.file_details_image_item -> ImageViewHolder(layout)
+            R.layout.file_details_video_item -> VideoViewHolder(layout)
+            else -> ImageViewHolder(layout)
+        }
     }
 
     override fun getItemCount() = files.size
@@ -37,9 +41,8 @@ class FileDetailsAdapter(val files : List<File>): RecyclerView.Adapter<FileDetai
         holder.bind(files[position])
     }
 
-    open class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
+    abstract class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
 
-        private val fileImage: ImageView = itemView.findViewById(R.id.file_image)
         private val nameText: TextView = itemView.findViewById(R.id.file_name_text)
         private val linkButton: ImageButton = itemView.findViewById(R.id.open_link_button)
         private val bottomSheet: LinearLayout = itemView.findViewById(R.id.bottom_layout)
@@ -59,11 +62,7 @@ class FileDetailsAdapter(val files : List<File>): RecyclerView.Adapter<FileDetai
             }
         }
 
-        fun bind(file: File){
-            Glide.with(itemView.context)
-                .load(file.name)
-                .into(fileImage)
-
+        open fun bind(file: File){
             nameText.text = file.name
             linkButton.setOnClickListener { openLink(file.name) }
         }
@@ -77,4 +76,17 @@ class FileDetailsAdapter(val files : List<File>): RecyclerView.Adapter<FileDetai
         }
     }
 
+    class ImageViewHolder(itemView: View): ViewHolder(itemView){
+
+        private val fileImage: ImageView = itemView.findViewById(R.id.file_image)
+
+        override fun bind(file: File){
+            super.bind(file)
+            Glide.with(itemView.context)
+                .load(file.name)
+                .into(fileImage)
+        }
+    }
+
+    class VideoViewHolder(itemView: View): ViewHolder(itemView)
 }
