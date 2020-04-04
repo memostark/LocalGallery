@@ -3,13 +3,11 @@ package com.guillermonegrete.gallery.files.details
 import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
@@ -75,12 +73,7 @@ class FileDetailsFragment : Fragment() {
         (activity as AppCompatActivity).supportActionBar?.hide()
 
         val window = activity?.window
-        if (Build.VERSION.SDK_INT < 16) {
-            window?.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN)
-        }else{
-            window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
-        }
+        window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
 
     }
 
@@ -88,11 +81,7 @@ class FileDetailsFragment : Fragment() {
         (activity as AppCompatActivity).supportActionBar?.show()
 
         val window = activity?.window
-        if (Build.VERSION.SDK_INT < 16) {
-            window?.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
-        }else{
-            window?.decorView?.systemUiVisibility = 0
-        }
+        window?.decorView?.systemUiVisibility = 0
     }
 
     private fun setPagerListener(viewPager: ViewPager2){

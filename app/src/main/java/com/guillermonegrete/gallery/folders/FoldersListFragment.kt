@@ -4,9 +4,14 @@ import android.app.SearchManager
 import android.content.Context
 import android.os.Bundle
 import android.view.*
-import android.widget.*
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
+import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
@@ -52,6 +57,10 @@ class FoldersListFragment: Fragment(){
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val root = inflater.inflate(R.layout.fragment_folders_list, container, false)
+
+        // Set up toolbar
+        val toolbar: Toolbar = root.findViewById(R.id.folders_list_toolbar)
+        (activity as? AppCompatActivity)?.setSupportActionBar(toolbar)
 
         rootFolderName = root.findViewById(R.id.textView_root_folder)
 

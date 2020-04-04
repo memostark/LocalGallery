@@ -7,6 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
@@ -43,6 +45,10 @@ class FilesListFragment: Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_files_list, container, false)
+
+        // Set up toolbar
+        val toolbar: Toolbar = root.findViewById(R.id.files_list_toolbar)
+        (activity as? AppCompatActivity)?.setSupportActionBar(toolbar)
 
         val folder = arguments?.getString(FOLDER_KEY) ?: ""
         val folderName: TextView = root.findViewById(R.id.folder_name_text)
