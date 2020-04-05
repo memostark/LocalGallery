@@ -11,33 +11,47 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.Folder
+import com.guillermonegrete.gallery.data.GetFolderResponse
 import java.util.*
 
 class FolderAdapter(
-    private val folders: List<Folder>,
+    private val data: GetFolderResponse,
     private val viewModel: FoldersViewModel
-): RecyclerView.Adapter<FolderAdapter.ViewHolder>(), Filterable {
+): RecyclerView.Adapter<RecyclerView.ViewHolder>(), Filterable {
 
-    private var filteredFolders = folders
+    private var filteredFolders = data.folders
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val item = LayoutInflater.from(parent.context).inflate(R.layout.folder_item, parent, false)
-        return ViewHolder(viewModel, item)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        val item = LayoutInflater.from(parent.context).inflate(viewType, parent, false)
+        return when(viewType) {
+            R.layout.folder_name_item -> NameViewHolder(item)
+            else -> ViewHolder(viewModel, item)
+        }
     }
 
     override fun getItemCount() = filteredFolders.size
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(filteredFolders[position])
+    override fun getItemViewType(position: Int): Int {
+        return when(position){
+            0 -> R.layout.folder_name_item
+            else -> R.layout.folder_item
+        }
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        when(holder){
+            is ViewHolder -> holder.bind(filteredFolders[position])
+            is NameViewHolder -> holder.bind(data.name)
+        }
     }
 
     override fun getFilter(): Filter {
         return object: Filter(){
             override fun performFiltering(constraint: CharSequence?): FilterResults {
                 filteredFolders = if(constraint.isNullOrBlank()){
-                    folders
+                    data.folders
                 }else{
-                    folders.filter { it.name.toLowerCase(Locale.getDefault()).contains(constraint) }
+                    data.folders.filter { it.name.toLowerCase(Locale.getDefault()).contains(constraint) }
                 }
 
                 val filterResults = FilterResults()
@@ -70,6 +84,15 @@ class FolderAdapter(
             itemView.setOnClickListener {
                 viewModel.openFolder(item.name)
             }
+        }
+    }
+
+    class NameViewHolder(item: View): RecyclerView.ViewHolder(item){
+
+        private val folderName: TextView = itemView.findViewById(R.id.textView_root_folder)
+
+        fun bind(name: String){
+             folderName.text = name
         }
     }
 }

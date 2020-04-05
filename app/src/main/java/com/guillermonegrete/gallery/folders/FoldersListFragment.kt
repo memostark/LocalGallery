@@ -33,7 +33,6 @@ class FoldersListFragment: Fragment(){
     private lateinit var messageContainer: View
     private lateinit var messageIcon: ImageView
     private lateinit var messageText: TextView
-    private lateinit var rootFolderName: TextView
     private lateinit var folderList: RecyclerView
     private lateinit var searchView: SearchView
 
@@ -62,10 +61,12 @@ class FoldersListFragment: Fragment(){
         val toolbar: Toolbar = root.findViewById(R.id.folders_list_toolbar)
         (activity as? AppCompatActivity)?.setSupportActionBar(toolbar)
 
-        rootFolderName = root.findViewById(R.id.textView_root_folder)
-
         folderList = root.findViewById(R.id.folders_list)
-        folderList.layoutManager = GridLayoutManager(requireContext(), 2)
+        val layoutManager = GridLayoutManager(requireContext(), 2)
+        layoutManager.spanSizeLookup = object: GridLayoutManager.SpanSizeLookup(){
+            override fun getSpanSize(position: Int) = if(position == 0) 2 else 1
+        }
+        folderList.layoutManager = layoutManager
 
         loadingIcon = root.findViewById(R.id.folders_progress_bar)
         folderListContainer = root.findViewById(R.id.folders_linear_layout)
@@ -187,8 +188,7 @@ class FoldersListFragment: Fragment(){
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 {
-                    rootFolderName.text = it.name
-                    adapter = FolderAdapter(it.folders, viewModel)
+                    adapter = FolderAdapter(it, viewModel)
                     folderList.adapter = adapter
                 },
                 {error -> println("Error loading folders: ${error.message}")}
