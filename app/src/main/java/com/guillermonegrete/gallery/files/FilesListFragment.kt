@@ -13,8 +13,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.flexbox.*
 import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.files.details.FileDetailsFragment
@@ -55,7 +55,13 @@ class FilesListFragment: Fragment() {
         folderName.text = folder
 
         filesList = root.findViewById(R.id.files_list)
-        filesList.layoutManager = LinearLayoutManager(context)
+        val layoutManager = FlexboxLayoutManager(context).apply {
+            flexWrap = FlexWrap.WRAP
+            flexDirection = FlexDirection.ROW
+            alignItems = AlignItems.STRETCH
+        }
+
+        filesList.layoutManager = layoutManager
 
         loadingIcon = root.findViewById(R.id.files_progress_bar)
 

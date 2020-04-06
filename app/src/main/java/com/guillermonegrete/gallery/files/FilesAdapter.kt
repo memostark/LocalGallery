@@ -7,6 +7,8 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.bumptech.glide.request.RequestOptions
+import com.google.android.flexbox.FlexboxLayoutManager
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.File
 
@@ -48,8 +50,14 @@ class FilesAdapter(
             Glide.with(itemView)
                 .load(item.name)
                 .placeholder(R.drawable.ic_image_24dp)
+                .apply( RequestOptions().override(200, 400))
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .into(image)
+
+            val params = image.layoutParams
+            if (params is FlexboxLayoutManager.LayoutParams){
+                params.flexGrow = 1.0f
+            }
         }
     }
 }
