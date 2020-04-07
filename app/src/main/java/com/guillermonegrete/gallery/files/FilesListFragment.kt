@@ -50,10 +50,6 @@ class FilesListFragment: Fragment() {
         val toolbar: Toolbar = root.findViewById(R.id.files_list_toolbar)
         (activity as? AppCompatActivity)?.setSupportActionBar(toolbar)
 
-        val folder = arguments?.getString(FOLDER_KEY) ?: ""
-        val folderName: TextView = root.findViewById(R.id.folder_name_text)
-        folderName.text = folder
-
         filesList = root.findViewById(R.id.files_list)
         val layoutManager = FlexboxLayoutManager(context).apply {
             flexWrap = FlexWrap.WRAP
@@ -67,6 +63,7 @@ class FilesListFragment: Fragment() {
 
         messageContainer = root.findViewById(R.id.files_message_container)
 
+        val folder = arguments?.getString(FOLDER_KEY) ?: ""
         bindViewModel(folder)
 
         return root
@@ -82,7 +79,7 @@ class FilesListFragment: Fragment() {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
-                { filesList.adapter = FilesAdapter(it, viewModel) },
+                { filesList.adapter = FilesAdapter(folder, it, viewModel) },
                 { error -> println("Error loading files: ${error.message}") }
             )
         )

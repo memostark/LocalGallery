@@ -3,34 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".files.details.FileDetailsFragment">
 
-    <FrameLayout
+    <com.google.android.exoplayer2.ui.PlayerView
+        android:id="@+id/exo_player_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <com.google.android.exoplayer2.ui.PlayerView
-            android:id="@+id/exo_player_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|end"
-            android:padding="8dp"
-            android:contentDescription="@string/video_type"
-            app:srcCompat="@drawable/ic_play_circle_outline_black_24dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|start"
-            android:text="@string/video_length_placeholder"
-            android:padding="8dp"/>
-
-    </FrameLayout>
+        android:layout_height="match_parent"/>
 
     <include layout="@layout/file_details_bottom"/>
 
