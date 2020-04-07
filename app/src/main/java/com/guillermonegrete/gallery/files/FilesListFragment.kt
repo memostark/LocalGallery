@@ -69,6 +69,11 @@ class FilesListFragment: Fragment() {
         return root
     }
 
+    override fun onStart() {
+        super.onStart()
+        setFolderClickEvent()
+    }
+
     override fun onStop() {
         disposable.clear()
         super.onStop()
@@ -94,7 +99,9 @@ class FilesListFragment: Fragment() {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe{ messageContainer.visibility = if(it) View.VISIBLE else View.GONE })
+    }
 
+    private fun setFolderClickEvent(){
         disposable.add(viewModel.openFolder
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
