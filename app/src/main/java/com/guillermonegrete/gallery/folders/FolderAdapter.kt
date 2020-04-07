@@ -29,7 +29,7 @@ class FolderAdapter(
         }
     }
 
-    override fun getItemCount() = filteredFolders.size
+    override fun getItemCount() = filteredFolders.size + 1
 
     override fun getItemViewType(position: Int): Int {
         return when(position){
@@ -40,7 +40,7 @@ class FolderAdapter(
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when(holder){
-            is ViewHolder -> holder.bind(filteredFolders[position])
+            is ViewHolder -> holder.bind(filteredFolders[position - 1])
             is NameViewHolder -> holder.bind(data.name)
         }
     }

@@ -27,11 +27,11 @@ class FilesAdapter(
         }
     }
 
-    override fun getItemCount() = files.size
+    override fun getItemCount() = files.size + 1
 
     override fun getItemViewType(position: Int): Int {
         if(position == 0) return R.layout.folder_name_item
-        return when(files[position].type){
+        return when(files[position - 1].type){
             "jpg", "jpeg" -> R.layout.file_image_item
             "mp4" -> R.layout.file_video_item
             else -> R.layout.file_image_item
@@ -39,9 +39,11 @@ class FilesAdapter(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val item = files[position]
         when(holder){
-            is ViewHolder -> holder.bind(item)
+            is ViewHolder -> {
+                val item = files[position - 1]
+                holder.bind(item)
+            }
             is NameViewHolder -> holder.bind(folderName)
         }
     }
@@ -54,7 +56,8 @@ class FilesAdapter(
         private val image: ImageView = itemView.findViewById(R.id.file_view)
 
         fun bind(item: File){
-            image.setOnClickListener { viewModel.openFilesDetails(adapterPosition) }
+            val realPos = adapterPosition - 1
+            image.setOnClickListener { viewModel.openFilesDetails(realPos) }
 
             Glide.with(itemView)
                 .load(item.name)
