@@ -3,11 +3,9 @@ package com.guillermonegrete.gallery.folders
 import android.app.SearchManager
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.*
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
@@ -15,6 +13,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -24,9 +23,12 @@ import com.guillermonegrete.gallery.files.FilesListFragment
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class FoldersListFragment: Fragment(){
+
+    private val TAG = FoldersListFragment::class.java.simpleName
 
     private lateinit var loadingIcon: ProgressBar
     private lateinit var folderListContainer: View
@@ -35,6 +37,8 @@ class FoldersListFragment: Fragment(){
     private lateinit var messageText: TextView
     private lateinit var folderList: RecyclerView
     private lateinit var searchView: SearchView
+
+    private lateinit var serversText: TextView
 
     private lateinit var adapter: FolderAdapter
 
@@ -113,6 +117,12 @@ class FoldersListFragment: Fragment(){
         val addressText: EditText = dialogLayout.findViewById(R.id.server_address_edit)
         addressText.setText(presetData)
         addressText.setSelection(presetData.length)
+
+        serversText = dialogLayout.findViewById(R.id.servers_list)
+
+        dialogLayout.findViewById<Button>(R.id.search_servers_btn).setOnClickListener {
+            searchForServers()
+        }
 
         val builder = AlertDialog.Builder(requireContext())
         builder.setMessage("Set server address")
@@ -202,7 +212,7 @@ class FoldersListFragment: Fragment(){
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 { showServerDialog(it) },
-                { error -> println("Unable to log dialog data $error") }
+                { error -> Log.e(TAG,"Unable to log dialog data $error") }
             )
         )
     }
@@ -239,5 +249,12 @@ class FoldersListFragment: Fragment(){
         }
         folderListContainer.visibility = if (visible) View.GONE else View.VISIBLE
         messageContainer.visibility = if (visible) View.VISIBLE else View.GONE
+    }
+
+    private fun searchForServers() = lifecycleScope.launch {
+        val scanner = ServerScanner()
+        val ip = scanner.search()
+
+        serversText.text = ip
     }
 }
