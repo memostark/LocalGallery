@@ -6,24 +6,23 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.widget.*
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.files.FilesListFragment
+import com.guillermonegrete.gallery.servers.ServersFragment
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class FoldersListFragment: Fragment(){
@@ -84,6 +83,19 @@ class FoldersListFragment: Fragment(){
         return root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // Listen to updates from Servers Fragment
+        // TODO compare this method with the new fragment communication API
+        val stateHandle = findNavController().currentBackStackEntry?.savedStateHandle
+        stateHandle?.getLiveData<String>(ServersFragment.IP_KEY)?.observe(viewLifecycleOwner, Observer {
+            Toast.makeText(context, "New ip: $it", Toast.LENGTH_SHORT).show()
+            viewModel.updateServerUrl(it)
+            loadFoldersData()
+        })
+    }
+
     override fun onStart() {
         super.onStart()
         setViewModel()
@@ -110,31 +122,6 @@ class FoldersListFragment: Fragment(){
 
             else -> super.onOptionsItemSelected(item)
         }
-    }
-
-    private fun showServerDialog(presetData: String) {
-        val dialogLayout = layoutInflater.inflate(R.layout.dialog_set_server_address, null)
-        val addressText: EditText = dialogLayout.findViewById(R.id.server_address_edit)
-        addressText.setText(presetData)
-        addressText.setSelection(presetData.length)
-
-        serversText = dialogLayout.findViewById(R.id.servers_list)
-
-        dialogLayout.findViewById<Button>(R.id.search_servers_btn).setOnClickListener {
-            searchForServers()
-        }
-
-        val builder = AlertDialog.Builder(requireContext())
-        builder.setMessage("Set server address")
-            .setView(dialogLayout)
-            .setPositiveButton(R.string.ok) { _, _ ->
-                viewModel.updateServerUrl(addressText.text.toString())
-                loadFoldersData()
-            }
-            .setNegativeButton(R.string.cancel) { _, _ ->}
-
-        builder.create().show()
-
     }
 
     private fun setViewModel() {
@@ -211,7 +198,7 @@ class FoldersListFragment: Fragment(){
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
-                { showServerDialog(it) },
+                { openServerFragment(it) },
                 { error -> Log.e(TAG,"Unable to log dialog data $error") }
             )
         )
@@ -221,6 +208,12 @@ class FoldersListFragment: Fragment(){
         val bundle = Bundle()
         bundle.putString(FilesListFragment.FOLDER_KEY, folder)
         findNavController().navigate(R.id.files_fragment_dest, bundle)
+    }
+
+    private fun openServerFragment(presetIp: String){
+        val bundle = Bundle()
+        bundle.putString(ServersFragment.IP_KEY, presetIp)
+        findNavController().navigate(R.id.servers_fragment_dest, bundle)
     }
 
     private fun setSearchViewConfig(menu: Menu){
@@ -251,10 +244,4 @@ class FoldersListFragment: Fragment(){
         messageContainer.visibility = if (visible) View.VISIBLE else View.GONE
     }
 
-    private fun searchForServers() = lifecycleScope.launch {
-        val scanner = ServerScanner()
-        val ip = scanner.search()
-
-        serversText.text = ip
-    }
 }

@@ -51,7 +51,7 @@ class FileDetailsFragment : Fragment() {
         exoPlayer = SimpleExoPlayer.Builder(requireContext()).build()
 
         viewPager.adapter = FileDetailsAdapter(fileList)
-        viewPager.currentItem = index
+        viewPager.setCurrentItem(index, false)
 
         setPagerListener(viewPager)
 
