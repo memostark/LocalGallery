@@ -51,7 +51,7 @@ class ServersFragment: DialogFragment(){
                 val scanner = ServerScanner()
                 val ip = scanner.search()
 
-                serversAdapter.addServer(ip)
+                if(ip != null) serversAdapter.addServer(ip)
             }
         }
     }

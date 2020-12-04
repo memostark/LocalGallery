@@ -11,7 +11,7 @@ import java.net.*
  * */
 class ServerScanner {
 
-    suspend fun search(): String {
+    suspend fun search(): String? {
         return withContext(Dispatchers.IO) {
             val className = this.javaClass.simpleName
             try {
@@ -83,7 +83,7 @@ class ServerScanner {
                 println( ex.message)
             }
 
-            return@withContext ""
+            return@withContext null
         }
     }
 
