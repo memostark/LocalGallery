@@ -10,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
@@ -70,7 +69,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
         // Listen to updates from Servers Fragment
         // TODO compare this method with the new fragment communication API
         val stateHandle = findNavController().currentBackStackEntry?.savedStateHandle
-        stateHandle?.getLiveData<String>(ServersFragment.IP_KEY)?.observe(viewLifecycleOwner, Observer {
+        stateHandle?.getLiveData<String>(ServersFragment.IP_KEY)?.observe(viewLifecycleOwner, {
             Toast.makeText(context, "New ip: $it", Toast.LENGTH_SHORT).show()
             viewModel.updateServerUrl(it)
             loadFoldersData()
@@ -206,7 +205,8 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
         searchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener{
             override fun onQueryTextSubmit(query: String?): Boolean {
                 adapter.filter.filter(query)
-                return false
+                searchView.clearFocus()
+                return true
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
@@ -214,6 +214,20 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                 return false
             }
         })
+
+        searchView.setOnQueryTextFocusChangeListener { _, hasFocus ->
+            // If keyboard is closed (hasFocus is false) and no text in search
+            if(!hasFocus && searchView.query.isNullOrBlank()) searchView.isIconified = true
+        }
+
+        view?.isFocusableInTouchMode = true
+        view?.setOnKeyListener { _, keyCode, _ ->
+            return@setOnKeyListener if(keyCode == KeyEvent.KEYCODE_BACK && !searchView.isIconified) {
+                // If search view is open, close it instead of closing the app
+                searchView.isIconified = true
+                true
+            } else false
+        }
     }
 
     private fun setMessageContainer(visible: Boolean, message: String, icon: Int){
