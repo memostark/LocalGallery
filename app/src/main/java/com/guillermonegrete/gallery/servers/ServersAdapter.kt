@@ -1,19 +1,17 @@
 package com.guillermonegrete.gallery.servers
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.guillermonegrete.gallery.R
+import com.guillermonegrete.gallery.databinding.ServerItemBinding
 
 class ServersAdapter: RecyclerView.Adapter<ServersAdapter.ViewHolder>() {
 
     private val servers = mutableListOf<String>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view  = LayoutInflater.from(parent.context).inflate(R.layout.server_item, parent, false)
-        return ViewHolder(view)
+        val binding = ServerItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ViewHolder(binding)
     }
 
     override fun getItemCount() = servers.size
@@ -29,12 +27,10 @@ class ServersAdapter: RecyclerView.Adapter<ServersAdapter.ViewHolder>() {
         }
     }
 
-    class ViewHolder(view: View): RecyclerView.ViewHolder(view){
-
-        private val ipText: TextView = itemView.findViewById(R.id.server_ip)
+    class ViewHolder(private val binding: ServerItemBinding): RecyclerView.ViewHolder(binding.root){
 
         fun bind(text: String){
-            ipText.text = text
+            binding.serverIp.text = text
         }
     }
 }

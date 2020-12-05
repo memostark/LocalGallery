@@ -4,7 +4,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
@@ -12,6 +11,7 @@ import com.bumptech.glide.request.RequestOptions
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.File
+import com.guillermonegrete.gallery.databinding.FolderNameItemBinding
 
 class FilesAdapter(
     private val folderName: String,
@@ -20,10 +20,10 @@ class FilesAdapter(
 ): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        val item = LayoutInflater.from(parent.context).inflate(viewType, parent, false)
+        val inflater = LayoutInflater.from(parent.context)
         return when(viewType) {
-            R.layout.folder_name_item -> NameViewHolder(item)
-            else -> ViewHolder(viewModel, item)
+            R.layout.folder_name_item -> NameViewHolder(FolderNameItemBinding.inflate(inflater, parent, false))
+            else -> ViewHolder(viewModel, inflater.inflate(viewType, parent, false))
         }
     }
 
@@ -48,6 +48,7 @@ class FilesAdapter(
         }
     }
 
+    // TODO create View Holder for image and video item
     class ViewHolder(
         private val viewModel: FilesViewModel,
         item: View
@@ -73,12 +74,10 @@ class FilesAdapter(
         }
     }
 
-    class NameViewHolder(item: View): RecyclerView.ViewHolder(item){
-
-        private val folderName: TextView = itemView.findViewById(R.id.textView_root_folder)
+    class NameViewHolder(private val binding: FolderNameItemBinding): RecyclerView.ViewHolder(binding.root){
 
         fun bind(name: String){
-            folderName.text = name
+            binding.rootFolder.text = name
         }
     }
 }

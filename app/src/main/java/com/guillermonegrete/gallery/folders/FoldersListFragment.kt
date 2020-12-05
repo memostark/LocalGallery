@@ -8,16 +8,15 @@ import android.view.*
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
-import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
+import com.guillermonegrete.gallery.databinding.FragmentFoldersListBinding
 import com.guillermonegrete.gallery.files.FilesListFragment
 import com.guillermonegrete.gallery.servers.ServersFragment
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -25,19 +24,12 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
-class FoldersListFragment: Fragment(){
+class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
 
     private val TAG = FoldersListFragment::class.java.simpleName
 
-    private lateinit var loadingIcon: ProgressBar
-    private lateinit var folderListContainer: View
-    private lateinit var messageContainer: View
-    private lateinit var messageIcon: ImageView
-    private lateinit var messageText: TextView
-    private lateinit var folderList: RecyclerView
-    private lateinit var searchView: SearchView
-
-    private lateinit var serversText: TextView
+    private  var _binding: FragmentFoldersListBinding? = null
+    private val binding get() = _binding!!
 
     private lateinit var adapter: FolderAdapter
 
@@ -56,35 +48,24 @@ class FoldersListFragment: Fragment(){
         setHasOptionsMenu(true)
     }
 
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val root = inflater.inflate(R.layout.fragment_folders_list, container, false)
-
-        // Set up toolbar
-        val toolbar: Toolbar = root.findViewById(R.id.folders_list_toolbar)
-        (activity as? AppCompatActivity)?.setSupportActionBar(toolbar)
-
-        folderList = root.findViewById(R.id.folders_list)
-        val layoutManager = GridLayoutManager(requireContext(), 2)
-        layoutManager.spanSizeLookup = object: GridLayoutManager.SpanSizeLookup(){
-            override fun getSpanSize(position: Int) = if(position == 0) 2 else 1
-        }
-        folderList.layoutManager = layoutManager
-
-        loadingIcon = root.findViewById(R.id.folders_progress_bar)
-        folderListContainer = root.findViewById(R.id.folders_linear_layout)
-
-        messageContainer = root.findViewById(R.id.folders_message_container)
-        messageIcon = root.findViewById(R.id.foldersMessageIcon)
-        messageText = root.findViewById(R.id.foldersMessageMain)
-
-        messageIcon.setOnClickListener { loadFoldersData() }
-
-        return root
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        _binding = FragmentFoldersListBinding.bind(view)
+
+        with(binding){
+            // Set up toolbar
+            (activity as? AppCompatActivity)?.setSupportActionBar(toolbar)
+
+
+            val layoutManager = GridLayoutManager(requireContext(), 2)
+            layoutManager.spanSizeLookup = object: GridLayoutManager.SpanSizeLookup(){
+                override fun getSpanSize(position: Int) = if(position == 0) 2 else 1
+            }
+            foldersList.layoutManager = layoutManager
+
+            messageIcon.setOnClickListener { loadFoldersData() }
+        }
+
 
         // Listen to updates from Servers Fragment
         // TODO compare this method with the new fragment communication API
@@ -94,6 +75,11 @@ class FoldersListFragment: Fragment(){
             viewModel.updateServerUrl(it)
             loadFoldersData()
         })
+    }
+
+    override fun onDestroyView() {
+        _binding = null
+        super.onDestroyView()
     }
 
     override fun onStart() {
@@ -130,19 +116,14 @@ class FoldersListFragment: Fragment(){
             disposable.add(loadingIndicator
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe {loadingIcon.visibility = if(it) View.VISIBLE else View.GONE}
+                .subscribe {binding.loadingBar.visibility = if(it) View.VISIBLE else View.GONE}
             )
 
             disposable.add(urlAvailable
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe{
-                    if(!it){
-                        messageText.text = resources.getString(R.string.no_address_message)
-                        messageIcon.setImageResource(R.drawable.ic_settings_input_antenna_black_24dp)
-                    }
-                    folderListContainer.visibility = if(it) View.VISIBLE else View.GONE
-                    messageContainer.visibility = if(it) View.GONE else View.VISIBLE
+                    setMessageContainer(!it, getString(R.string.no_address_message), R.drawable.ic_settings_input_antenna_black_24dp)
                 }
             )
 
@@ -158,7 +139,7 @@ class FoldersListFragment: Fragment(){
                 .subscribe {
                     setMessageContainer(
                         it,
-                        resources.getString(R.string.error_message),
+                        getString(R.string.error_message),
                         R.drawable.ic_refresh_black_24dp
                     )
                 }
@@ -170,7 +151,7 @@ class FoldersListFragment: Fragment(){
                 .subscribe {
                     setMessageContainer(
                         it,
-                        resources.getString(R.string.folder_empty_message),
+                        getString(R.string.folder_empty_message),
                         R.drawable.ic_folder_open_black_24dp
                     )
                 }
@@ -186,7 +167,7 @@ class FoldersListFragment: Fragment(){
             .subscribe(
                 {
                     adapter = FolderAdapter(it, viewModel)
-                    folderList.adapter = adapter
+                    binding.foldersList.adapter = adapter
                 },
                 {error -> println("Error loading folders: ${error.message}")}
             )
@@ -218,7 +199,7 @@ class FoldersListFragment: Fragment(){
 
     private fun setSearchViewConfig(menu: Menu){
         val searchManager = context?.getSystemService(Context.SEARCH_SERVICE) as SearchManager
-        searchView = menu.findItem(R.id.action_search).actionView as SearchView
+        val searchView = menu.findItem(R.id.action_search).actionView as SearchView
         searchView.setSearchableInfo(searchManager.getSearchableInfo(activity?.componentName))
         searchView.maxWidth = Int.MAX_VALUE
 
@@ -236,12 +217,14 @@ class FoldersListFragment: Fragment(){
     }
 
     private fun setMessageContainer(visible: Boolean, message: String, icon: Int){
-        if(visible){
-            messageText.text = message
-            messageIcon.setImageResource(icon)
+        with(binding){
+            if(visible){
+                this.message.text = message
+                messageIcon.setImageResource(icon)
+            }
+            foldersList.visibility = if (visible) View.GONE else View.VISIBLE
+            messageContainer.visibility = if (visible) View.VISIBLE else View.GONE
         }
-        folderListContainer.visibility = if (visible) View.GONE else View.VISIBLE
-        messageContainer.visibility = if (visible) View.VISIBLE else View.GONE
     }
 
 }

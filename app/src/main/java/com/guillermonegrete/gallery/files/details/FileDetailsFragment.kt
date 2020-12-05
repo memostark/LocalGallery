@@ -19,10 +19,14 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
+import com.guillermonegrete.gallery.databinding.FragmentFileDetailsBinding
 import com.guillermonegrete.gallery.files.FilesViewModel
 import javax.inject.Inject
 
-class FileDetailsFragment : Fragment() {
+class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
+
+    private  var _binding: FragmentFileDetailsBinding? = null
+    private val binding get() = _binding!!
 
     @Inject lateinit var viewModelFactory: ViewModelProvider.Factory
     private val viewModel by activityViewModels<FilesViewModel> { viewModelFactory }
@@ -42,20 +46,31 @@ class FileDetailsFragment : Fragment() {
     ): View? {
         val root = inflater.inflate(R.layout.fragment_file_details, container, false)
 
-        val index = arguments?.getInt(FILE_INDEX_KEY) ?: 0
 
-        val viewPager: ViewPager2 = root.findViewById(R.id.file_details_viewpager)
+
+        return root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        _binding = FragmentFileDetailsBinding.bind(view)
+
+        val index = arguments?.getInt(FILE_INDEX_KEY) ?: 0
 
         val fileList = viewModel.cachedFileList
 
-        exoPlayer = SimpleExoPlayer.Builder(requireContext()).build()
-
+        val viewPager: ViewPager2 = binding.fileDetailsViewpager
         viewPager.adapter = FileDetailsAdapter(fileList)
         viewPager.setCurrentItem(index, false)
 
-        setPagerListener(viewPager)
+        exoPlayer = SimpleExoPlayer.Builder(requireContext()).build()
 
-        return root
+        setPagerListener(viewPager)
+    }
+
+    override fun onDestroy() {
+        _binding = null
+        super.onDestroy()
     }
 
     override fun onResume() {
