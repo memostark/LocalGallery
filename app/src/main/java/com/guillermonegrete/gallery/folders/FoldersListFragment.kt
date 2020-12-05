@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
@@ -104,7 +105,6 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                 loadDialogData()
                 true
             }
-
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -129,7 +129,10 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             disposable.add(openFolder
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe{ openFileFragment(it) }
+                .subscribe {
+                    hideKeyboard()
+                    openFileFragment(it)
+                }
             )
 
             disposable.add(networkError
@@ -241,4 +244,10 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
         }
     }
 
+    private fun hideKeyboard() {
+        val context = activity ?: return
+        val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val focusedView = context.currentFocus ?: return
+        inputMethodManager.hideSoftInputFromWindow(focusedView.windowToken, 0)
+    }
 }
