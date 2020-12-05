@@ -10,6 +10,7 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
@@ -46,6 +47,13 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
+
+        setFragmentResultListener(ServersFragment.REQUEST_KEY) { _, bundle ->
+            val ip = bundle.getString(ServersFragment.IP_KEY) ?: return@setFragmentResultListener
+            Toast.makeText(context, "New ip: $ip", Toast.LENGTH_SHORT).show()
+            viewModel.updateServerUrl(ip)
+            loadFoldersData()
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -65,16 +73,6 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
 
             messageIcon.setOnClickListener { loadFoldersData() }
         }
-
-
-        // Listen to updates from Servers Fragment
-        // TODO compare this method with the new fragment communication API
-        val stateHandle = findNavController().currentBackStackEntry?.savedStateHandle
-        stateHandle?.getLiveData<String>(ServersFragment.IP_KEY)?.observe(viewLifecycleOwner, {
-            Toast.makeText(context, "New ip: $it", Toast.LENGTH_SHORT).show()
-            viewModel.updateServerUrl(it)
-            loadFoldersData()
-        })
 
         loadFoldersData()
     }

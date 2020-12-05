@@ -3,9 +3,10 @@ package com.guillermonegrete.gallery.servers
 import android.app.Dialog
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
+import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.databinding.DialogSetServerAddressBinding
@@ -26,10 +27,10 @@ class ServersFragment: DialogFragment(){
             bindLayout()
 
             builder.setView(view)
-                .setMessage("Set server address")
+                .setMessage("Set server address") // TODO use string resource
                 .setPositiveButton(R.string.ok) { _, _ ->
                     val serverIp = binding.serverAddressEdit.text.toString()
-                    findNavController().previousBackStackEntry?.savedStateHandle?.set(IP_KEY, serverIp)
+                    setFragmentResult(REQUEST_KEY, bundleOf(IP_KEY to serverIp))
                 }
                 .setNegativeButton(R.string.cancel) { dialog, _ ->  dialog.cancel() }
 
@@ -63,5 +64,6 @@ class ServersFragment: DialogFragment(){
 
     companion object{
         const val IP_KEY = "preset-ip"
+        const val REQUEST_KEY = "server_frag_request"
     }
 }
