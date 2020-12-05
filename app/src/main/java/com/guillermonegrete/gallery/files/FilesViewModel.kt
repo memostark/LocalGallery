@@ -19,7 +19,7 @@ class FilesViewModel @Inject constructor(
 
     val networkError: BehaviorSubject<Boolean> = BehaviorSubject.create()
 
-    val openFolder: Subject<Int> = PublishSubject.create()
+    val openDetails: Subject<Int> = PublishSubject.create()
 
     var cachedFileList = emptyList<File>()
         private set
@@ -51,6 +51,6 @@ class FilesViewModel @Inject constructor(
     }
 
     fun openFilesDetails(index: Int){
-        openFolder.onNext(index)
+        openDetails.onNext(index)
     }
 }

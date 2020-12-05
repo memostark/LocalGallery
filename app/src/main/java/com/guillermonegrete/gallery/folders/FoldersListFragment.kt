@@ -75,16 +75,18 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             viewModel.updateServerUrl(it)
             loadFoldersData()
         })
-    }
 
-    override fun onDestroyView() {
-        _binding = null
-        super.onDestroyView()
+        loadFoldersData()
     }
 
     override fun onStart() {
         super.onStart()
         setViewModel()
+    }
+
+    override fun onDestroyView() {
+        _binding = null
+        super.onDestroyView()
     }
 
     override fun onStop() {
@@ -159,7 +161,6 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                 }
             )
         }
-        loadFoldersData()
     }
 
     private fun loadFoldersData(){

@@ -61,7 +61,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
 
     override fun onStart() {
         super.onStart()
-        setFolderClickEvent()
+        setFileClickEvent()
     }
 
     override fun onStop() {
@@ -91,8 +91,8 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
             .subscribe{ binding.filesMessageContainer.visibility = if(it) View.VISIBLE else View.GONE })
     }
 
-    private fun setFolderClickEvent(){
-        disposable.add(viewModel.openFolder
+    private fun setFileClickEvent(){
+        disposable.add(viewModel.openDetails
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe{ openFileDetails(it) }
