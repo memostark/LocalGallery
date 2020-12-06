@@ -72,16 +72,16 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
     private fun hideStatusBar(){
         (activity as AppCompatActivity).supportActionBar?.hide()
 
-        val window = activity?.window
-        window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
+        val window = activity?.window ?: return
+        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
 
     }
 
     private fun showStatusBar(){
         (activity as AppCompatActivity).supportActionBar?.show()
 
-        val window = activity?.window
-        window?.decorView?.systemUiVisibility = 0
+        val window = activity?.window ?: return
+        window.decorView.systemUiVisibility = 0
     }
 
     private fun setPagerListener(viewPager: ViewPager2){
