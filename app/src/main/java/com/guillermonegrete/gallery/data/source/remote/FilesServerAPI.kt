@@ -1,5 +1,6 @@
 package com.guillermonegrete.gallery.data.source.remote
 
+import com.guillermonegrete.gallery.data.FileResponse
 import com.guillermonegrete.gallery.data.GetFolderResponse
 import io.reactivex.Single
 import retrofit2.http.GET
@@ -14,5 +15,5 @@ interface FilesServerAPI{
     fun getFiles(
         @Path(value="baseUrl", encoded = true)  baseUrl: String,
         @Path(value="path", encoded = false)  path: String
-    ): Single<List<String>>
+    ): Single<List<FileResponse>>
 }

@@ -1,5 +1,6 @@
 package com.guillermonegrete.gallery.files
 
+import com.guillermonegrete.gallery.data.File
 import com.guillermonegrete.gallery.data.source.FakeFilesRepository
 import com.guillermonegrete.gallery.data.source.FakeSettingsRepository
 import org.junit.Before
@@ -14,7 +15,11 @@ class FilesViewModelTest {
     private lateinit var filesRepository: FakeFilesRepository
 
     private val defaultFolder = "folder-name"
-    private val defaultFiles = listOf("http://file1.jpg", "http://file02.jpg", "http://file_3.jpg")
+    private val defaultFiles = listOf(
+        File("http://file1.jpg", "jpg"),
+        File("http://file02.jpg", "jpg"),
+        File("http://file_3.jpg", "jpg")
+    )
 
     @Before
     fun setUp(){

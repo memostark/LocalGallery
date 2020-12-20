@@ -33,13 +33,6 @@ class FilesViewModel @Inject constructor(
         loadingIndicator.onNext(true)
 
         return filesRepository.getFiles(folder)
-            // This map should not be necessary later because Moshi adapter should handle the file object creation
-            .map {list->
-                list.map {
-                    val type = it.split(".").last()
-                    File(it, type)
-                }
-            }
             .doOnSuccess {
                 loadingIndicator.onNext(false)
                 cachedFileList = it

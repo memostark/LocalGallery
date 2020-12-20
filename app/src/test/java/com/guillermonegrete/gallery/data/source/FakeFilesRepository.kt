@@ -1,6 +1,7 @@
 package com.guillermonegrete.gallery.data.source
 
 import androidx.annotation.VisibleForTesting
+import com.guillermonegrete.gallery.data.File
 import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.GetFolderResponse
 import io.reactivex.Single
@@ -10,7 +11,7 @@ class FakeFilesRepository: FilesRepository {
 
     var foldersServiceData = arrayListOf<Folder>()
 
-    var filesServiceData: LinkedHashMap<String, MutableList<String>> = LinkedHashMap()
+    var filesServiceData: LinkedHashMap<String, MutableList<File>> = LinkedHashMap()
 
     var repoUrl = ""
 
@@ -29,7 +30,7 @@ class FakeFilesRepository: FilesRepository {
         return Single.just(GetFolderResponse("Name", foldersServiceData))
     }
 
-    override fun getFiles(folder: String): Single<List<String>> {
+    override fun getFiles(folder: String): Single<List<File>> {
         if(shouldReturnError) return Single.error(RuntimeException())
         return Single.just(filesServiceData[folder])
     }
@@ -42,7 +43,7 @@ class FakeFilesRepository: FilesRepository {
     }
 
     @VisibleForTesting
-    fun addFiles(folder: String, vararg files: String) {
+    fun addFiles(folder: String, vararg files: File) {
         val fileList = filesServiceData[folder]
         if(fileList == null){
             filesServiceData[folder] = files.toMutableList()
