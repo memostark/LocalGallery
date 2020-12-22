@@ -3,11 +3,11 @@ package com.guillermonegrete.gallery.files
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
-import com.bumptech.glide.request.RequestOptions
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.File
@@ -57,13 +57,15 @@ class FilesAdapter(
         private val image: ImageView = itemView.findViewById(R.id.file_view)
 
         fun bind(item: File){
+            itemView.layoutParams = FrameLayout.LayoutParams(item.width, item.height)
             val realPos = adapterPosition - 1
             image.setOnClickListener { viewModel.openFilesDetails(realPos) }
 
             Glide.with(itemView)
                 .load(item.name)
                 .placeholder(R.drawable.ic_image_24dp)
-                .apply( RequestOptions().override(200, 400))
+                .override(item.width, item.height)
+                .centerCrop()
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .into(image)
 
