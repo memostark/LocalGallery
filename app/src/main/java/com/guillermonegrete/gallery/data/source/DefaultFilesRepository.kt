@@ -3,6 +3,7 @@ package com.guillermonegrete.gallery.data.source
 import android.util.Patterns
 import com.guillermonegrete.gallery.data.File
 import com.guillermonegrete.gallery.data.GetFolderResponse
+import com.guillermonegrete.gallery.data.PagedFileResponse
 import com.guillermonegrete.gallery.data.source.remote.FilesServerAPI
 import io.reactivex.Single
 import javax.inject.Inject
@@ -30,6 +31,10 @@ class DefaultFilesRepository @Inject constructor(private var fileAPI: FilesServe
                 File(it.url, type, it.width, it.height)
             }
         }
+    }
+
+    override fun getPagedFiles(folder: String, page: Int): Single<PagedFileResponse> {
+        return fileAPI.getPagedFiles(baseUrl, folder, page)
     }
 
     companion object{

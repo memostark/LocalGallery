@@ -9,7 +9,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.paging.PagingData
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.File
@@ -64,11 +66,29 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
     }
 
     private fun bindViewModel(folder: String){
-        disposable.add(viewModel.loadFiles(folder)
+        val adapter = FilesPagerAdapter(viewModel)
+        val list = binding.filesList
+        list.layoutManager = GridLayoutManager(context, 3)
+        list.adapter = adapter
+//        adapter
+
+        /*disposable.add(viewModel.loadFiles(folder)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 { setFilesList(folder, it) },
+                { error -> println("Error loading files: ${error.message}") }
+            )
+        )*/
+
+        disposable.add(viewModel.loadPagedFiles(folder)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                {
+                    adapter.submitData(lifecycle, it)
+//                    setFilesList(folder, emptyList(),  it)
+                },
                 { error -> println("Error loading files: ${error.message}") }
             )
         )

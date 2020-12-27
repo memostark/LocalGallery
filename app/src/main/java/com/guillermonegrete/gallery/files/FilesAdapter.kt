@@ -5,6 +5,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
+import androidx.paging.PagingDataAdapter
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
@@ -57,14 +59,14 @@ class FilesAdapter(
         private val image: ImageView = itemView.findViewById(R.id.file_view)
 
         fun bind(item: File){
-            itemView.layoutParams = FrameLayout.LayoutParams(item.width, item.height)
+//            itemView.layoutParams = FrameLayout.LayoutParams(item.width, item.height)
             val realPos = adapterPosition - 1
             image.setOnClickListener { viewModel.openFilesDetails(realPos) }
 
             Glide.with(itemView)
                 .load(item.name)
                 .placeholder(R.drawable.ic_image_24dp)
-                .override(item.width, item.height)
+//                .override(item.width, item.height)
                 .centerCrop()
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .into(image)
@@ -81,5 +83,29 @@ class FilesAdapter(
         fun bind(name: String){
             binding.rootFolder.text = name
         }
+    }
+}
+
+class FilesPagerAdapter(
+    private val viewModel: FilesViewModel
+): PagingDataAdapter<File, FilesAdapter.ViewHolder>(FileDiffCallback) {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FilesAdapter.ViewHolder {
+        return FilesAdapter.ViewHolder(viewModel, LayoutInflater.from(parent.context).inflate(R.layout.file_video_item, parent, false))
+    }
+
+    override fun onBindViewHolder(holder: FilesAdapter.ViewHolder, position: Int) {
+        val item = getItem(position) ?: return
+        holder.bind(item)
+    }
+}
+
+object FileDiffCallback : DiffUtil.ItemCallback<File>() {
+
+    override fun areItemsTheSame(oldItem: File, newItem: File): Boolean {
+        return oldItem.name == newItem.name
+    }
+
+    override fun areContentsTheSame(oldItem: File, newItem: File): Boolean {
+        return oldItem == newItem
     }
 }

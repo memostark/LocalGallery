@@ -2,6 +2,7 @@ package com.guillermonegrete.gallery.data.source
 
 import com.guillermonegrete.gallery.data.File
 import com.guillermonegrete.gallery.data.GetFolderResponse
+import com.guillermonegrete.gallery.data.PagedFileResponse
 import io.reactivex.Single
 
 interface FilesRepository {
@@ -11,4 +12,6 @@ interface FilesRepository {
     fun getFolders(): Single<GetFolderResponse>
 
     fun getFiles(folder: String): Single<List<File>>
+
+    fun getPagedFiles(folder: String, page: Int): Single<PagedFileResponse>
 }
