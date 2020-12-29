@@ -66,7 +66,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
     }
 
     private fun bindViewModel(folder: String){
-        val adapter = FilesPagerAdapter(viewModel)
+        val adapter = FilesAdapter(viewModel)
         val list = binding.filesList
 
         val width = getScreenWidth()
