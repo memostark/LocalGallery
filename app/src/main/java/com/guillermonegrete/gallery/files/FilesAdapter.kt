@@ -59,14 +59,14 @@ class FilesAdapter(
         private val image: ImageView = itemView.findViewById(R.id.file_view)
 
         fun bind(item: File){
-//            itemView.layoutParams = FrameLayout.LayoutParams(item.width, item.height)
+            itemView.layoutParams = FrameLayout.LayoutParams(item.width, item.height)
             val realPos = adapterPosition - 1
             image.setOnClickListener { viewModel.openFilesDetails(realPos) }
 
             Glide.with(itemView)
                 .load(item.name)
                 .placeholder(R.drawable.ic_image_24dp)
-//                .override(item.width, item.height)
+                .override(item.width, item.height)
                 .centerCrop()
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .into(image)

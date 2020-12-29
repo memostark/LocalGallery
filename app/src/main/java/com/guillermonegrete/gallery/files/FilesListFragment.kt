@@ -9,9 +9,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
-import androidx.paging.PagingData
+import androidx.paging.flatMap
+import androidx.paging.map
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.File
@@ -68,27 +68,86 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
     private fun bindViewModel(folder: String){
         val adapter = FilesPagerAdapter(viewModel)
         val list = binding.filesList
-        list.layoutManager = GridLayoutManager(context, 3)
-        list.adapter = adapter
-//        adapter
 
-        /*disposable.add(viewModel.loadFiles(folder)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-                { setFilesList(folder, it) },
-                { error -> println("Error loading files: ${error.message}") }
-            )
-        )*/
+        val width = getScreenWidth()
+
+        val layoutManager = GridLayoutManager(context, width)
+        list.layoutManager = layoutManager
+        layoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+            override fun getSpanSize(position: Int): Int {
+                val file = adapter.snapshot()[position]
+                return file?.width ?: 1
+            }
+        }
+        list.adapter = adapter
+
+        val arMin = 2.0f
+        val arMax = 3.0f
+
+        var dataSize = 0
 
         disposable.add(viewModel.loadPagedFiles(folder)
             .subscribeOn(Schedulers.io())
+                // Hacky way used to find out how many
+            .map { pagingData ->
+                pagingData.map { dataSize++; it }
+            }
+            .map { pagingData ->
+                var arSum = 0f
+                val tempList = mutableListOf<File>()
+                val tempSizes = mutableListOf<Size>()
+
+                var index = 0
+
+                pagingData.flatMap { file ->
+                    val size = Size(file.width, file.height)
+                    tempList.add(file)
+                    tempSizes.add(size)
+                    arSum += getAspectRatio(size)
+                    index++
+
+                    when {
+                        arSum in arMin..arMax -> {
+                            normalizeHeights(tempSizes, width / arSum)
+                            arSum = 0f
+                            val files = updateSizes(tempList, tempSizes)
+                            tempList.clear()
+                            tempSizes.clear()
+                            println("Returning: $files")
+                            files
+                        }
+                        arSum > arMax -> {
+                            val pop = tempSizes.removeLast()
+                            val popFile = tempList.removeLast()
+                            arSum -= getAspectRatio(pop)
+                            normalizeHeights(tempSizes, width / arSum)
+                            val files = updateSizes(tempList, tempSizes)
+                            tempList.clear()
+                            tempSizes.clear()
+                            tempSizes.add(pop)
+                            tempList.add(popFile)
+                            arSum = getAspectRatio(pop)
+                            println("Returning max limit: $files")
+                            files
+                        }
+                        index == dataSize -> {
+                            dataSize = 0
+                            index = 0
+                            normalizeHeights(tempSizes, width / arSum)
+                            arSum = 0f
+                            val files = updateSizes(tempList, tempSizes)
+                            println("Returning last files: $files")
+                            tempList.clear()
+                            tempSizes.clear()
+                            files
+                        }
+                        else -> emptyList()
+                    }
+                }
+            }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
-                {
-                    adapter.submitData(lifecycle, it)
-//                    setFilesList(folder, emptyList(),  it)
-                },
+                { adapter.submitData(lifecycle, it); println() },
                 { error -> println("Error loading files: ${error.message}") }
             )
         )
@@ -119,64 +178,8 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         findNavController().navigate(R.id.fileDetailsFragment, bundle)
     }
 
-
-
     companion object{
         const val FOLDER_KEY = "folder"
-    }
-
-    private fun setFilesList(folder: String, files: List<File>){
-        val sizes = files.map { Size(it.width, it.height) }
-        val dm = DisplayMetrics()
-        requireActivity().windowManager.defaultDisplay.getMetrics(dm)
-        val width = dm.widthPixels
-        applyAspects(sizes, width)
-
-        val fileListItems = files.mapIndexed { index, file ->
-            val size = sizes[index]
-            File(file.name, file.type, size.width, size.height)
-        }
-
-        val layoutManager = GridLayoutManager(context, width)
-        layoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
-            override fun getSpanSize(position: Int): Int {
-                if(position == 0) return width // First item is a header
-                val spanSize = fileListItems[position - 1].width
-                return if (spanSize <= width) spanSize else width
-            }
-        }
-        val list = binding.filesList
-        list.layoutManager = layoutManager
-        list.adapter = FilesAdapter(folder, fileListItems, viewModel)
-    }
-
-    @Synchronized
-    private fun applyAspects(
-        imageList: List<Size>,
-        width: Int,
-        ar_min: Float = 2.0f,
-        ar_max: Float = 3.0f,
-    ) {
-
-        var arSum = 0f
-        val tempList = mutableListOf<Size>()
-        for (temp in imageList) {
-            tempList.add(temp)
-            arSum += getAspectRatio(temp)
-            if (arSum in ar_min..ar_max) {
-                normalizeHeights(tempList, width / arSum)
-                arSum = 0f
-                tempList.clear()
-            } else if (arSum > ar_max) {
-                val pop = tempList.removeAt(tempList.size - 1)
-                arSum -= getAspectRatio(pop)
-                normalizeHeights(tempList, width / arSum)
-                tempList.clear()
-                tempList.add(pop)
-                arSum = getAspectRatio(pop)
-            }
-        }
-        normalizeHeights(tempList, width / arSum)
     }
 
     @Synchronized
@@ -192,5 +195,18 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         return 1.0f * dim.width / dim.height
     }
 
+    private fun updateSizes(files: List<File>, sizes: List<Size>): List<File>{
+        return sizes.mapIndexed { index, newSize ->
+            val oldFile = files[index]
+            File(oldFile.name, oldFile.type, newSize.width, newSize.height)
+        }
+    }
+
     data class Size(var width: Int, var height: Int)
+
+    private fun Fragment.getScreenWidth(): Int{
+        val dm = DisplayMetrics()
+        this.requireActivity().windowManager.defaultDisplay.getMetrics(dm)
+        return dm.widthPixels
+    }
 }
