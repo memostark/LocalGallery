@@ -5,10 +5,12 @@ import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
 import androidx.paging.flatMap
 import androidx.paging.map
 import androidx.recyclerview.widget.GridLayoutManager
@@ -67,6 +69,11 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
 
     private fun bindViewModel(folder: String){
         val adapter = FilesAdapter(viewModel)
+        adapter.addLoadStateListener { loadStates ->
+            binding.loadingIcon.isVisible = loadStates.refresh is LoadState.Loading
+            binding.filesMessageContainer.isVisible = loadStates.refresh is LoadState.Error
+
+        }
         val list = binding.filesList
 
         val width = getScreenWidth()
@@ -113,7 +120,6 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                             val files = updateSizes(tempList, tempSizes)
                             tempList.clear()
                             tempSizes.clear()
-                            println("Returning: $files")
                             files
                         }
                         arSum > arMax -> {
@@ -127,7 +133,6 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                             tempSizes.add(pop)
                             tempList.add(popFile)
                             arSum = getAspectRatio(pop)
-                            println("Returning max limit: $files")
                             files
                         }
                         index == dataSize -> {
@@ -136,7 +141,6 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                             normalizeHeights(tempSizes, width / arSum)
                             arSum = 0f
                             val files = updateSizes(tempList, tempSizes)
-                            println("Returning last files: $files")
                             tempList.clear()
                             tempSizes.clear()
                             files
@@ -151,17 +155,6 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                 { error -> println("Error loading files: ${error.message}") }
             )
         )
-
-        disposable.add(viewModel.loadingIndicator
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe{ binding.loadingIcon.visibility = if(it) View.VISIBLE else View.GONE }
-        )
-
-        disposable.add(viewModel.networkError
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe{ binding.filesMessageContainer.visibility = if(it) View.VISIBLE else View.GONE })
     }
 
     private fun setFileClickEvent(){

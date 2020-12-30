@@ -55,16 +55,8 @@ class FilesViewModel @Inject constructor(
 
         return Pager(PagingConfig(pageSize = 20)) {
             FilesPageSource(filesRepository, folder)
-        }.flowable
-            .cachedIn(viewModelScope)
-            .doOnNext {
-                loadingIndicator.onNext(false)
-//                cachedFileList = it
-            }
-            .doOnError {
-                loadingIndicator.onNext(false)
-                networkError.onNext(true)
-            }
+        }.flowable.cachedIn(viewModelScope)
+
 
     }
 
