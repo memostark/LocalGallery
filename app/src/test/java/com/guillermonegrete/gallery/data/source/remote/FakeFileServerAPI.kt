@@ -4,6 +4,7 @@ import androidx.annotation.VisibleForTesting
 import com.guillermonegrete.gallery.data.FileResponse
 import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.GetFolderResponse
+import com.guillermonegrete.gallery.data.PagedFileResponse
 import io.reactivex.Single
 import retrofit2.http.Path
 
@@ -21,6 +22,15 @@ class FakeFileServerAPI(folderServiceData: LinkedHashMap<Folder, List<FileRespon
         @Path(encoded = true, value = "baseUrl") baseUrl: String,
         @Path(encoded = false, value = "path") path: String
     ): Single<List<FileResponse>> = Single.just(filesMap[path])
+
+    override fun getPagedFiles(
+        baseUrl: String,
+        path: String,
+        page: Int,
+        size: Int
+    ): Single<PagedFileResponse> {
+        TODO("Not yet implemented")
+    }
 
     @VisibleForTesting
     fun addFolder(folder: Folder, files: List<FileResponse>){

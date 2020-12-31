@@ -23,10 +23,6 @@ class FilesViewModel @Inject constructor(
     private val filesRepository: FilesRepository
 ): ViewModel() {
 
-    val loadingIndicator: BehaviorSubject<Boolean> = BehaviorSubject.createDefault(false)
-
-    val networkError: BehaviorSubject<Boolean> = BehaviorSubject.create()
-
     val openDetails: Subject<Int> = PublishSubject.create()
 
     var cachedFileList = emptyList<File>()
@@ -37,27 +33,10 @@ class FilesViewModel @Inject constructor(
         filesRepository.updateRepoURL(url)
     }
 
-    fun loadFiles(folder: String): Single<List<File>> {
-        loadingIndicator.onNext(true)
-
-        return filesRepository.getFiles(folder)
-            .doOnSuccess {
-                loadingIndicator.onNext(false)
-                cachedFileList = it
-            }
-            .doOnError{
-                loadingIndicator.onNext(false)
-                networkError.onNext(true)
-            }
-    }
-
     fun loadPagedFiles(folder: String): Flowable<PagingData<File>>{
-
         return Pager(PagingConfig(pageSize = 20)) {
             FilesPageSource(filesRepository, folder)
         }.flowable.cachedIn(viewModelScope)
-
-
     }
 
     fun openFilesDetails(index: Int){

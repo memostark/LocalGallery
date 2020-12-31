@@ -4,6 +4,7 @@ import androidx.annotation.VisibleForTesting
 import com.guillermonegrete.gallery.data.File
 import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.GetFolderResponse
+import com.guillermonegrete.gallery.data.PagedFileResponse
 import io.reactivex.Single
 import java.lang.RuntimeException
 
@@ -33,6 +34,10 @@ class FakeFilesRepository: FilesRepository {
     override fun getFiles(folder: String): Single<List<File>> {
         if(shouldReturnError) return Single.error(RuntimeException())
         return Single.just(filesServiceData[folder])
+    }
+
+    override fun getPagedFiles(folder: String, page: Int): Single<PagedFileResponse> {
+        TODO("Not yet implemented")
     }
 
     @VisibleForTesting
