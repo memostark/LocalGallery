@@ -34,9 +34,7 @@ class FilesViewModel @Inject constructor(
     }
 
     fun loadPagedFiles(folder: String): Flowable<PagingData<File>>{
-        return Pager(PagingConfig(pageSize = 20)) {
-            FilesPageSource(filesRepository, folder)
-        }.flowable.cachedIn(viewModelScope)
+        return filesRepository.getPagedFiles(folder).cachedIn(viewModelScope)
     }
 
     fun openFilesDetails(index: Int){

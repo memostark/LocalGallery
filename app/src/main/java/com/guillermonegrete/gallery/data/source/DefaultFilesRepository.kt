@@ -1,10 +1,15 @@
 package com.guillermonegrete.gallery.data.source
 
 import android.util.Patterns
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.rxjava2.flowable
 import com.guillermonegrete.gallery.data.File
 import com.guillermonegrete.gallery.data.GetFolderResponse
-import com.guillermonegrete.gallery.data.PagedFileResponse
+import com.guillermonegrete.gallery.data.source.remote.FilesPageSource
 import com.guillermonegrete.gallery.data.source.remote.FilesServerAPI
+import io.reactivex.Flowable
 import io.reactivex.Single
 import javax.inject.Inject
 
@@ -33,8 +38,10 @@ class DefaultFilesRepository @Inject constructor(private var fileAPI: FilesServe
         }
     }
 
-    override fun getPagedFiles(folder: String, page: Int): Single<PagedFileResponse> {
-        return fileAPI.getPagedFiles(baseUrl, folder, page)
+    override fun getPagedFiles(folder: String): Flowable<PagingData<File>> {
+        return Pager(PagingConfig(pageSize = 20)) {
+            FilesPageSource(fileAPI, baseUrl, folder)
+        }.flowable
     }
 
     companion object{

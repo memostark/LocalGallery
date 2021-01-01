@@ -1,10 +1,12 @@
 package com.guillermonegrete.gallery.data.source
 
 import androidx.annotation.VisibleForTesting
+import androidx.paging.PagingData
 import com.guillermonegrete.gallery.data.File
 import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.GetFolderResponse
 import com.guillermonegrete.gallery.data.PagedFileResponse
+import io.reactivex.Flowable
 import io.reactivex.Single
 import java.lang.RuntimeException
 
@@ -36,7 +38,7 @@ class FakeFilesRepository: FilesRepository {
         return Single.just(filesServiceData[folder])
     }
 
-    override fun getPagedFiles(folder: String, page: Int): Single<PagedFileResponse> {
+    override fun getPagedFiles(folder: String): Flowable<PagingData<File>> {
         TODO("Not yet implemented")
     }
 
