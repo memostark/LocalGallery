@@ -18,6 +18,9 @@ import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.databinding.FragmentFileDetailsBinding
 import com.guillermonegrete.gallery.files.FilesViewModel
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
@@ -31,6 +34,8 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
     private var currentPlayerView: PlayerView? = null
 
+    private val disposable = CompositeDisposable()
+
     override fun onAttach(context: Context) {
         (context.applicationContext as MyApplication).appComponent.inject(this)
         super.onAttach(context)
@@ -40,22 +45,39 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentFileDetailsBinding.bind(view)
 
-        val index = arguments?.getInt(FILE_INDEX_KEY) ?: 0
-
-        val fileList = viewModel.cachedFileList
+        val adapter = FileDetailsAdapter()
+        setUpViewModel(adapter)
 
         val viewPager: ViewPager2 = binding.fileDetailsViewpager
-        viewPager.adapter = FileDetailsAdapter(fileList)
-        viewPager.setCurrentItem(index, false)
 
         exoPlayer = SimpleExoPlayer.Builder(requireContext()).build()
 
-        setPagerListener(viewPager)
+        setPagerListener(viewPager, adapter)
     }
 
-    override fun onDestroy() {
+    private fun setUpViewModel(adapter: FileDetailsAdapter) {
+        val listFlow = viewModel.cachedFileList ?: return
+        binding.fileDetailsViewpager.adapter = adapter
+
+        val index = arguments?.getInt(FILE_INDEX_KEY) ?: 0
+
+        disposable.add(listFlow
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                {
+                    adapter.submitData(lifecycle, it)
+                    binding.fileDetailsViewpager.setCurrentItem(index + 1, false)
+                },
+                { error -> println("Error loading files: ${error.message}") }
+            )
+        )
+    }
+
+    override fun onDestroyView() {
         _binding = null
-        super.onDestroy()
+        disposable.clear()
+        super.onDestroyView()
     }
 
     override fun onResume() {
@@ -84,7 +106,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
         window.decorView.systemUiVisibility = 0
     }
 
-    private fun setPagerListener(viewPager: ViewPager2){
+    private fun setPagerListener(viewPager: ViewPager2, adapter: FileDetailsAdapter){
 
         viewPager.setPageTransformer { page, position ->
 
@@ -95,15 +117,16 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                 // If playerView exists it means is a video item, create Media Source and setup ExoPlayer
                 playerView?.let {
                     val dataSourceFactory = DefaultDataSourceFactory(context, Util.getUserAgent(requireContext(), "player"))
-                    val file = viewModel.cachedFileList[pageIndex]
-
-                    val extractorMediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
-                        .createMediaSource(Uri.parse(file.name))
 
                     // Detach player from previous view and update with current view
                     currentPlayerView?.player = null
                     currentPlayerView = it
                     it.player = exoPlayer
+
+                    val file = adapter.snapshot()[pageIndex] ?: return@let
+
+                    val extractorMediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+                        .createMediaSource(Uri.parse(file.name))
 
                     exoPlayer?.prepare(extractorMediaSource)
                     exoPlayer?.playWhenReady = false

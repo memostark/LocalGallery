@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.paging.flatMap
 import androidx.paging.map
@@ -34,9 +35,12 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
 
     private val disposable = CompositeDisposable()
 
+    private lateinit var adapter: FilesAdapter
+
     override fun onAttach(context: Context) {
         (context.applicationContext as MyApplication).appComponent.inject(this)
         super.onAttach(context)
+        adapter = FilesAdapter(viewModel)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -54,6 +58,8 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
 
     override fun onDestroyView() {
         _binding = null
+        disposable.clear()
+        adapter.removeLoadStateListener(loadListener)
         super.onDestroyView()
     }
 
@@ -62,18 +68,8 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         setFileClickEvent()
     }
 
-    override fun onStop() {
-        disposable.clear()
-        super.onStop()
-    }
-
     private fun bindViewModel(folder: String){
-        val adapter = FilesAdapter(viewModel)
-        adapter.addLoadStateListener { loadStates ->
-            binding.loadingIcon.isVisible = loadStates.refresh is LoadState.Loading
-            binding.filesMessageContainer.isVisible = loadStates.refresh is LoadState.Error
-
-        }
+        adapter.addLoadStateListener(loadListener)
         val list = binding.filesList
 
         val width = getScreenWidth()
@@ -193,6 +189,11 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
             val oldFile = files[index]
             File(oldFile.name, oldFile.type, newSize.width, newSize.height)
         }
+    }
+
+    private val loadListener  = { loadStates: CombinedLoadStates ->
+        binding.loadingIcon.isVisible = loadStates.refresh is LoadState.Loading
+        binding.filesMessageContainer.isVisible = loadStates.refresh is LoadState.Error
     }
 
     data class Size(var width: Int, var height: Int)

@@ -2,18 +2,12 @@ package com.guillermonegrete.gallery.files
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.rxjava2.cachedIn
-import androidx.paging.rxjava2.flowable
 import com.guillermonegrete.gallery.data.File
 import com.guillermonegrete.gallery.data.source.FilesRepository
 import com.guillermonegrete.gallery.data.source.SettingsRepository
-import com.guillermonegrete.gallery.data.source.remote.FilesPageSource
 import io.reactivex.Flowable
-import io.reactivex.Single
-import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
 import javax.inject.Inject
@@ -25,8 +19,10 @@ class FilesViewModel @Inject constructor(
 
     val openDetails: Subject<Int> = PublishSubject.create()
 
-    var cachedFileList = emptyList<File>()
+    var cachedFileList: Flowable<PagingData<File>>? = null
         private set
+
+    private var currentFolder: String? = null
 
     init {
         val url = settings.getServerURL()
@@ -34,7 +30,13 @@ class FilesViewModel @Inject constructor(
     }
 
     fun loadPagedFiles(folder: String): Flowable<PagingData<File>>{
-        return filesRepository.getPagedFiles(folder).cachedIn(viewModelScope)
+        val lastResult = cachedFileList
+        if (currentFolder == folder && lastResult != null) return lastResult
+
+        val newResult = filesRepository.getPagedFiles(folder).cachedIn(viewModelScope)
+        currentFolder = folder
+        cachedFileList = newResult
+        return newResult
     }
 
     fun openFilesDetails(index: Int){

@@ -10,13 +10,15 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.File
+import com.guillermonegrete.gallery.files.FileDiffCallback
 
 
-class FileDetailsAdapter(val files : List<File>): RecyclerView.Adapter<FileDetailsAdapter.ViewHolder>(){
+class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>(FileDiffCallback){
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val layout = LayoutInflater.from(parent.context).inflate(viewType, parent, false)
@@ -27,10 +29,8 @@ class FileDetailsAdapter(val files : List<File>): RecyclerView.Adapter<FileDetai
         }
     }
 
-    override fun getItemCount() = files.size
-
     override fun getItemViewType(position: Int): Int {
-        return when(files[position].type){
+        return when(getItem(position)?.type){
             "jpg", "jpeg" -> R.layout.file_details_image_item
             "mp4" -> R.layout.file_details_video_item
             else -> R.layout.file_details_image_item
@@ -38,7 +38,8 @@ class FileDetailsAdapter(val files : List<File>): RecyclerView.Adapter<FileDetai
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(files[position])
+        val file = getItem(position) ?: return
+        holder.bind(file)
     }
 
     abstract class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
