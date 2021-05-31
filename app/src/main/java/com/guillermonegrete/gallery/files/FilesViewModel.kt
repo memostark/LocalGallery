@@ -1,11 +1,13 @@
 package com.guillermonegrete.gallery.files
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.rxjava2.cachedIn
 import com.guillermonegrete.gallery.data.File
 import com.guillermonegrete.gallery.data.source.FilesRepository
 import com.guillermonegrete.gallery.data.source.SettingsRepository
-import io.reactivex.Single
-import io.reactivex.subjects.BehaviorSubject
+import io.reactivex.Flowable
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
 import javax.inject.Inject
@@ -15,42 +17,29 @@ class FilesViewModel @Inject constructor(
     private val filesRepository: FilesRepository
 ): ViewModel() {
 
-    val loadingIndicator: BehaviorSubject<Boolean> = BehaviorSubject.createDefault(false)
+    val openDetails: Subject<Int> = PublishSubject.create()
 
-    val networkError: BehaviorSubject<Boolean> = BehaviorSubject.create()
-
-    val openFolder: Subject<Int> = PublishSubject.create()
-
-    var cachedFileList = emptyList<File>()
+    var cachedFileList: Flowable<PagingData<File>>? = null
         private set
+
+    private var currentFolder: String? = null
 
     init {
         val url = settings.getServerURL()
         filesRepository.updateRepoURL(url)
     }
 
-    fun loadFiles(folder: String): Single<List<File>> {
-        loadingIndicator.onNext(true)
+    fun loadPagedFiles(folder: String): Flowable<PagingData<File>>{
+        val lastResult = cachedFileList
+        if (currentFolder == folder && lastResult != null) return lastResult
 
-        return filesRepository.getFiles(folder)
-            // This map should not be necessary later because Moshi adapter should handle the file object creation
-            .map {list->
-                list.map {
-                    val type = it.split(".").last()
-                    File(it, type)
-                }
-            }
-            .doOnSuccess {
-                loadingIndicator.onNext(false)
-                cachedFileList = it
-            }
-            .doOnError{
-                loadingIndicator.onNext(false)
-                networkError.onNext(true)
-            }
+        val newResult = filesRepository.getPagedFiles(folder).cachedIn(viewModelScope)
+        currentFolder = folder
+        cachedFileList = newResult
+        return newResult
     }
 
     fun openFilesDetails(index: Int){
-        openFolder.onNext(index)
+        openDetails.onNext(index)
     }
 }

@@ -1,17 +1,16 @@
 package com.guillermonegrete.gallery.folders
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.GetFolderResponse
+import com.guillermonegrete.gallery.databinding.FolderItemBinding
+import com.guillermonegrete.gallery.databinding.FolderNameItemBinding
 import java.util.*
 
 class FolderAdapter(
@@ -22,10 +21,10 @@ class FolderAdapter(
     private var filteredFolders = data.folders
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        val item = LayoutInflater.from(parent.context).inflate(viewType, parent, false)
+        val inflater = LayoutInflater.from(parent.context)
         return when(viewType) {
-            R.layout.folder_name_item -> NameViewHolder(item)
-            else -> ViewHolder(viewModel, item)
+            R.layout.folder_name_item -> NameViewHolder(FolderNameItemBinding.inflate(inflater, parent, false))
+            else -> ViewHolder(viewModel, FolderItemBinding.inflate(inflater, parent, false))
         }
     }
 
@@ -68,31 +67,30 @@ class FolderAdapter(
 
     class ViewHolder(
         private val viewModel: FoldersViewModel,
-        item: View
-    ): RecyclerView.ViewHolder(item){
-        private val cover: ImageView = itemView.findViewById(R.id.cover_image)
-        private val name: TextView = itemView.findViewById(R.id.name_text)
-        private val itemCount: TextView = itemView.findViewById(R.id.items_count_text)
+        private val binding: FolderItemBinding,
+    ): RecyclerView.ViewHolder(binding.root){
 
         fun bind(item: Folder){
-            Glide.with(itemView)
-                .load(item.coverUrl)
-                .into(cover)
-            name.text = item.name
-            itemCount.text = itemView.resources.getQuantityString(R.plurals.folder_item_count_text, item.count, item.count)
+            with(binding) {
+                Glide.with(itemView)
+                    .load(item.coverUrl)
+                    .into(coverImage)
+                nameText.text = item.name
+                itemsCountText.text = itemView.resources.getQuantityString(
+                    R.plurals.folder_item_count_text,
+                    item.count,
+                    item.count
+                )
 
-            itemView.setOnClickListener {
-                viewModel.openFolder(item.name)
+                itemView.setOnClickListener { viewModel.openFolder(item.name) }
             }
         }
     }
 
-    class NameViewHolder(item: View): RecyclerView.ViewHolder(item){
-
-        private val folderName: TextView = itemView.findViewById(R.id.textView_root_folder)
+    class NameViewHolder(private val binding: FolderNameItemBinding): RecyclerView.ViewHolder(binding.root){
 
         fun bind(name: String){
-             folderName.text = name
+             binding.rootFolder.text = name
         }
     }
 }

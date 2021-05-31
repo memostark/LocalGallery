@@ -13,6 +13,9 @@
         <action
             android:id="@+id/open_folder"
             app:destination="@id/files_fragment_dest" />
+        <action
+            android:id="@+id/action_folders_fragment_dest_to_serversFragment"
+            app:destination="@id/servers_fragment_dest" />
     </fragment>
     <fragment
         android:id="@+id/files_fragment_dest"
@@ -28,5 +31,10 @@
         android:name="com.guillermonegrete.gallery.files.details.FileDetailsFragment"
         android:label="fragment_file_details"
         tools:layout="@layout/fragment_file_details" />
+    <dialog
+        android:id="@+id/servers_fragment_dest"
+        android:name="com.guillermonegrete.gallery.servers.ServersFragment"
+        android:label="ServersFragment"
+        tools:layout="@layout/dialog_set_server_address"/>
 
 </navigation>

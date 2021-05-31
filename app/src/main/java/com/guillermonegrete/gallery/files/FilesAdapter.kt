@@ -3,51 +3,40 @@ package com.guillermonegrete.gallery.files
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ImageView
-import android.widget.TextView
+import androidx.paging.PagingDataAdapter
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
-import com.bumptech.glide.request.RequestOptions
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.File
 
 class FilesAdapter(
-    private val folderName: String,
-    private val files: List<File>,
     private val viewModel: FilesViewModel
-): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+): PagingDataAdapter<File, FilesAdapter.ViewHolder>(FileDiffCallback) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        val item = LayoutInflater.from(parent.context).inflate(viewType, parent, false)
-        return when(viewType) {
-            R.layout.folder_name_item -> NameViewHolder(item)
-            else -> ViewHolder(viewModel, item)
-        }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
+        return ViewHolder(viewModel, inflater.inflate(viewType, parent, false))
     }
 
-    override fun getItemCount() = files.size + 1
-
     override fun getItemViewType(position: Int): Int {
-        if(position == 0) return R.layout.folder_name_item
-        return when(files[position - 1].type){
+        return when(getItem(position)?.type){
             "jpg", "jpeg" -> R.layout.file_image_item
             "mp4" -> R.layout.file_video_item
             else -> R.layout.file_image_item
         }
     }
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        when(holder){
-            is ViewHolder -> {
-                val item = files[position - 1]
-                holder.bind(item)
-            }
-            is NameViewHolder -> holder.bind(folderName)
-        }
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val item = getItem(position) ?: return
+        holder.bind(item)
     }
 
+    // TODO create View Holder for image and video item
     class ViewHolder(
         private val viewModel: FilesViewModel,
         item: View
@@ -56,13 +45,15 @@ class FilesAdapter(
         private val image: ImageView = itemView.findViewById(R.id.file_view)
 
         fun bind(item: File){
+            itemView.layoutParams = FrameLayout.LayoutParams(item.width, item.height)
             val realPos = adapterPosition - 1
             image.setOnClickListener { viewModel.openFilesDetails(realPos) }
 
             Glide.with(itemView)
                 .load(item.name)
                 .placeholder(R.drawable.ic_image_24dp)
-                .apply( RequestOptions().override(200, 400))
+                .override(item.width, item.height)
+                .centerCrop()
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .into(image)
 
@@ -72,13 +63,15 @@ class FilesAdapter(
             }
         }
     }
+}
 
-    class NameViewHolder(item: View): RecyclerView.ViewHolder(item){
+object FileDiffCallback : DiffUtil.ItemCallback<File>() {
 
-        private val folderName: TextView = itemView.findViewById(R.id.textView_root_folder)
+    override fun areItemsTheSame(oldItem: File, newItem: File): Boolean {
+        return oldItem.name == newItem.name
+    }
 
-        fun bind(name: String){
-            folderName.text = name
-        }
+    override fun areContentsTheSame(oldItem: File, newItem: File): Boolean {
+        return oldItem == newItem
     }
 }
