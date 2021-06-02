@@ -27,7 +27,7 @@ class FilesPageSource(
                 File(it.url, type, it.width, it.height)
             },
             prevKey = if (nextPageNumber > 0) nextPageNumber - 1 else null,
-            nextKey = if (nextPageNumber < response.totalPages) nextPageNumber + 1 else null
+            nextKey = if (nextPageNumber < response.totalPages - 1) nextPageNumber + 1 else null
         )
     }
 
