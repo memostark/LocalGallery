@@ -58,9 +58,7 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
          */
         @SuppressLint("ClickableViewAccessibility")
         fun enableSheets(){
-            bottomSheet.setOnTouchListener { _, _ ->
-                return@setOnTouchListener true
-            }
+            bottomSheet.setOnTouchListener { _, _ -> true }
         }
 
         open fun bind(file: File){
