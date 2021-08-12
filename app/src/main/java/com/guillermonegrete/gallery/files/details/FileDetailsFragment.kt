@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.ViewPager2
+import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.ui.PlayerView
@@ -129,6 +130,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                         .createMediaSource(Uri.parse(file.name))
 
                     exoPlayer?.prepare(extractorMediaSource)
+                    exoPlayer?.repeatMode = Player.REPEAT_MODE_ONE
                     exoPlayer?.playWhenReady = false
                 }
             }
