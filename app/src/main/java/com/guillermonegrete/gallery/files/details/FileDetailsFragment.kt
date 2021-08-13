@@ -37,6 +37,8 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
     private val disposable = CompositeDisposable()
 
+    private lateinit var adapter: FileDetailsAdapter
+
     override fun onAttach(context: Context) {
         (context.applicationContext as MyApplication).appComponent.inject(this)
         super.onAttach(context)
@@ -46,17 +48,16 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentFileDetailsBinding.bind(view)
 
-        val adapter = FileDetailsAdapter()
-        setUpViewModel(adapter)
-
-        val viewPager: ViewPager2 = binding.fileDetailsViewpager
-
-        exoPlayer = SimpleExoPlayer.Builder(requireContext()).build()
-
-        setPagerListener(viewPager, adapter)
+        adapter = FileDetailsAdapter()
+        setUpViewModel()
     }
 
-    private fun setUpViewModel(adapter: FileDetailsAdapter) {
+    override fun onStart() {
+        super.onStart()
+        initializePlayer()
+    }
+
+    private fun setUpViewModel() {
         val listFlow = viewModel.cachedFileList ?: return
         binding.fileDetailsViewpager.adapter = adapter
 
@@ -90,6 +91,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
         super.onStop()
         showStatusBar()
         exoPlayer?.release()
+        exoPlayer = null
     }
 
     private fun hideStatusBar(){
@@ -107,7 +109,14 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
         window.decorView.systemUiVisibility = 0
     }
 
-    private fun setPagerListener(viewPager: ViewPager2, adapter: FileDetailsAdapter){
+    private fun initializePlayer(){
+        if (exoPlayer == null) exoPlayer = SimpleExoPlayer.Builder(requireContext()).build()
+
+        val viewPager: ViewPager2 = binding.fileDetailsViewpager
+        setPagerListener(viewPager)
+    }
+
+    private fun setPagerListener(viewPager: ViewPager2){
 
         viewPager.setPageTransformer { page, position ->
 
