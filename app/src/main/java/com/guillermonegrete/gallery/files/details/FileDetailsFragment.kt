@@ -112,27 +112,29 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
         viewPager.setPageTransformer { page, position ->
 
             if (position == 0.0f){ // New page
-                val playerView: PlayerView? = page.findViewById(R.id.exo_player_view)
                 val pageIndex = viewPager.currentItem
 
+                val player = exoPlayer ?: return@setPageTransformer
+                player.stop()
+                player.seekTo(0)
+
                 // If playerView exists it means is a video item, create Media Source and setup ExoPlayer
-                playerView?.let {
-                    val dataSourceFactory = DefaultDataSourceFactory(context, Util.getUserAgent(requireContext(), "player"))
+                val playerView: PlayerView = page.findViewById(R.id.exo_player_view) ?: return@setPageTransformer
+                val dataSourceFactory = DefaultDataSourceFactory(context, Util.getUserAgent(requireContext(), "player"))
 
-                    // Detach player from previous view and update with current view
-                    currentPlayerView?.player = null
-                    currentPlayerView = it
-                    it.player = exoPlayer
+                // Detach player from previous view and update with current view
+                currentPlayerView?.player = null
+                currentPlayerView = playerView
+                playerView.player = player
 
-                    val file = adapter.snapshot()[pageIndex] ?: return@let
+                val file = adapter.snapshot()[pageIndex] ?: return@setPageTransformer
 
-                    val extractorMediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
-                        .createMediaSource(Uri.parse(file.name))
+                val extractorMediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(Uri.parse(file.name))
 
-                    exoPlayer?.prepare(extractorMediaSource)
-                    exoPlayer?.repeatMode = Player.REPEAT_MODE_ONE
-                    exoPlayer?.playWhenReady = false
-                }
+                player.prepare(extractorMediaSource)
+                player.repeatMode = Player.REPEAT_MODE_ONE
+                player.playWhenReady = false
             }
         }
     }
