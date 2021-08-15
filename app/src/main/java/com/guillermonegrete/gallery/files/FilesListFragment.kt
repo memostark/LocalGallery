@@ -91,7 +91,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
 
         disposable.add(viewModel.loadPagedFiles(folder)
             .subscribeOn(Schedulers.io())
-                // Hacky way used to find out how many
+                // Hacky way used to find out how many items are in the list
             .map { pagingData ->
                 pagingData.map { dataSize++; it }
             }
@@ -111,6 +111,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
 
                     when {
                         arSum in arMin..arMax -> {
+                            // Ratio in range, add row
                             normalizeHeights(tempSizes, width / arSum)
                             arSum = 0f
                             val files = updateSizes(tempList, tempSizes)
@@ -119,6 +120,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                             files
                         }
                         arSum > arMax -> {
+                            // Ratio too big, remove last and add the rest as a row
                             val pop = tempSizes.removeLast()
                             val popFile = tempList.removeLast()
                             arSum -= getAspectRatio(pop)
@@ -132,6 +134,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                             files
                         }
                         index == dataSize -> {
+                            // Last item, add row with remaining
                             dataSize = 0
                             index = 0
                             normalizeHeights(tempSizes, width / arSum)
@@ -147,7 +150,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
             }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
-                { adapter.submitData(lifecycle, it); println() },
+                { adapter.submitData(lifecycle, it) },
                 { error -> println("Error loading files: ${error.message}") }
             )
         )
@@ -173,10 +176,18 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
 
     @Synchronized
     private fun normalizeHeights(subList: List<Size>, height: Float) {
+        var totalWidth = 0
         for (temp in subList) {
-            temp.width = (height * getAspectRatio(temp)).toInt()
+            val width = (height * getAspectRatio(temp)).toInt()
+            totalWidth += width
+            temp.width = width
             temp.height = height.toInt()
         }
+
+        // Sometimes the total width is off by a couple of pixels, e.g. (screen: 720, total: 718)
+        // Add the remaining to compensate
+        val remaining = getScreenWidth() - totalWidth
+        if(remaining > 0) subList.last().width += remaining
     }
 
     @Synchronized
