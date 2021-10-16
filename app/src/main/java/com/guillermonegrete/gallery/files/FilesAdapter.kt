@@ -13,6 +13,8 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.File
+import com.guillermonegrete.gallery.data.ImageFile
+import com.guillermonegrete.gallery.data.VideoFile
 
 class FilesAdapter(
     private val viewModel: FilesViewModel
@@ -24,9 +26,9 @@ class FilesAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
-        return when(getItem(position)?.type){
-            "jpg", "jpeg" -> R.layout.file_image_item
-            "mp4" -> R.layout.file_video_item
+        return when(getItem(position)){
+            is ImageFile -> R.layout.file_image_item
+            is VideoFile -> R.layout.file_video_item
             else -> R.layout.file_image_item
         }
     }

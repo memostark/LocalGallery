@@ -18,6 +18,8 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.File
+import com.guillermonegrete.gallery.data.ImageFile
+import com.guillermonegrete.gallery.data.VideoFile
 import com.guillermonegrete.gallery.databinding.FragmentFilesListBinding
 import com.guillermonegrete.gallery.files.details.FileDetailsFragment
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -197,8 +199,10 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
 
     private fun updateSizes(files: List<File>, sizes: List<Size>): List<File>{
         return sizes.mapIndexed { index, newSize ->
-            val oldFile = files[index]
-            File(oldFile.name, oldFile.type, newSize.width, newSize.height)
+            when(val oldFile = files[index]){
+                is ImageFile -> ImageFile(oldFile.name, newSize.width, newSize.height)
+                is VideoFile -> VideoFile(oldFile.name, newSize.width, newSize.height, oldFile.duration)
+            }
         }
     }
 
