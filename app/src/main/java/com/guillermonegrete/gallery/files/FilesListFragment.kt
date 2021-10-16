@@ -3,6 +3,7 @@ package com.guillermonegrete.gallery.files
 import android.content.Context
 import android.os.Bundle
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
@@ -207,8 +208,10 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
     }
 
     private val loadListener  = { loadStates: CombinedLoadStates ->
-        binding.loadingIcon.isVisible = loadStates.refresh is LoadState.Loading
-        binding.filesMessageContainer.isVisible = loadStates.refresh is LoadState.Error
+        val state = loadStates.refresh
+        binding.loadingIcon.isVisible = state is LoadState.Loading
+        binding.filesMessageContainer.isVisible = state is LoadState.Error
+        if(state is LoadState.Error) Log.e("FilesFileFragment", "Error when loading", state.error)
     }
 
     data class Size(var width: Int, var height: Int)
