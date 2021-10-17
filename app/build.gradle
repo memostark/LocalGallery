@@ -77,9 +77,6 @@ dependencies {
     // PhotoView
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
 
-    // Flexbox
-    implementation 'com.google.android:flexbox:2.0.1'
-
     // Exo player
     def exo_version = "2.11.3"
     implementation "com.google.android.exoplayer:exoplayer-core:$exo_version"

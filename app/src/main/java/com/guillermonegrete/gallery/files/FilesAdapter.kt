@@ -1,5 +1,6 @@
 package com.guillermonegrete.gallery.files
 
+import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,11 +11,11 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
-import com.google.android.flexbox.FlexboxLayoutManager
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.File
 import com.guillermonegrete.gallery.data.ImageFile
 import com.guillermonegrete.gallery.data.VideoFile
+import com.guillermonegrete.gallery.databinding.FileVideoItemBinding
 
 class FilesAdapter(
     private val viewModel: FilesViewModel
@@ -22,7 +23,10 @@ class FilesAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        return ViewHolder(viewModel, inflater.inflate(viewType, parent, false))
+        return when(viewType){
+            R.layout.file_video_item -> VideoViewHolder(viewModel, FileVideoItemBinding.inflate(inflater, parent, false))
+            else -> ViewHolder(viewModel, inflater.inflate(viewType, parent, false))
+        }
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -35,11 +39,13 @@ class FilesAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = getItem(position) ?: return
-        holder.bind(item)
+        when(holder){
+            is VideoViewHolder -> holder.bind(item as VideoFile)
+            else -> holder.bind(item)
+        }
     }
 
-    // TODO create View Holder for image and video item
-    class ViewHolder(
+    open class ViewHolder(
         private val viewModel: FilesViewModel,
         item: View
     ): RecyclerView.ViewHolder(item){
@@ -48,7 +54,7 @@ class FilesAdapter(
 
         fun bind(item: File){
             itemView.layoutParams = FrameLayout.LayoutParams(item.width, item.height)
-            val realPos = adapterPosition - 1
+            val realPos = bindingAdapterPosition - 1
             image.setOnClickListener { viewModel.openFilesDetails(realPos) }
 
             Glide.with(itemView)
@@ -58,11 +64,13 @@ class FilesAdapter(
                 .centerCrop()
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .into(image)
+        }
+    }
 
-            val params = image.layoutParams
-            if (params is FlexboxLayoutManager.LayoutParams){
-                params.flexGrow = 1.0f
-            }
+    class VideoViewHolder(viewModel: FilesViewModel, private val binding: FileVideoItemBinding): ViewHolder(viewModel, binding.root){
+        fun bind(item: VideoFile){
+            super.bind(item)
+            binding.duration.text = DateUtils.formatElapsedTime(item.duration.toLong())
         }
     }
 }
