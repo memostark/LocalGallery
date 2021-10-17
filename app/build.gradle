@@ -51,9 +51,15 @@ dependencies {
     implementation 'com.android.support:multidex:1.0.3'
 
     // Retrofit
-    implementation 'com.squareup.retrofit2:retrofit:2.6.2'
-    implementation 'com.squareup.retrofit2:converter-gson:2.6.2'
-    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.6.2'
+    def retrofit_version = "2.9.0"
+    implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
+    implementation "com.squareup.retrofit2:converter-moshi:$retrofit_version"
+    implementation "com.squareup.retrofit2:adapter-rxjava2:$retrofit_version"
+
+    // Moshi
+    def moshi_version = "1.12.0"
+    implementation "com.squareup.moshi:moshi-kotlin:$moshi_version"
+    implementation "com.squareup.moshi:moshi-adapters:$moshi_version"
 
     // RxJava
     implementation 'io.reactivex.rxjava2:rxjava:2.2.13'
@@ -70,9 +76,6 @@ dependencies {
 
     // PhotoView
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
-
-    // Flexbox
-    implementation 'com.google.android:flexbox:2.0.1'
 
     // Exo player
     def exo_version = "2.11.3"
