@@ -77,6 +77,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
     }
 
     override fun onDestroyView() {
+        binding.fileDetailsViewpager.adapter = null
         _binding = null
         disposable.clear()
         super.onDestroyView()

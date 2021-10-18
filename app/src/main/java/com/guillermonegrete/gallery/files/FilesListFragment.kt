@@ -60,6 +60,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
     }
 
     override fun onDestroyView() {
+        binding.filesList.adapter = null
         _binding = null
         disposable.clear()
         adapter.removeLoadStateListener(loadListener)
@@ -163,7 +164,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         disposable.add(viewModel.openDetails
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe{ openFileDetails(it) }
+            .subscribe(::openFileDetails)
         )
     }
 
