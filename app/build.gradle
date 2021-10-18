@@ -89,6 +89,9 @@ dependencies {
     // Kotlin
     implementation "androidx.fragment:fragment-ktx:1.2.0-beta2"
 
+    // LeakCanary
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
+
     testImplementation 'junit:junit:4.12'
     testImplementation "androidx.arch.core:core-testing:2.1.0"
 
