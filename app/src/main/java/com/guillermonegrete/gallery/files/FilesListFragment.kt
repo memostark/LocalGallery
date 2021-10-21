@@ -5,8 +5,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.util.Log
-import android.view.KeyEvent
 import android.view.View
+import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -74,14 +74,15 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         bindViewModel(folder)
 
         // Handles the back button, used for restoring the list layout when navigating back from details view pager
-        view.isFocusableInTouchMode = true
-        view.requestFocus()
-        view.setOnKeyListener { _, keyCode, _ ->
-            if(keyCode == KeyEvent.KEYCODE_BACK){
-                if(inDetailsView) showListView()
-                return@setOnKeyListener true
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            if(inDetailsView) {
+                showListView()
+            } else {
+                if (isEnabled) {
+                    isEnabled = false
+                    requireActivity().onBackPressed()
+                }
             }
-            false
         }
     }
 
