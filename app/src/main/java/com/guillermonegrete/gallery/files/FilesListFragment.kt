@@ -19,9 +19,10 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.File
-import com.guillermonegrete.gallery.data.ImageFile
-import com.guillermonegrete.gallery.data.VideoFile
 import com.guillermonegrete.gallery.databinding.FragmentFilesListBinding
+import com.guillermonegrete.gallery.files.AspectRatioComputer.getAspectRatio
+import com.guillermonegrete.gallery.files.AspectRatioComputer.normalizeHeights
+import com.guillermonegrete.gallery.files.AspectRatioComputer.updateSizes
 import com.guillermonegrete.gallery.files.details.FileDetailsFragment
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -93,6 +94,8 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
 
         var dataSize = 0
 
+        val screenWidth = getScreenWidth()
+
         disposable.add(viewModel.loadPagedFiles(folder)
             .subscribeOn(Schedulers.io())
                 // Hacky way used to find out how many items are in the list
@@ -116,7 +119,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                     when {
                         arSum in arMin..arMax -> {
                             // Ratio in range, add row
-                            normalizeHeights(tempSizes, width / arSum)
+                            normalizeHeights(tempSizes, width / arSum, screenWidth)
                             arSum = 0f
                             val files = updateSizes(tempList, tempSizes)
                             tempList.clear()
@@ -128,7 +131,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                             val pop = tempSizes.removeLast()
                             val popFile = tempList.removeLast()
                             arSum -= getAspectRatio(pop)
-                            normalizeHeights(tempSizes, width / arSum)
+                            normalizeHeights(tempSizes, width / arSum, screenWidth)
                             val files = updateSizes(tempList, tempSizes)
                             tempList.clear()
                             tempSizes.clear()
@@ -141,7 +144,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                             // Last item, add row with remaining
                             dataSize = 0
                             index = 0
-                            normalizeHeights(tempSizes, width / arSum)
+                            normalizeHeights(tempSizes, width / arSum, screenWidth)
                             arSum = 0f
                             val files = updateSizes(tempList, tempSizes)
                             tempList.clear()
@@ -176,36 +179,6 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
 
     companion object{
         const val FOLDER_KEY = "folder"
-    }
-
-    @Synchronized
-    private fun normalizeHeights(subList: List<Size>, height: Float) {
-        var totalWidth = 0
-        for (temp in subList) {
-            val width = (height * getAspectRatio(temp)).toInt()
-            totalWidth += width
-            temp.width = width
-            temp.height = height.toInt()
-        }
-
-        // Sometimes the total width is off by a couple of pixels, e.g. (screen: 720, total: 718)
-        // Add the remaining to compensate
-        val remaining = getScreenWidth() - totalWidth
-        if(remaining > 0) subList.last().width += remaining
-    }
-
-    @Synchronized
-    private fun getAspectRatio(dim: Size): Float {
-        return 1.0f * dim.width / dim.height
-    }
-
-    private fun updateSizes(files: List<File>, sizes: List<Size>): List<File>{
-        return sizes.mapIndexed { index, newSize ->
-            when(val oldFile = files[index]){
-                is ImageFile -> ImageFile(oldFile.name, newSize.width, newSize.height)
-                is VideoFile -> VideoFile(oldFile.name, newSize.width, newSize.height, oldFile.duration)
-            }
-        }
     }
 
     private val loadListener  = { loadStates: CombinedLoadStates ->
