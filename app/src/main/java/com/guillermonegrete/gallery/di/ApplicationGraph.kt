@@ -6,7 +6,6 @@ import com.guillermonegrete.gallery.folders.FoldersModule
 import com.guillermonegrete.gallery.ViewModelBuilder
 import com.guillermonegrete.gallery.files.FilesListFragment
 import com.guillermonegrete.gallery.files.FilesModule
-import com.guillermonegrete.gallery.files.details.FileDetailsFragment
 import dagger.BindsInstance
 import dagger.Component
 
@@ -27,6 +26,4 @@ interface ApplicationGraph {
     fun inject(fragment: FoldersListFragment)
 
     fun inject(fragment: FilesListFragment)
-
-    fun inject(fragment: FileDetailsFragment)
 }
