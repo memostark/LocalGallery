@@ -83,6 +83,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
     }
 
     override fun onDestroyView() {
+        binding.foldersList.adapter = null
         _binding = null
         super.onDestroyView()
     }
