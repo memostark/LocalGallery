@@ -93,8 +93,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
 
         var dataSize = 0
 
-        disposable.add(viewModel.loadPagedFiles(folder)
-            .subscribeOn(Schedulers.io())
+        disposable.add(viewModel.cachedFileList
                 // Hacky way used to find out how many items are in the list
             .map { pagingData ->
                 pagingData.map { dataSize++; it }
@@ -158,6 +157,8 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                 { error -> println("Error loading files: ${error.message}") }
             )
         )
+
+        viewModel.setFolderName(folder)
     }
 
     private fun setFileClickEvent(){

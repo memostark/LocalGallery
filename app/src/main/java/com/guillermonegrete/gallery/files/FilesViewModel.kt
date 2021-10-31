@@ -7,6 +7,7 @@ import androidx.paging.rxjava2.cachedIn
 import com.guillermonegrete.gallery.data.File
 import com.guillermonegrete.gallery.data.source.FilesRepository
 import com.guillermonegrete.gallery.data.source.SettingsRepository
+import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
@@ -19,27 +20,23 @@ class FilesViewModel @Inject constructor(
 
     val openDetails: Subject<Int> = PublishSubject.create()
 
-    var cachedFileList: Flowable<PagingData<File>>? = null
-        private set
+    private val folderName: Subject<String> = PublishSubject.create()
 
-    private var currentFolder: String? = null
+    var cachedFileList: Flowable<PagingData<File>> = folderName.distinctUntilChanged().switchMap {
+        filesRepository.getPagedFiles(it).toObservable()
+    }.toFlowable(BackpressureStrategy.LATEST).cachedIn(viewModelScope)
 
     init {
         val url = settings.getServerURL()
         filesRepository.updateRepoURL(url)
     }
 
-    fun loadPagedFiles(folder: String): Flowable<PagingData<File>>{
-        val lastResult = cachedFileList
-        if (currentFolder == folder && lastResult != null) return lastResult
-
-        val newResult = filesRepository.getPagedFiles(folder).cachedIn(viewModelScope)
-        currentFolder = folder
-        cachedFileList = newResult
-        return newResult
-    }
-
     fun openFilesDetails(index: Int){
         openDetails.onNext(index)
+    }
+
+    fun setFolderName(name: String){
+        println("Set folder name")
+        folderName.onNext(name)
     }
 }
