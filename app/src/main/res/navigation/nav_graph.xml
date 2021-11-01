@@ -6,6 +6,16 @@
     app:startDestination="@id/folders_fragment_dest">
 
     <fragment
+        android:id="@+id/all_files_dest"
+        android:name="com.guillermonegrete.gallery.files.FilesListFragment"
+        android:label="Files list"
+        tools:layout="@layout/fragment_files_list">
+        <action
+            android:id="@+id/open_file_details"
+            app:destination="@id/fileDetailsFragment" />
+    </fragment>
+
+    <fragment
         android:id="@+id/folders_fragment_dest"
         android:name="com.guillermonegrete.gallery.folders.FoldersListFragment"
         android:label="Folders list"

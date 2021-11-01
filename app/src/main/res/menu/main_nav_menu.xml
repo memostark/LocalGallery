@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/folders_fragment_dest"
+        android:icon="@drawable/ic_folder_open_black_24dp"
+        android:title="@string/folders"/>
+    <item android:id="@+id/all_files_dest"
+        android:icon="@drawable/ic_image_24dp"
+        android:title="@string/files"/>
+</menu>

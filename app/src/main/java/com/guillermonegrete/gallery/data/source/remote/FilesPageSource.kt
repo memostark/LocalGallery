@@ -13,10 +13,18 @@ class FilesPageSource(
 
     override fun loadSingle(params: LoadParams<Int>): Single<LoadResult<Int, File>> {
         val nextPageNumber = params.key ?: 0
-        return filesApi.getPagedFiles(baseUrl, folder, nextPageNumber)
+        return getFilesSource(nextPageNumber)
             .subscribeOn(Schedulers.io())
             .map { toLoadResult(it, nextPageNumber) }
             .onErrorReturn { LoadResult.Error(it) }
+    }
+
+    /**
+     * If folder is not empty, get files from endpoint url/folder/{folder_name}
+     * else get it from the files/ endpoint
+     */
+    private fun getFilesSource(nextPageNumber: Int): Single<PagedFileResponse> {
+        return if(folder.isNotEmpty()) filesApi.getPagedFiles(baseUrl, folder, nextPageNumber) else filesApi.getPagedFiles(baseUrl, nextPageNumber)
     }
 
     private fun toLoadResult(response: PagedFileResponse, nextPageNumber: Int): LoadResult<Int, File> {
