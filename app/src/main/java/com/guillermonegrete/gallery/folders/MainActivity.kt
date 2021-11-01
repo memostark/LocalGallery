@@ -2,6 +2,7 @@ package com.guillermonegrete.gallery.folders
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isGone
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -14,8 +15,11 @@ class MainActivity : AppCompatActivity(R.layout.activity_main){
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val navController = navHostFragment.navController
-        findViewById<BottomNavigationView>(R.id.main_bottom_nav)
-            .setupWithNavController(navController)
+        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.main_bottom_nav)
+        bottomNavigationView.setupWithNavController(navController)
 
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            bottomNavigationView.isGone = destination.id == R.id.fileDetailsFragment
+        }
     }
 }
