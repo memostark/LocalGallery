@@ -36,7 +36,6 @@ class FilesViewModel @Inject constructor(
     }
 
     fun setFolderName(name: String){
-        println("Set folder name")
         folderName.onNext(name)
     }
 }

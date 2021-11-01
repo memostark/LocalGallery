@@ -154,7 +154,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 { adapter.submitData(lifecycle, it) },
-                { error -> println("Error loading files: ${error.message}") }
+                { error -> Log.e(FilesListFragment::class.simpleName, "Error loading files", error) }
             )
         )
 
