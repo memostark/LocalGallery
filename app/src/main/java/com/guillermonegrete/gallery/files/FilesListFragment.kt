@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -16,11 +16,13 @@ import androidx.paging.LoadState
 import androidx.paging.flatMap
 import androidx.paging.map
 import androidx.recyclerview.widget.GridLayoutManager
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.File
 import com.guillermonegrete.gallery.data.ImageFile
 import com.guillermonegrete.gallery.data.VideoFile
+import com.guillermonegrete.gallery.databinding.DialogFileOrderByBinding
 import com.guillermonegrete.gallery.databinding.FragmentFilesListBinding
 import com.guillermonegrete.gallery.files.details.FileDetailsFragment
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -49,13 +51,19 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentFilesListBinding.bind(view)
+        val folder = arguments?.getString(FOLDER_KEY) ?: ""
 
         with(binding){
-            // Set up toolbar
-            (activity as? AppCompatActivity)?.setSupportActionBar(toolbar)
+            toolbar.title = folder
+            toolbar.inflateMenu(R.menu.files_list_menu)
+            toolbar.setOnMenuItemClickListener {
+                if(it.itemId == R.id.action_sort){
+                    showSortDialog()
+                    return@setOnMenuItemClickListener true
+                }
+                false
+            }
         }
-
-        val folder = arguments?.getString(FOLDER_KEY) ?: ""
         bindViewModel(folder)
     }
 
@@ -173,6 +181,26 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         val bundle = Bundle()
         bundle.putInt(FileDetailsFragment.FILE_INDEX_KEY, index)
         findNavController().navigate(R.id.fileDetailsFragment, bundle)
+    }
+
+    private fun showSortDialog(){
+        val dialog = BottomSheetDialog(requireContext())
+        val binding = DialogFileOrderByBinding.inflate(layoutInflater)
+        dialog.setContentView(binding.root)
+
+        binding.fieldSort.setOnCheckedChangeListener { _, checkedId ->
+            Toast.makeText(context, "Checked: $checkedId", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.orderSort.setOnCheckedChangeListener { _, checkedId ->
+            Toast.makeText(context, "Checked: $checkedId", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.doneButton.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     companion object{
