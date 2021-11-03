@@ -41,6 +41,10 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
 
     private lateinit var adapter: FilesAdapter
 
+    // Default values for the checked items in the sorting dialog
+    private var checkedField = R.id.by_name
+    private var checkedOrder = R.id.ascending_order
+
     override fun onAttach(context: Context) {
         (context.applicationContext as MyApplication).appComponent.inject(this)
         super.onAttach(context)
@@ -182,37 +186,43 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         findNavController().navigate(R.id.fileDetailsFragment, bundle)
     }
 
+    private val fieldIdMap = mapOf(
+        R.id.by_name to "filename",
+        R.id.by_creation to "creationDate",
+        R.id.by_last_modified to "lastModified",
+    )
+
+    private val sortIdMap = mapOf(
+        R.id.ascending_order to "asc",
+        R.id.descending_order to "desc",
+    )
+
     private fun showSortDialog(){
         val dialog = BottomSheetDialog(requireContext())
         val binding = DialogFileOrderByBinding.inflate(layoutInflater)
         dialog.setContentView(binding.root)
 
-        var field: String? = null
-        var sort: String? = null
+        var changed = false
 
+        binding.fieldSort.check(checkedField)
         binding.fieldSort.setOnCheckedChangeListener { _, checkedId ->
-            field = when(checkedId){
-                R.id.by_name -> "filename"
-                R.id.by_creation -> "creation_date"
-                R.id.by_last_modified -> "last_modified"
-//                R.id.by_type -> "file_type"
-                else -> null
-            }
+            changed = true
+            checkedField = checkedId
         }
 
+        binding.orderSort.check(checkedOrder)
         binding.orderSort.setOnCheckedChangeListener { _, checkedId ->
-            sort = when(checkedId){
-                R.id.ascending_order -> "asc"
-                R.id.descending_order -> "desc"
-                else -> null
-            }
+            changed = true
+            checkedOrder = checkedId
         }
 
         binding.doneButton.setOnClickListener {
-            val finalField = field
-            if(finalField != null && sort != null) {
+            if(changed) {
+                val field = fieldIdMap[checkedField] ?: "filename"
+                val sort = sortIdMap[checkedOrder] ?: "asc"
+
                 // Because ascending is the default order, don't add it to the string filter
-                val filter = if(sort == "desc") "$finalField,desc" else finalField
+                val filter = if(sort == "asc") field else "$field,desc"
                 viewModel.setFilter(filter)
                 viewModel.setFolderName(arguments?.getString(FOLDER_KEY) ?: "")
             }
