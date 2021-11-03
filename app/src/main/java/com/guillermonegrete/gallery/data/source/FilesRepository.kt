@@ -14,5 +14,5 @@ interface FilesRepository {
 
     fun getFiles(folder: String): Single<List<File>>
 
-    fun getPagedFiles(folder: String): Flowable<PagingData<File>>
+    fun getPagedFiles(folder: String, sort: String?): Flowable<PagingData<File>>
 }

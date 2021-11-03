@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
-import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -188,15 +187,35 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         val binding = DialogFileOrderByBinding.inflate(layoutInflater)
         dialog.setContentView(binding.root)
 
+        var field: String? = null
+        var sort: String? = null
+
         binding.fieldSort.setOnCheckedChangeListener { _, checkedId ->
-            Toast.makeText(context, "Checked: $checkedId", Toast.LENGTH_SHORT).show()
+            field = when(checkedId){
+                R.id.by_name -> "filename"
+                R.id.by_creation -> "creation_date"
+                R.id.by_last_modified -> "last_modified"
+//                R.id.by_type -> "file_type"
+                else -> null
+            }
         }
 
         binding.orderSort.setOnCheckedChangeListener { _, checkedId ->
-            Toast.makeText(context, "Checked: $checkedId", Toast.LENGTH_SHORT).show()
+            sort = when(checkedId){
+                R.id.ascending_order -> "asc"
+                R.id.descending_order -> "desc"
+                else -> null
+            }
         }
 
         binding.doneButton.setOnClickListener {
+            val finalField = field
+            if(finalField != null && sort != null) {
+                // Because ascending is the default order, don't add it to the string filter
+                val filter = if(sort == "desc") "$finalField,desc" else finalField
+                viewModel.setFilter(filter)
+                viewModel.setFolderName(arguments?.getString(FOLDER_KEY) ?: "")
+            }
             dialog.dismiss()
         }
 

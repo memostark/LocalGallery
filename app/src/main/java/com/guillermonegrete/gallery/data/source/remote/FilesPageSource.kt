@@ -8,7 +8,8 @@ import io.reactivex.schedulers.Schedulers
 class FilesPageSource(
     private val filesApi: FilesServerAPI,
     private val baseUrl: String,
-    val folder: String,
+    private val folder: String,
+    private val sort: String?
 ): RxPagingSource<Int, File>() {
 
     override fun loadSingle(params: LoadParams<Int>): Single<LoadResult<Int, File>> {
@@ -24,7 +25,8 @@ class FilesPageSource(
      * else get it from the files/ endpoint
      */
     private fun getFilesSource(nextPageNumber: Int): Single<PagedFileResponse> {
-        return if(folder.isNotEmpty()) filesApi.getPagedFiles(baseUrl, folder, nextPageNumber) else filesApi.getPagedFiles(baseUrl, nextPageNumber)
+        return if(folder.isNotEmpty())
+            filesApi.getPagedFiles(baseUrl, folder, nextPageNumber, sort) else filesApi.getPagedFiles(baseUrl, nextPageNumber, sort)
     }
 
     private fun toLoadResult(response: PagedFileResponse, nextPageNumber: Int): LoadResult<Int, File> {

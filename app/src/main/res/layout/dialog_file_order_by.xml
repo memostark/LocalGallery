@@ -43,12 +43,13 @@
             android:text="@string/last_modified"
             style="@style/SortDialogRadioButton" />
 
-        <RadioButton
+<!--        Causes a problem with the backend server-->
+        <!--<RadioButton
             android:id="@+id/by_type"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="@string/type"
-            style="@style/SortDialogRadioButton" />
+            style="@style/SortDialogRadioButton" />-->
     </RadioGroup>
 
     <TextView
