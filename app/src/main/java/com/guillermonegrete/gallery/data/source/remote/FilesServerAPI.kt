@@ -24,6 +24,7 @@ interface FilesServerAPI{
         @Path(value="baseUrl", encoded = true)  baseUrl: String,
         @Path(value="path", encoded = false)  path: String,
         @Query("page") page: Int,
+        @Query("sort") sort: String? = null,
         @Query("size") size: Int = 30,
     ): Single<PagedFileResponse>
 
@@ -31,7 +32,7 @@ interface FilesServerAPI{
     fun getPagedFiles(
         @Path(value="baseUrl", encoded = true)  baseUrl: String,
         @Query("page") page: Int,
-        @Query("size") size: Int = 30,
         @Query("sort") sort: String? = null,
+        @Query("size") size: Int = 30,
     ): Single<PagedFileResponse>
 }
