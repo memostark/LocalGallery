@@ -40,4 +40,8 @@
     <string name="descending">Descending</string>
     <string name="done">Done</string>
 
+    <!-- File details-->
+    <string name="created">Created:</string>
+    <string name="modified">Modified:</string>
+
 </resources>

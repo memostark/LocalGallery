@@ -36,7 +36,8 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:visibility="visible"
-            android:visibility="gone">
+            android:visibility="gone"
+            tools:ignore="UseCompoundDrawables">
 
             <ImageView
                 android:id="@+id/files_message_icon"

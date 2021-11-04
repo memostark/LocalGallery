@@ -8,6 +8,7 @@ import com.guillermonegrete.gallery.data.source.SettingsRepository
 import com.guillermonegrete.gallery.data.source.remote.FilesServerAPI
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
+import com.squareup.moshi.adapters.Rfc3339DateJsonAdapter
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Binds
 import dagger.Module
@@ -15,6 +16,7 @@ import dagger.Provides
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
+import java.util.*
 
 @Module(includes = [RepositoryModuleBinds::class])
 object RepositoryModule {
@@ -22,6 +24,7 @@ object RepositoryModule {
     @Provides
     fun provideFileServer(): FilesServerAPI{
         val moshi = Moshi.Builder()
+            .add(Date::class.java, Rfc3339DateJsonAdapter())
             .add(PolymorphicJsonAdapterFactory.of(FileResponse::class.java, "file_type")
                 .withSubtype(ImageFileResponse::class.java, FileType.Image.name)
                 .withSubtype(VideoFileResponse::class.java, FileType.Video.name))
