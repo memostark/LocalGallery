@@ -46,7 +46,6 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)
 
         setFragmentResultListener(ServersFragment.REQUEST_KEY) { _, bundle ->
             val ip = bundle.getString(ServersFragment.IP_KEY) ?: return@setFragmentResultListener
@@ -62,7 +61,18 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
 
         with(binding){
             // Set up toolbar
-            (activity as? AppCompatActivity)?.setSupportActionBar(toolbar)
+            toolbar.setTitle(R.string.app_name)
+            toolbar.inflateMenu(R.menu.menu_folders_list_frag)
+            setSearchViewConfig(toolbar.menu)
+            toolbar.setOnMenuItemClickListener { item ->
+                when(item.itemId){
+                    R.id.set_server_menu_item -> {
+                        loadDialogData()
+                        true
+                    }
+                    else -> false
+                }
+            }
 
 
             val layoutManager = GridLayoutManager(requireContext(), 2)
@@ -90,23 +100,6 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
     override fun onStop() {
         disposable.clear()
         super.onStop()
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.menu_folders_list_frag, menu)
-        setSearchViewConfig(menu)
-
-        super.onCreateOptionsMenu(menu, inflater)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when(item.itemId){
-            R.id.set_server_menu_item -> {
-                loadDialogData()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
     }
 
     private fun setViewModel() {
