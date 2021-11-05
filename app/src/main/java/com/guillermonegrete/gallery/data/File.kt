@@ -1,15 +1,19 @@
 package com.guillermonegrete.gallery.data
 
+import java.lang.Exception
+import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.*
+import java.io.File as JavaFile
 
 sealed class File(
-    val name:String,
+    val name: String, // actually an URL with name of the file
     val width: Int,
     val height: Int,
     val creationDate: Date,
     val lastModified: Date
 ) {
+    val filename: String =  try { JavaFile(URL(name).path).name ?: name } catch (e: Exception) { name } // Maybe it will be better if backend gives the filename
     val sizeText: String = "${width}x$height"
     val formatter = SimpleDateFormat("dd MMM yyyy HH:mm", Locale.getDefault())
     val creationText: CharSequence = formatter.format(creationDate)

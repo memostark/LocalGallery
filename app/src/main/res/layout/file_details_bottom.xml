@@ -27,8 +27,8 @@
 
         <ImageView
             android:id="@+id/imageView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
             android:layout_marginTop="16dp"
             android:contentDescription="@string/image_icon"
             app:layout_constraintStart_toStartOf="parent"
@@ -43,6 +43,7 @@
             android:layout_marginLeft="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
             app:layout_constraintBottom_toBottomOf="@+id/imageView"
             app:layout_constraintEnd_toStartOf="@+id/open_link_button"
             app:layout_constraintStart_toEndOf="@+id/imageView"
@@ -56,6 +57,7 @@
             android:background="?android:selectableItemBackground"
             android:contentDescription="@string/open_in_browser"
             android:tint="#2196F3"
+            android:padding="4dp"
             app:layout_constraintBottom_toBottomOf="@+id/file_name_text"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/file_name_text"

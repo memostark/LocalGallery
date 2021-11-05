@@ -67,7 +67,7 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
         }
 
         open fun bind(file: File){
-            nameText.text = file.name
+            nameText.text = file.filename
             fileSizeText.text = file.sizeText
             createdText.text = file.creationText
             modifiedText.text = file.modifiedText
