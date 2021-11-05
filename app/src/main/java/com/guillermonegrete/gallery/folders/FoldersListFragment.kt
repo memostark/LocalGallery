@@ -7,8 +7,8 @@ import android.util.Log
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
@@ -26,8 +26,6 @@ import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
-
-    private val TAG = FoldersListFragment::class.java.simpleName
 
     private  var _binding: FragmentFoldersListBinding? = null
     private val binding get() = _binding!!
@@ -108,7 +106,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             disposable.add(loadingIndicator
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe {binding.loadingBar.visibility = if(it) View.VISIBLE else View.GONE}
+                .subscribe {binding.loadingBar.isVisible = it }
             )
 
             disposable.add(urlAvailable
@@ -163,7 +161,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                     adapter = FolderAdapter(it, viewModel)
                     binding.foldersList.adapter = adapter
                 },
-                {error -> println("Error loading folders: ${error.message}")}
+                { error -> Log.e(TAG, "Error loading folders", error)}
             )
         )
     }
@@ -174,7 +172,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 { openServerFragment(it) },
-                { error -> Log.e(TAG,"Unable to log dialog data $error") }
+                { error -> Log.e(TAG,"Unable to log dialog data", error) }
             )
         )
     }
@@ -241,5 +239,9 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
         val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         val focusedView = context.currentFocus ?: return
         inputMethodManager.hideSoftInputFromWindow(focusedView.windowToken, 0)
+    }
+
+    companion object {
+        private val TAG = FoldersListFragment::class.java.simpleName
     }
 }
