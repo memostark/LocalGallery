@@ -48,6 +48,9 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
 
         private val nameText: TextView = itemView.findViewById(R.id.file_name_text)
         private val linkButton: ImageButton = itemView.findViewById(R.id.open_link_button)
+        private val fileSizeText: TextView = itemView.findViewById(R.id.file_size)
+        private val createdText: TextView = itemView.findViewById(R.id.creation_date)
+        private val modifiedText: TextView = itemView.findViewById(R.id.modified_date)
         private val bottomSheet: LinearLayout = itemView.findViewById(R.id.bottom_layout)
 
         init {
@@ -64,7 +67,10 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
         }
 
         open fun bind(file: File){
-            nameText.text = file.name
+            nameText.text = file.filename
+            fileSizeText.text = file.sizeText
+            createdText.text = file.creationText
+            modifiedText.text = file.modifiedText
             linkButton.setOnClickListener { openLink(file.name) }
         }
 
