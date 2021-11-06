@@ -3,7 +3,6 @@ package com.guillermonegrete.gallery.files
 import android.content.Context
 import android.os.Bundle
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -27,6 +26,7 @@ import com.guillermonegrete.gallery.files.details.FileDetailsFragment
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import timber.log.Timber
 import javax.inject.Inject
 
 class FilesListFragment: Fragment(R.layout.fragment_files_list) {
@@ -165,7 +165,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 { adapter.submitData(lifecycle, it) },
-                { error -> Log.e(FilesListFragment::class.simpleName, "Error loading files", error) }
+                { error -> Timber.e(error,"Error loading files") }
             )
         )
 
@@ -270,7 +270,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         val state = loadStates.refresh
         binding.loadingIcon.isVisible = state is LoadState.Loading
         binding.filesMessageContainer.isVisible = state is LoadState.Error
-        if(state is LoadState.Error) Log.e("FilesFileFragment", "Error when loading", state.error)
+        if(state is LoadState.Error) Timber.e(state.error, "Error when loading")
     }
 
     data class Size(var width: Int, var height: Int)

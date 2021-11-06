@@ -3,7 +3,6 @@ package com.guillermonegrete.gallery.files.details
 import android.content.Context
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -22,6 +21,7 @@ import com.guillermonegrete.gallery.databinding.FragmentFileDetailsBinding
 import com.guillermonegrete.gallery.files.FilesViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import timber.log.Timber
 import javax.inject.Inject
 
 class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
@@ -69,7 +69,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                     adapter.submitData(lifecycle, it)
                     binding.fileDetailsViewpager.setCurrentItem(index + 1, false)
                 },
-                { error -> Log.e(TAG, "Error loading files", error) }
+                { error -> Timber.e(error, "Error loading files") }
             )
         )
 
@@ -79,7 +79,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                     // Prevents clunky sideways movement when dragging the bottom panel
                     binding.fileDetailsViewpager.isUserInputEnabled = !panelTouched
                 },
-                { error -> Log.e(TAG, "Error detecting panel touch", error) }
+                { error -> Timber.e(error, "Error detecting panel touch") }
             )
         )
     }
@@ -159,6 +159,5 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
     companion object{
         const val FILE_INDEX_KEY = "file_index"
-        private val TAG = this::class.java.simpleName
     }
 }
