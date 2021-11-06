@@ -3,6 +3,7 @@ package com.guillermonegrete.gallery.files.details
 import android.content.Context
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -68,7 +69,17 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                     adapter.submitData(lifecycle, it)
                     binding.fileDetailsViewpager.setCurrentItem(index + 1, false)
                 },
-                { error -> println("Error loading files: ${error.message}") }
+                { error -> Log.e(TAG, "Error loading files", error) }
+            )
+        )
+
+        disposable.add(adapter.panelTouchSubject.distinctUntilChanged()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({  panelTouched ->
+                    // Prevents clunky sideways movement when dragging the bottom panel
+                    binding.fileDetailsViewpager.isUserInputEnabled = !panelTouched
+                },
+                { error -> Log.e(TAG, "Error detecting panel touch", error) }
             )
         )
     }
@@ -148,5 +159,6 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
     companion object{
         const val FILE_INDEX_KEY = "file_index"
+        private val TAG = this::class.java.simpleName
     }
 }

@@ -13,14 +13,18 @@ import android.widget.TextView
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.File
 import com.guillermonegrete.gallery.data.ImageFile
 import com.guillermonegrete.gallery.data.VideoFile
 import com.guillermonegrete.gallery.files.FileDiffCallback
+import io.reactivex.subjects.PublishSubject
 
 
 class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>(FileDiffCallback){
+
+    val panelTouchSubject = PublishSubject.create<Boolean>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val layout = LayoutInflater.from(parent.context).inflate(viewType, parent, false)
@@ -44,7 +48,7 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
         holder.bind(file)
     }
 
-    abstract class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
+    abstract inner class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
 
         private val nameText: TextView = itemView.findViewById(R.id.file_name_text)
         private val linkButton: ImageButton = itemView.findViewById(R.id.open_link_button)
@@ -54,16 +58,30 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
         private val bottomSheet: LinearLayout = itemView.findViewById(R.id.bottom_layout)
 
         init {
-            enableSheets()
+            setSheets()
         }
 
-        /**
-         * We need to return true so the bottom sheet handles the touch events.
-         * We only do this because otherwise PhotoView consumes the events.
-         */
         @SuppressLint("ClickableViewAccessibility")
-        fun enableSheets(){
+        fun setSheets(){
+            // We need to return true so the bottom sheet handles the touch events.
+            // We only do this because otherwise PhotoView consumes the events.
             bottomSheet.setOnTouchListener { _, _ -> true }
+
+            // Hidden state is not considered because it's not enabled for this bottom sheet
+            val behaviour = BottomSheetBehavior.from(bottomSheet)
+            behaviour.setBottomSheetCallback(object: BottomSheetBehavior.BottomSheetCallback(){
+                override fun onStateChanged(p0: View, p1: Int) {
+                    when(p1){
+                        BottomSheetBehavior.STATE_SETTLING,
+                        BottomSheetBehavior.STATE_COLLAPSED,
+                        BottomSheetBehavior.STATE_EXPANDED  -> panelTouchSubject.onNext(false)
+                        BottomSheetBehavior.STATE_DRAGGING -> panelTouchSubject.onNext(true)
+                        else -> {}
+                    }
+                }
+
+                override fun onSlide(p0: View, p1: Float) {}
+            })
         }
 
         open fun bind(file: File){
@@ -83,7 +101,7 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
         }
     }
 
-    class ImageViewHolder(itemView: View): ViewHolder(itemView){
+    inner class ImageViewHolder(itemView: View): ViewHolder(itemView){
 
         private val fileImage: ImageView = itemView.findViewById(R.id.file_image)
 
@@ -95,5 +113,5 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
         }
     }
 
-    class VideoViewHolder(itemView: View): ViewHolder(itemView)
+    inner class VideoViewHolder(itemView: View): ViewHolder(itemView)
 }
