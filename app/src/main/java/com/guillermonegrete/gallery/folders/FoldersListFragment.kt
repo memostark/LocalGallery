@@ -3,7 +3,6 @@ package com.guillermonegrete.gallery.folders
 import android.app.SearchManager
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
@@ -23,6 +22,7 @@ import com.guillermonegrete.gallery.servers.ServersFragment
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import timber.log.Timber
 import javax.inject.Inject
 
 class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
@@ -161,7 +161,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                     adapter = FolderAdapter(it, viewModel)
                     binding.foldersList.adapter = adapter
                 },
-                { error -> Log.e(TAG, "Error loading folders", error)}
+                { error -> Timber.e(error, "Error loading folders") }
             )
         )
     }
@@ -172,7 +172,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 { openServerFragment(it) },
-                { error -> Log.e(TAG,"Unable to log dialog data", error) }
+                { error -> Timber.e(error, "Unable to log dialog data") }
             )
         )
     }
@@ -239,9 +239,5 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
         val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         val focusedView = context.currentFocus ?: return
         inputMethodManager.hideSoftInputFromWindow(focusedView.windowToken, 0)
-    }
-
-    companion object {
-        private val TAG = FoldersListFragment::class.java.simpleName
     }
 }
