@@ -105,7 +105,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         var dataSize = 0
 
         disposable.add(viewModel.cachedFileList
-                // Hacky way used to find out how many items are in the list
+            // Hacky way used to find out how many items are in the list
             .map { pagingData ->
                 pagingData.map { dataSize++; it }
             }
@@ -113,6 +113,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                 var arSum = 0f
                 val tempList = mutableListOf<File>()
                 val tempSizes = mutableListOf<Size>()
+                val unfinishedRow = mutableListOf<Size>()
 
                 var index = 0
 
@@ -129,9 +130,14 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                             normalizeHeights(tempSizes, width / arSum)
                             arSum = 0f
                             val files = updateSizes(tempList, tempSizes)
+                            val unfinishedCount = unfinishedRow.size
+                            updateUnfinishedRow(tempSizes, index, unfinishedCount)
                             tempList.clear()
                             tempSizes.clear()
-                            files
+                            unfinishedRow.clear()
+                            // If there are any files from an unfinished row don't return them
+                            // Those were already returned in index == dataSize condition
+                            if(unfinishedCount < 1) files else files.subList(unfinishedCount, files.size)
                         }
                         arSum > arMax -> {
                             // Ratio too big, remove last and add the rest as a row
@@ -140,22 +146,21 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                             arSum -= getAspectRatio(pop)
                             normalizeHeights(tempSizes, width / arSum)
                             val files = updateSizes(tempList, tempSizes)
+                            val unfinishedCount = unfinishedRow.size
+                            updateUnfinishedRow(tempSizes, index, unfinishedCount)
                             tempList.clear()
                             tempSizes.clear()
+                            unfinishedRow.clear()
                             tempSizes.add(pop)
                             tempList.add(popFile)
                             arSum = getAspectRatio(pop)
-                            files
+                            if(unfinishedCount < 1) files else files.subList(unfinishedCount, files.size)
                         }
                         index == dataSize -> {
-                            // Last item, add row with remaining
-                            dataSize = 0
-                            index = 0
-                            normalizeHeights(tempSizes, width / arSum)
-                            arSum = 0f
+                            // Last item for this page, add them as unfinished
+                            unfinishedRow.addAll(tempSizes)
+                            onlyNormalizeHeights(tempSizes, width / arMin)
                             val files = updateSizes(tempList, tempSizes)
-                            tempList.clear()
-                            tempSizes.clear()
                             files
                         }
                         else -> emptyList()
@@ -170,6 +175,20 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         )
 
         viewModel.setFolderName(folder)
+    }
+
+    /**
+     * Sometimes the last items of a page can't complete a full row, when new data is added a row is completed
+     * and their sizes potentially changed, this updates the size of those items.
+     */
+    private fun updateUnfinishedRow(tempSizes: List<Size>, itemIndex: Int, unfinishedCount: Int) {
+        val i = itemIndex - tempSizes.size
+        for((zi, newIndex) in ((i + 1)..(i + unfinishedCount)).withIndex()){
+            val unSize = tempSizes[zi]
+            adapter.snapshot().items[newIndex - 1].width = unSize.width
+            adapter.snapshot().items[newIndex - 1].height = unSize.height
+
+        }
     }
 
     private fun setFileClickEvent(){
@@ -250,6 +269,16 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         // Add the remaining to compensate
         val remaining = getScreenWidth() - totalWidth
         if(remaining > 0) subList.last().width += remaining
+    }
+
+    private fun onlyNormalizeHeights(subList: List<Size>, height: Float){
+        var totalWidth = 0
+        for (temp in subList) {
+            val width = (height * getAspectRatio(temp)).toInt()
+            totalWidth += width
+            temp.width = width
+            temp.height = height.toInt()
+        }
     }
 
     @Synchronized
