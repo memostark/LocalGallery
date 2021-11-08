@@ -21,6 +21,7 @@ import com.guillermonegrete.gallery.databinding.FragmentFileDetailsBinding
 import com.guillermonegrete.gallery.files.FilesViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -63,6 +64,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
         val index = arguments?.getInt(FILE_INDEX_KEY) ?: 0
 
         disposable.add(viewModel.cachedFileList
+            .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 {
