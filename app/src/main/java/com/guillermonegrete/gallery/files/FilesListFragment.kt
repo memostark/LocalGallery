@@ -11,15 +11,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
-import androidx.paging.flatMap
-import androidx.paging.map
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
-import com.guillermonegrete.gallery.data.File
-import com.guillermonegrete.gallery.data.ImageFile
-import com.guillermonegrete.gallery.data.VideoFile
 import com.guillermonegrete.gallery.databinding.DialogFileOrderByBinding
 import com.guillermonegrete.gallery.databinding.FragmentFilesListBinding
 import com.guillermonegrete.gallery.files.details.FileDetailsFragment
@@ -99,96 +94,24 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         }
         list.adapter = adapter
 
-        val arMin = 2.0f
-        val arMax = 3.0f
+        viewModel.width = width
 
-        var dataSize = 0
-
-        disposable.add(viewModel.cachedFileList
-            // Hacky way used to find out how many items are in the list
-            .map { pagingData ->
-                pagingData.map { dataSize++; it }
-            }
-            .map { pagingData ->
-                var arSum = 0f
-                val tempList = mutableListOf<File>()
-                val tempSizes = mutableListOf<Size>()
-                val unfinishedRow = mutableListOf<Size>()
-
-                var index = 0
-
-                pagingData.flatMap { file ->
-                    val size = Size(file.width, file.height)
-                    tempList.add(file)
-                    tempSizes.add(size)
-                    arSum += getAspectRatio(size)
-                    index++
-
-                    when {
-                        arSum in arMin..arMax -> {
-                            // Ratio in range, add row
-                            normalizeHeights(tempSizes, width / arSum)
-                            arSum = 0f
-                            val files = updateSizes(tempList, tempSizes)
-                            val unfinishedCount = unfinishedRow.size
-                            updateUnfinishedRow(tempSizes, index, unfinishedCount)
-                            tempList.clear()
-                            tempSizes.clear()
-                            unfinishedRow.clear()
-                            // If there are any files from an unfinished row don't return them
-                            // Those were already returned in index == dataSize condition
-                            if(unfinishedCount < 1) files else files.subList(unfinishedCount, files.size)
-                        }
-                        arSum > arMax -> {
-                            // Ratio too big, remove last and add the rest as a row
-                            val pop = tempSizes.removeLast()
-                            val popFile = tempList.removeLast()
-                            arSum -= getAspectRatio(pop)
-                            normalizeHeights(tempSizes, width / arSum)
-                            val files = updateSizes(tempList, tempSizes)
-                            val unfinishedCount = unfinishedRow.size
-                            updateUnfinishedRow(tempSizes, index, unfinishedCount)
-                            tempList.clear()
-                            tempSizes.clear()
-                            unfinishedRow.clear()
-                            tempSizes.add(pop)
-                            tempList.add(popFile)
-                            arSum = getAspectRatio(pop)
-                            if(unfinishedCount < 1) files else files.subList(unfinishedCount, files.size)
-                        }
-                        index == dataSize -> {
-                            // Last item for this page, add them as unfinished
-                            unfinishedRow.addAll(tempSizes)
-                            onlyNormalizeHeights(tempSizes, width / arMin)
-                            val files = updateSizes(tempList, tempSizes)
-                            files
-                        }
-                        else -> emptyList()
-                    }
-                }
-            }
+        disposable.addAll(viewModel.cachedFileList
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 { adapter.submitData(lifecycle, it) },
                 { error -> Timber.e(error,"Error loading files") }
-            )
+            ),
+            viewModel.updateRows
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ it.forEach { row ->
+                    adapter.snapshot().items[row.pos].width = row.size.width
+                    adapter.snapshot().items[row.pos].height = row.size.height
+                }}, { error -> Timber.e(error,"Error loading files") }
+                )
         )
 
         viewModel.setFolderName(folder)
-    }
-
-    /**
-     * Sometimes the last items of a page can't complete a full row, when new data is added a row is completed
-     * and their sizes potentially changed, this updates the size of those items.
-     */
-    private fun updateUnfinishedRow(tempSizes: List<Size>, itemIndex: Int, unfinishedCount: Int) {
-        val i = itemIndex - tempSizes.size
-        for((zi, newIndex) in ((i + 1)..(i + unfinishedCount)).withIndex()){
-            val unSize = tempSizes[zi]
-            adapter.snapshot().items[newIndex - 1].width = unSize.width
-            adapter.snapshot().items[newIndex - 1].height = unSize.height
-
-        }
     }
 
     private fun setFileClickEvent(){
@@ -255,54 +178,12 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         const val FOLDER_KEY = "folder"
     }
 
-    @Synchronized
-    private fun normalizeHeights(subList: List<Size>, height: Float) {
-        var totalWidth = 0
-        for (temp in subList) {
-            val width = (height * getAspectRatio(temp)).toInt()
-            totalWidth += width
-            temp.width = width
-            temp.height = height.toInt()
-        }
-
-        // Sometimes the total width is off by a couple of pixels, e.g. (screen: 720, total: 718)
-        // Add the remaining to compensate
-        val remaining = getScreenWidth() - totalWidth
-        if(remaining > 0) subList.last().width += remaining
-    }
-
-    private fun onlyNormalizeHeights(subList: List<Size>, height: Float){
-        var totalWidth = 0
-        for (temp in subList) {
-            val width = (height * getAspectRatio(temp)).toInt()
-            totalWidth += width
-            temp.width = width
-            temp.height = height.toInt()
-        }
-    }
-
-    @Synchronized
-    private fun getAspectRatio(dim: Size): Float {
-        return 1.0f * dim.width / dim.height
-    }
-
-    private fun updateSizes(files: List<File>, sizes: List<Size>): List<File>{
-        return sizes.mapIndexed { index, newSize ->
-            when(val oldFile = files[index]){
-                is ImageFile -> ImageFile(oldFile.name, newSize.width, newSize.height, oldFile.creationDate, oldFile.lastModified)
-                is VideoFile -> VideoFile(oldFile.name, newSize.width, newSize.height, oldFile.creationDate, oldFile.lastModified, oldFile.duration)
-            }
-        }
-    }
-
     private val loadListener  = { loadStates: CombinedLoadStates ->
         val state = loadStates.refresh
         binding.loadingIcon.isVisible = state is LoadState.Loading
         binding.filesMessageContainer.isVisible = state is LoadState.Error
         if(state is LoadState.Error) Timber.e(state.error, "Error when loading")
     }
-
-    data class Size(var width: Int, var height: Int)
 
     private fun Fragment.getScreenWidth(): Int{
         val dm = DisplayMetrics()
