@@ -4,10 +4,10 @@ import androidx.lifecycle.ViewModel
 import com.guillermonegrete.gallery.data.GetFolderResponse
 import com.guillermonegrete.gallery.data.source.FilesRepository
 import com.guillermonegrete.gallery.data.source.SettingsRepository
-import io.reactivex.Single
-import io.reactivex.subjects.BehaviorSubject
-import io.reactivex.subjects.PublishSubject
-import io.reactivex.subjects.Subject
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.subjects.BehaviorSubject
+import io.reactivex.rxjava3.subjects.PublishSubject
+import io.reactivex.rxjava3.subjects.Subject
 import javax.inject.Inject
 
 class FoldersViewModel @Inject constructor(
@@ -30,7 +30,7 @@ class FoldersViewModel @Inject constructor(
         filesRepository.updateRepoURL(url)
     }
 
-    fun getDialogData(): Single<String>{
+    fun getDialogData(): Single<String> {
         return settings.getServerUrl()
     }
 

@@ -2,7 +2,7 @@ package com.guillermonegrete.gallery.data.source
 
 import android.content.Context
 import android.preference.PreferenceManager
-import io.reactivex.Single
+import io.reactivex.rxjava3.core.Single
 import javax.inject.Inject
 
 class DefaultSettingsRepository @Inject constructor(context: Context): SettingsRepository {

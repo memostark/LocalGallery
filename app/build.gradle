@@ -54,7 +54,7 @@ dependencies {
     def retrofit_version = "2.9.0"
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
     implementation "com.squareup.retrofit2:converter-moshi:$retrofit_version"
-    implementation "com.squareup.retrofit2:adapter-rxjava2:$retrofit_version"
+    implementation "com.squareup.retrofit2:adapter-rxjava3:$retrofit_version"
 
     // Moshi
     def moshi_version = "1.12.0"
@@ -62,8 +62,8 @@ dependencies {
     implementation "com.squareup.moshi:moshi-adapters:$moshi_version"
 
     // RxJava
-    implementation 'io.reactivex.rxjava2:rxjava:2.2.13'
-    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
+    implementation 'io.reactivex.rxjava3:rxjava:3.1.2'
+    implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
 
     // Glide
     implementation 'com.github.bumptech.glide:glide:4.9.0'
@@ -84,7 +84,7 @@ dependencies {
 
     def paging_version = "3.1.0-rc01"
     implementation "androidx.paging:paging-runtime-ktx:$paging_version"
-    implementation "androidx.paging:paging-rxjava2-ktx:$paging_version"
+    implementation "androidx.paging:paging-rxjava3:$paging_version"
 
     // Kotlin
     implementation "androidx.fragment:fragment-ktx:1.2.0-beta2"

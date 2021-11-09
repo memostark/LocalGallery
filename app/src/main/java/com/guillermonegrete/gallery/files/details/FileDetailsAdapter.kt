@@ -19,7 +19,7 @@ import com.guillermonegrete.gallery.data.File
 import com.guillermonegrete.gallery.data.ImageFile
 import com.guillermonegrete.gallery.data.VideoFile
 import com.guillermonegrete.gallery.files.FileDiffCallback
-import io.reactivex.subjects.PublishSubject
+import io.reactivex.rxjava3.subjects.PublishSubject
 
 
 class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>(FileDiffCallback){

@@ -18,9 +18,9 @@ import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.databinding.DialogFileOrderByBinding
 import com.guillermonegrete.gallery.databinding.FragmentFilesListBinding
 import com.guillermonegrete.gallery.files.details.FileDetailsFragment
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
 

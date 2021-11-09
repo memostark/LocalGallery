@@ -1,6 +1,6 @@
 package com.guillermonegrete.gallery.data.source
 
-import io.reactivex.Single
+import io.reactivex.rxjava3.core.Single
 
 interface SettingsRepository {
 

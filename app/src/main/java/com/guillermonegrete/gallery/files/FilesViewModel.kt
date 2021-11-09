@@ -5,17 +5,17 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.flatMap
 import androidx.paging.map
-import androidx.paging.rxjava2.cachedIn
+import androidx.paging.rxjava3.cachedIn
 import com.guillermonegrete.gallery.data.File
 import com.guillermonegrete.gallery.data.ImageFile
 import com.guillermonegrete.gallery.data.VideoFile
 import com.guillermonegrete.gallery.data.source.FilesRepository
 import com.guillermonegrete.gallery.data.source.SettingsRepository
-import io.reactivex.BackpressureStrategy
-import io.reactivex.Flowable
-import io.reactivex.subjects.BehaviorSubject
-import io.reactivex.subjects.PublishSubject
-import io.reactivex.subjects.Subject
+import io.reactivex.rxjava3.core.BackpressureStrategy
+import io.reactivex.rxjava3.core.Flowable
+import io.reactivex.rxjava3.subjects.BehaviorSubject
+import io.reactivex.rxjava3.subjects.PublishSubject
+import io.reactivex.rxjava3.subjects.Subject
 import javax.inject.Inject
 
 class FilesViewModel @Inject constructor(

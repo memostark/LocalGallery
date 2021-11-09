@@ -3,8 +3,8 @@ package com.guillermonegrete.gallery.data.source
 import androidx.paging.PagingData
 import com.guillermonegrete.gallery.data.File
 import com.guillermonegrete.gallery.data.GetFolderResponse
-import io.reactivex.Flowable
-import io.reactivex.Single
+import io.reactivex.rxjava3.core.Flowable
+import io.reactivex.rxjava3.core.Single
 
 interface FilesRepository {
 
