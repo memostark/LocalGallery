@@ -4,12 +4,12 @@ import android.util.Patterns
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import androidx.paging.rxjava2.flowable
+import androidx.paging.rxjava3.flowable
 import com.guillermonegrete.gallery.data.*
 import com.guillermonegrete.gallery.data.source.remote.FilesPageSource
 import com.guillermonegrete.gallery.data.source.remote.FilesServerAPI
-import io.reactivex.Flowable
-import io.reactivex.Single
+import io.reactivex.rxjava3.core.Flowable
+import io.reactivex.rxjava3.core.Single
 import javax.inject.Inject
 
 class DefaultFilesRepository @Inject constructor(private var fileAPI: FilesServerAPI): FilesRepository {
