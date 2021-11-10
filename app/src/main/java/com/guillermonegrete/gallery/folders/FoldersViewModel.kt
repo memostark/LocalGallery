@@ -1,9 +1,12 @@
 package com.guillermonegrete.gallery.folders
 
 import androidx.lifecycle.ViewModel
+import androidx.paging.PagingData
+import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.GetFolderResponse
 import com.guillermonegrete.gallery.data.source.FilesRepository
 import com.guillermonegrete.gallery.data.source.SettingsRepository
+import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
@@ -39,29 +42,16 @@ class FoldersViewModel @Inject constructor(
         settings.saveServerURL(url)
     }
 
-    fun getFolders(): Single<GetFolderResponse>{
-        loadingIndicator.onNext(true)
+    fun getFolders(): Flowable<PagingData<Folder>>{
+//        loadingIndicator.onNext(true)
         val serverUrl = settings.getServerURL()
+        if(serverUrl.isEmpty()) {
+            urlAvailable.onNext(false)
+        } else {
+            urlAvailable.onNext(true)
+        }
 
-        return filesRepository.getFolders()
-            .compose {
-                // Check if has url to show appropriate layout and folders list
-                if(serverUrl.isEmpty()) {
-                    urlAvailable.onNext(false)
-                    Single.just(GetFolderResponse("", emptyList()))
-                } else {
-                    urlAvailable.onNext(true)
-                    it
-                }
-            }
-            .doOnSuccess {
-                if(it.folders.isEmpty()) rootFolderEmpty.onNext(true)
-                loadingIndicator.onNext(false)
-            }
-            .doOnError{
-                loadingIndicator.onNext(false)
-                networkError.onNext(true)
-            }
+        return filesRepository.getPagedFolders(null)
     }
 
     fun openFolder(folder: String){

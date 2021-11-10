@@ -13,6 +13,9 @@ import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.paging.CombinedLoadStates
+import androidx.paging.LoadState
+import androidx.paging.map
 import androidx.recyclerview.widget.GridLayoutManager
 import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
@@ -74,9 +77,9 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
 
 
             val layoutManager = GridLayoutManager(requireContext(), 2)
-            layoutManager.spanSizeLookup = object: GridLayoutManager.SpanSizeLookup(){
+            /*layoutManager.spanSizeLookup = object: GridLayoutManager.SpanSizeLookup(){
                 override fun getSpanSize(position: Int) = if(position == 0) 2 else 1
-            }
+            }*/
             foldersList.layoutManager = layoutManager
 
             messageIcon.setOnClickListener { loadFoldersData() }
@@ -91,6 +94,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
     }
 
     override fun onDestroyView() {
+        adapter.removeLoadStateListener(loadListener)
         binding.foldersList.adapter = null
         _binding = null
         super.onDestroyView()
@@ -154,13 +158,20 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
     }
 
     private fun loadFoldersData(){
+        adapter = FolderAdapter(viewModel)
+        adapter.addLoadStateListener(loadListener)
+        binding.foldersList.adapter = adapter
         disposable.add(viewModel.getFolders()
             .subscribeOn(Schedulers.io())
+            .map { pageData ->
+                Timber.d("Paging data: $pageData")
+                pageData.map { Timber.d("Got folder: $it"); it }
+                pageData
+            }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 {
-                    adapter = FolderAdapter(it, viewModel)
-                    binding.foldersList.adapter = adapter
+                    adapter.submitData(lifecycle, it)
                 },
                 { error -> Timber.e(error, "Error loading folders") }
             )
@@ -198,13 +209,13 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
 
         searchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener{
             override fun onQueryTextSubmit(query: String?): Boolean {
-                adapter.filter.filter(query)
+//                adapter.filter.filter(query)
                 searchView.clearFocus()
                 return true
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                adapter.filter.filter(newText)
+//                adapter.filter.filter(newText)
                 return false
             }
         })
@@ -240,5 +251,12 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
         val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         val focusedView = context.currentFocus ?: return
         inputMethodManager.hideSoftInputFromWindow(focusedView.windowToken, 0)
+    }
+
+    private val loadListener  = { loadStates: CombinedLoadStates ->
+        val state = loadStates.refresh
+//        binding.loadingIcon.isVisible = state is LoadState.Loading
+//        binding.filesMessageContainer.isVisible = state is LoadState.Error
+        if(state is LoadState.Error) Timber.e(state.error, "Error when loading")
     }
 }

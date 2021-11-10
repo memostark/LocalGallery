@@ -4,6 +4,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
+import androidx.paging.PagingDataAdapter
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.guillermonegrete.gallery.R
@@ -14,11 +16,10 @@ import com.guillermonegrete.gallery.databinding.FolderNameItemBinding
 import java.util.*
 
 class FolderAdapter(
-    private val data: GetFolderResponse,
     private val viewModel: FoldersViewModel
-): RecyclerView.Adapter<RecyclerView.ViewHolder>(), Filterable {
+): PagingDataAdapter<Folder, RecyclerView.ViewHolder>(FolderDiffCallback)/*, Filterable*/ {
 
-    private var filteredFolders = data.folders
+//    private var filteredFolders = data.folders
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -28,23 +29,22 @@ class FolderAdapter(
         }
     }
 
-    override fun getItemCount() = filteredFolders.size + 1
-
     override fun getItemViewType(position: Int): Int {
         return when(position){
-            0 -> R.layout.folder_name_item
+//            0 -> R.layout.folder_name_item
             else -> R.layout.folder_item
         }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        val item = getItem(position) ?: return
         when(holder){
-            is ViewHolder -> holder.bind(filteredFolders[position - 1])
-            is NameViewHolder -> holder.bind(data.name)
+            is ViewHolder -> holder.bind(item)
+            is NameViewHolder -> holder.bind("No title yet")
         }
     }
 
-    override fun getFilter(): Filter {
+    /*override fun getFilter(): Filter {
         return object: Filter(){
             override fun performFiltering(constraint: CharSequence?): FilterResults {
                 filteredFolders = if(constraint.isNullOrBlank()){
@@ -63,7 +63,7 @@ class FolderAdapter(
                 notifyDataSetChanged()
             }
         }
-    }
+    }*/
 
     class ViewHolder(
         private val viewModel: FoldersViewModel,
@@ -92,5 +92,16 @@ class FolderAdapter(
         fun bind(name: String){
              binding.rootFolder.text = name
         }
+    }
+}
+
+object FolderDiffCallback : DiffUtil.ItemCallback<Folder>() {
+
+    override fun areItemsTheSame(oldItem: Folder, newItem: Folder): Boolean {
+        return oldItem.name == newItem.name
+    }
+
+    override fun areContentsTheSame(oldItem: Folder, newItem: Folder): Boolean {
+        return oldItem == newItem
     }
 }

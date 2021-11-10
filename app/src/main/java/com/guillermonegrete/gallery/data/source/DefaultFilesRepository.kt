@@ -8,11 +8,16 @@ import androidx.paging.rxjava3.flowable
 import com.guillermonegrete.gallery.data.*
 import com.guillermonegrete.gallery.data.source.remote.FilesPageSource
 import com.guillermonegrete.gallery.data.source.remote.FilesServerAPI
+import com.guillermonegrete.gallery.folders.source.FoldersAPI
+import com.guillermonegrete.gallery.folders.source.FoldersPageSource
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
 import javax.inject.Inject
 
-class DefaultFilesRepository @Inject constructor(private var fileAPI: FilesServerAPI): FilesRepository {
+class DefaultFilesRepository @Inject constructor(
+    private val fileAPI: FilesServerAPI,
+    private val foldersAPI: FoldersAPI
+): FilesRepository {
 
     private var baseUrl = ""
         set(newUrl){
@@ -25,6 +30,12 @@ class DefaultFilesRepository @Inject constructor(private var fileAPI: FilesServe
 
     override fun getFolders(): Single<GetFolderResponse> {
         return fileAPI.getFolders(baseUrl)
+    }
+
+    override fun getPagedFolders(sort: String?): Flowable<PagingData<Folder>> {
+        return Pager(PagingConfig(pageSize = 20)) {
+            FoldersPageSource(foldersAPI, baseUrl, sort)
+        }.flowable
     }
 
     override fun getFiles(folder: String): Single<List<File>> {
