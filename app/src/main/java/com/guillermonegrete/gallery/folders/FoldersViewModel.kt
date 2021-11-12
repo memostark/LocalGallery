@@ -1,11 +1,14 @@
 package com.guillermonegrete.gallery.folders
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
-import com.guillermonegrete.gallery.data.Folder
-import com.guillermonegrete.gallery.data.GetFolderResponse
+import androidx.paging.insertSeparators
+import androidx.paging.map
+import androidx.paging.rxjava3.cachedIn
 import com.guillermonegrete.gallery.data.source.FilesRepository
 import com.guillermonegrete.gallery.data.source.SettingsRepository
+import com.guillermonegrete.gallery.folders.models.FolderUI
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.subjects.BehaviorSubject
@@ -42,8 +45,7 @@ class FoldersViewModel @Inject constructor(
         settings.saveServerURL(url)
     }
 
-    fun getFolders(): Flowable<PagingData<Folder>>{
-//        loadingIndicator.onNext(true)
+    fun getFolders(): Flowable<PagingData<FolderUI>>{
         val serverUrl = settings.getServerURL()
         if(serverUrl.isEmpty()) {
             urlAvailable.onNext(false)
@@ -52,6 +54,12 @@ class FoldersViewModel @Inject constructor(
         }
 
         return filesRepository.getPagedFolders(null)
+            .map { pagingData ->
+                pagingData.map { FolderUI.Model(it) }.insertSeparators { before: FolderUI.Model?, after: FolderUI.Model? ->
+                    if(before == null) return@insertSeparators FolderUI.HeaderModel(after?.title ?: "")
+                    return@insertSeparators null
+                }
+            }.cachedIn(viewModelScope)
     }
 
     fun openFolder(folder: String){

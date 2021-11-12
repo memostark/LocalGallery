@@ -4,4 +4,6 @@ data class Folder(
     val name:String,
     val coverUrl: String,
     val count: Int
-)
+){
+    var title: String? = null
+}

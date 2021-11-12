@@ -15,7 +15,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
-import androidx.paging.map
 import androidx.recyclerview.widget.GridLayoutManager
 import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
@@ -77,9 +76,9 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
 
 
             val layoutManager = GridLayoutManager(requireContext(), 2)
-            /*layoutManager.spanSizeLookup = object: GridLayoutManager.SpanSizeLookup(){
+            layoutManager.spanSizeLookup = object: GridLayoutManager.SpanSizeLookup(){
                 override fun getSpanSize(position: Int) = if(position == 0) 2 else 1
-            }*/
+            }
             foldersList.layoutManager = layoutManager
 
             messageIcon.setOnClickListener { loadFoldersData() }
@@ -163,16 +162,9 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
         binding.foldersList.adapter = adapter
         disposable.add(viewModel.getFolders()
             .subscribeOn(Schedulers.io())
-            .map { pageData ->
-                Timber.d("Paging data: $pageData")
-                pageData.map { Timber.d("Got folder: $it"); it }
-                pageData
-            }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
-                {
-                    adapter.submitData(lifecycle, it)
-                },
+                { adapter.submitData(lifecycle, it) },
                 { error -> Timber.e(error, "Error loading folders") }
             )
         )

@@ -5,7 +5,6 @@ import androidx.paging.rxjava3.RxPagingSource
 import com.guillermonegrete.gallery.data.Folder
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
-import timber.log.Timber
 
 class FoldersPageSource(
     private val foldersAPI: FoldersAPI,
@@ -22,9 +21,9 @@ class FoldersPageSource(
     }
 
     private fun toLoadResult(response: PagedFolderResponse, nextPageNumber: Int): LoadResult<Int, Folder> {
-        Timber.d("Paging data $response")
+        val items = if(nextPageNumber == 0) response.page.items.apply { first().title = response.name } else response.page.items
         return LoadResult.Page(
-            data = response.page.items,
+            data = items,
             prevKey = if (nextPageNumber > 0) nextPageNumber - 1 else null,
             nextKey = if (nextPageNumber < response.page.totalItems - 1) nextPageNumber + 1 else null
         )
