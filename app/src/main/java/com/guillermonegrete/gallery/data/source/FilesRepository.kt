@@ -13,7 +13,7 @@ interface FilesRepository {
 
     fun getFolders(): Single<GetFolderResponse>
 
-    fun getPagedFolders(sort: String?): Flowable<PagingData<Folder>>
+    fun getPagedFolders(query: String?, sort: String?): Flowable<PagingData<Folder>>
 
     fun getFiles(folder: String): Single<List<File>>
 

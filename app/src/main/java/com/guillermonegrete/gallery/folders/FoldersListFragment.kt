@@ -22,10 +22,12 @@ import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.databinding.FragmentFoldersListBinding
 import com.guillermonegrete.gallery.files.FilesListFragment
 import com.guillermonegrete.gallery.servers.ServersFragment
+import com.jakewharton.rxbinding4.appcompat.queryTextChanges
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
@@ -183,18 +185,13 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
         searchView.setSearchableInfo(searchManager.getSearchableInfo(activity?.componentName))
         searchView.maxWidth = Int.MAX_VALUE
 
-        searchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener{
-            override fun onQueryTextSubmit(query: String?): Boolean {
-//                adapter.filter.filter(query)
-                searchView.clearFocus()
-                return true
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-//                adapter.filter.filter(newText)
-                return false
-            }
-        })
+        searchView.queryTextChanges()
+            .debounce(300, TimeUnit.MILLISECONDS)
+            .distinctUntilChanged()
+            .subscribe(
+                { viewModel.updateFilter(it) },
+                { Timber.e(it, "Error when querying search view") }
+            )
 
         searchView.setOnQueryTextFocusChangeListener { _, hasFocus ->
             // If keyboard is closed (hasFocus is false) and no text in search

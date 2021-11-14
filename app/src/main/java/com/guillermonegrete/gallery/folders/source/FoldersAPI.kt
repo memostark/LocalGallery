@@ -15,6 +15,7 @@ interface FoldersAPI {
     fun getFolders(
         @Path(value = "baseUrl", encoded = true) baseUrl: String,
         @Query("page") page: Int,
+        @Query("query") query: String? = null,
         @Query("sort") sort: String? = null,
         @Query("size") size: Int = 30,
     ): Single<PagedFolderResponse>

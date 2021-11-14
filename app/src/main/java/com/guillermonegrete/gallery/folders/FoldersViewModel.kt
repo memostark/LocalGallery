@@ -28,14 +28,19 @@ class FoldersViewModel @Inject constructor(
 
     private val urlFolder: Subject<String> = PublishSubject.create()
 
+    private val searchQuery: Subject<String> = BehaviorSubject.createDefault("")
+
     val pagedFolders = urlFolder.switchMap {
-        filesRepository.getPagedFolders(null)
-            .map { pagingData ->
-                pagingData.map { FolderUI.Model(it) }.insertSeparators { before: FolderUI.Model?, after: FolderUI.Model? ->
-                    if(before == null) return@insertSeparators FolderUI.HeaderModel(after?.title ?: "")
-                    return@insertSeparators null
-                }
-            }.toObservable()
+        searchQuery.switchMap { query ->
+            val finalQuery = if(query.isEmpty()) null else query
+            filesRepository.getPagedFolders(finalQuery, null)
+                .map { pagingData ->
+                    pagingData.map { FolderUI.Model(it) }.insertSeparators { before: FolderUI.Model?, after: FolderUI.Model? ->
+                        if(before == null) return@insertSeparators FolderUI.HeaderModel(after?.title ?: "")
+                        return@insertSeparators null
+                    }
+                }.toObservable()
+        }
     }.toFlowable(BackpressureStrategy.LATEST).cachedIn(viewModelScope)
 
     init {
@@ -64,5 +69,9 @@ class FoldersViewModel @Inject constructor(
 
     fun openFolder(folder: String){
         openFolder.onNext(folder)
+    }
+
+    fun updateFilter(query: CharSequence) {
+        searchQuery.onNext(query.toString())
     }
 }
