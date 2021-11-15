@@ -2,8 +2,10 @@ package com.guillermonegrete.gallery.data.source
 
 import com.guillermonegrete.gallery.data.*
 import com.guillermonegrete.gallery.data.source.remote.FakeFileServerAPI
+import com.guillermonegrete.gallery.folders.source.FakeFoldersApi
 import org.junit.Before
 import org.junit.Test
+import java.util.*
 
 class DefaultFilesRepositoryTest {
 
@@ -28,7 +30,7 @@ class DefaultFilesRepositoryTest {
             defaultFolders[2] to defaultFiles[2]
         )
 
-        repository = DefaultFilesRepository(FakeFileServerAPI(filesMap))
+        repository = DefaultFilesRepository(FakeFileServerAPI(filesMap), FakeFoldersApi())
     }
 
     @Test
@@ -43,7 +45,8 @@ class DefaultFilesRepositoryTest {
         val folderName = defaultFolders.first().name
         val files = repository.getFiles(folderName)
 
-        val expected = listOf(ImageFile("file1.jpg"), ImageFile("file2.jpg"))
+        val date = Date()
+        val expected = listOf(ImageFile("file1.jpg", creationDate = date, lastModified = date), ImageFile("file2.jpg", creationDate = date, lastModified = date))
         files.test()
             .assertValue(expected)
     }

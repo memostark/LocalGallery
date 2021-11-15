@@ -20,7 +20,7 @@ sealed class File(
     val modifiedText: CharSequence = formatter.format(lastModified)
 }
 
-class ImageFile(name: String, width: Int = 0, height: Int = 0, creationDate: Date, lastModified: Date): File(name, width, height, creationDate, lastModified){
+class ImageFile(name: String, width: Int = 0, height: Int = 0, creationDate: Date = Date(), lastModified: Date = Date()): File(name, width, height, creationDate, lastModified){
     // To make testing easier when comparing and simulate a data class
     override fun equals(other: Any?) =
         if(other is ImageFile) name == other.name && width == other.width && height == other.height else false

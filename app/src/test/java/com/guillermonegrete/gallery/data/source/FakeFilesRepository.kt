@@ -5,9 +5,8 @@ import androidx.paging.PagingData
 import com.guillermonegrete.gallery.data.File
 import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.GetFolderResponse
-import com.guillermonegrete.gallery.data.PagedFileResponse
-import io.reactivex.Flowable
-import io.reactivex.Single
+import io.reactivex.rxjava3.core.Flowable
+import io.reactivex.rxjava3.core.Single
 import java.lang.RuntimeException
 
 class FakeFilesRepository: FilesRepository {
@@ -33,12 +32,16 @@ class FakeFilesRepository: FilesRepository {
         return Single.just(GetFolderResponse("Name", foldersServiceData))
     }
 
+    override fun getPagedFolders(query: String?, sort: String?): Flowable<PagingData<Folder>> {
+        TODO("Not yet implemented")
+    }
+
     override fun getFiles(folder: String): Single<List<File>> {
         if(shouldReturnError) return Single.error(RuntimeException())
         return Single.just(filesServiceData[folder])
     }
 
-    override fun getPagedFiles(folder: String): Flowable<PagingData<File>> {
+    override fun getPagedFiles(folder: String, sort: String?): Flowable<PagingData<File>> {
         TODO("Not yet implemented")
     }
 
