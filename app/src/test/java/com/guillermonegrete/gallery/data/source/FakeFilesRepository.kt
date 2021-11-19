@@ -33,7 +33,7 @@ class FakeFilesRepository: FilesRepository {
     }
 
     override fun getPagedFolders(query: String?, sort: String?): Flowable<PagingData<Folder>> {
-        TODO("Not yet implemented")
+        return Flowable.just(PagingData.from(foldersServiceData))
     }
 
     override fun getFiles(folder: String): Single<List<File>> {

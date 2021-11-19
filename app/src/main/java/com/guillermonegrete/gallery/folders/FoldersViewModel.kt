@@ -35,7 +35,7 @@ class FoldersViewModel @Inject constructor(
             val finalQuery = if(query.isEmpty()) null else query
             filesRepository.getPagedFolders(finalQuery, null)
                 .map { pagingData ->
-                    pagingData.map { FolderUI.Model(it) }.insertSeparators { before: FolderUI.Model?, after: FolderUI.Model? ->
+                    pagingData.map { folder -> FolderUI.Model(folder) }.insertSeparators { before: FolderUI.Model?, after: FolderUI.Model? ->
                         if(before == null) return@insertSeparators FolderUI.HeaderModel(after?.title ?: "")
                         return@insertSeparators null
                     }

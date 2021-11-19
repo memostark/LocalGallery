@@ -3,7 +3,7 @@ package com.guillermonegrete.gallery.folders.models
 import com.guillermonegrete.gallery.data.Folder
 
 sealed class FolderUI {
-    class Model(
+    data class Model(
         val name: String,
         val coverUrl: String,
         val count: Int
@@ -15,5 +15,5 @@ sealed class FolderUI {
         var title: String? = null
     }
 
-    class HeaderModel(val title: String) : FolderUI()
+    data class HeaderModel(val title: String) : FolderUI()
 }
