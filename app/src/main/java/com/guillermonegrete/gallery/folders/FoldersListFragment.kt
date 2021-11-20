@@ -126,18 +126,6 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                     openFileFragment(it)
                 }
             )
-
-            disposable.add(rootFolderEmpty
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe {
-                    setMessageContainer(
-                        it,
-                        getString(R.string.folder_empty_message),
-                        R.drawable.ic_folder_open_black_24dp
-                    )
-                }
-            )
         }
     }
 
@@ -233,6 +221,8 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
         if(state is LoadState.Error) {
             Timber.e(state.error, "Load state listener error")
             setMessageContainer(true, getString(R.string.error_message), R.drawable.ic_refresh_black_24dp)
+        } else if(state is LoadState.NotLoading){
+            setMessageContainer(adapter.itemCount < 1, getString(R.string.folder_empty_message), R.drawable.ic_folder_open_black_24dp)
         }
     }
 }

@@ -128,7 +128,6 @@ class FoldersViewModelTest {
 
     @Test
     fun `Given no folders in root, when load, no folders layout shown`(){
-        val rootFolderEmptyTest = viewModel.rootFolderEmpty.test()
         viewModel.pagedFolders.test()
 
         // Set folders list as empty
@@ -143,8 +142,6 @@ class FoldersViewModelTest {
 
         val items = getItems(viewModel.pagedFolders.blockingFirst())
         assertEquals(emptyList<FolderUI>(), items)
-
-        rootFolderEmptyTest.assertValue(true)
     }
 
     /**

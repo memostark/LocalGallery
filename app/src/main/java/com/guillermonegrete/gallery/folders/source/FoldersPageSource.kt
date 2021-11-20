@@ -22,7 +22,8 @@ class FoldersPageSource(
     }
 
     private fun toLoadResult(response: PagedFolderResponse, nextPageNumber: Int): LoadResult<Int, Folder> {
-        val items = if(nextPageNumber == 0) response.page.items.apply { first().title = response.name } else response.page.items
+        val rawItems = response.page.items
+        val items = if(nextPageNumber == 0 && rawItems.isNotEmpty()) rawItems.apply { first().title = response.name } else rawItems
         return LoadResult.Page(
             data = items,
             prevKey = if (nextPageNumber > 0) nextPageNumber - 1 else null,

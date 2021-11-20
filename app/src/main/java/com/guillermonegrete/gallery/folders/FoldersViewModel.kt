@@ -22,8 +22,6 @@ class FoldersViewModel @Inject constructor(
 
     val urlAvailable: BehaviorSubject<Boolean> = BehaviorSubject.createDefault(false)
 
-    val rootFolderEmpty: Subject<Boolean> = PublishSubject.create()
-
     val openFolder: Subject<String> = PublishSubject.create()
 
     private val urlFolder: Subject<String> = PublishSubject.create()
@@ -36,7 +34,7 @@ class FoldersViewModel @Inject constructor(
             filesRepository.getPagedFolders(finalQuery, null)
                 .map { pagingData ->
                     pagingData.map { folder -> FolderUI.Model(folder) }.insertSeparators { before: FolderUI.Model?, after: FolderUI.Model? ->
-                        if(before == null) return@insertSeparators FolderUI.HeaderModel(after?.title ?: "")
+                        if(before == null && after != null) return@insertSeparators FolderUI.HeaderModel(after.title ?: "")
                         return@insertSeparators null
                     }
                 }.toObservable()
