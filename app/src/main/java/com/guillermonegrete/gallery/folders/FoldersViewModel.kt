@@ -1,9 +1,14 @@
 package com.guillermonegrete.gallery.folders
 
 import androidx.lifecycle.ViewModel
-import com.guillermonegrete.gallery.data.GetFolderResponse
+import androidx.lifecycle.viewModelScope
+import androidx.paging.insertSeparators
+import androidx.paging.map
+import androidx.paging.rxjava3.cachedIn
 import com.guillermonegrete.gallery.data.source.FilesRepository
 import com.guillermonegrete.gallery.data.source.SettingsRepository
+import com.guillermonegrete.gallery.folders.models.FolderUI
+import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
@@ -15,15 +20,26 @@ class FoldersViewModel @Inject constructor(
     private val filesRepository: FilesRepository
 ): ViewModel() {
 
-    val loadingIndicator: BehaviorSubject<Boolean> = BehaviorSubject.createDefault(false)
-
     val urlAvailable: BehaviorSubject<Boolean> = BehaviorSubject.createDefault(false)
 
-    val networkError: Subject<Boolean> = BehaviorSubject.createDefault(false)
-
-    val rootFolderEmpty: Subject<Boolean> = PublishSubject.create()
-
     val openFolder: Subject<String> = PublishSubject.create()
+
+    private val urlFolder: Subject<String> = PublishSubject.create()
+
+    private val searchQuery: Subject<String> = BehaviorSubject.createDefault("")
+
+    val pagedFolders = urlFolder.switchMap {
+        searchQuery.switchMap { query ->
+            val finalQuery = if(query.isEmpty()) null else query
+            filesRepository.getPagedFolders(finalQuery, null)
+                .map { pagingData ->
+                    pagingData.map { folder -> FolderUI.Model(folder) }.insertSeparators { before: FolderUI.Model?, after: FolderUI.Model? ->
+                        if(before == null && after != null) return@insertSeparators FolderUI.HeaderModel(after.title ?: "")
+                        return@insertSeparators null
+                    }
+                }.toObservable()
+        }
+    }.toFlowable(BackpressureStrategy.LATEST).cachedIn(viewModelScope)
 
     init {
         val url = settings.getServerURL()
@@ -39,32 +55,21 @@ class FoldersViewModel @Inject constructor(
         settings.saveServerURL(url)
     }
 
-    fun getFolders(): Single<GetFolderResponse>{
-        loadingIndicator.onNext(true)
+    fun getFolders(){
         val serverUrl = settings.getServerURL()
-
-        return filesRepository.getFolders()
-            .compose {
-                // Check if has url to show appropriate layout and folders list
-                if(serverUrl.isEmpty()) {
-                    urlAvailable.onNext(false)
-                    Single.just(GetFolderResponse("", emptyList()))
-                } else {
-                    urlAvailable.onNext(true)
-                    it
-                }
-            }
-            .doOnSuccess {
-                if(it.folders.isEmpty()) rootFolderEmpty.onNext(true)
-                loadingIndicator.onNext(false)
-            }
-            .doOnError{
-                loadingIndicator.onNext(false)
-                networkError.onNext(true)
-            }
+        if(serverUrl.isEmpty()) {
+            urlAvailable.onNext(false)
+        } else {
+            urlAvailable.onNext(true)
+            urlFolder.onNext(serverUrl)
+        }
     }
 
     fun openFolder(folder: String){
         openFolder.onNext(folder)
+    }
+
+    fun updateFilter(query: CharSequence) {
+        searchQuery.onNext(query.toString())
     }
 }

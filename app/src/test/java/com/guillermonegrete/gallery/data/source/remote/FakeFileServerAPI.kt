@@ -5,7 +5,7 @@ import com.guillermonegrete.gallery.data.FileResponse
 import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.GetFolderResponse
 import com.guillermonegrete.gallery.data.PagedFileResponse
-import io.reactivex.Single
+import io.reactivex.rxjava3.core.Single
 import retrofit2.http.Path
 
 class FakeFileServerAPI(folderServiceData: LinkedHashMap<Folder, List<FileResponse>>): FilesServerAPI {
@@ -27,6 +27,16 @@ class FakeFileServerAPI(folderServiceData: LinkedHashMap<Folder, List<FileRespon
         baseUrl: String,
         path: String,
         page: Int,
+        sort: String?,
+        size: Int
+    ): Single<PagedFileResponse> {
+        TODO("Not yet implemented")
+    }
+
+    override fun getPagedFiles(
+        baseUrl: String,
+        page: Int,
+        sort: String?,
         size: Int
     ): Single<PagedFileResponse> {
         TODO("Not yet implemented")

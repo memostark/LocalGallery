@@ -6,6 +6,7 @@ import com.guillermonegrete.gallery.data.source.DefaultSettingsRepository
 import com.guillermonegrete.gallery.data.source.FilesRepository
 import com.guillermonegrete.gallery.data.source.SettingsRepository
 import com.guillermonegrete.gallery.data.source.remote.FilesServerAPI
+import com.guillermonegrete.gallery.folders.source.FoldersAPI
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
 import com.squareup.moshi.adapters.Rfc3339DateJsonAdapter
@@ -22,7 +23,7 @@ import java.util.*
 object RepositoryModule {
 
     @Provides
-    fun provideFileServer(): FilesServerAPI{
+    fun provideRetrofit(): Retrofit{
         val moshi = Moshi.Builder()
             .add(Date::class.java, Rfc3339DateJsonAdapter())
             .add(PolymorphicJsonAdapterFactory.of(FileResponse::class.java, "file_type")
@@ -30,13 +31,18 @@ object RepositoryModule {
                 .withSubtype(VideoFileResponse::class.java, FileType.Video.name))
             .add(KotlinJsonAdapterFactory())
             .build()
-        val retrofit = Retrofit.Builder()
+        return Retrofit.Builder()
             .baseUrl("http://localhost/")
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
             .build()
-        return retrofit.create(FilesServerAPI::class.java)
     }
+
+    @Provides
+    fun provideFileServer(retrofit: Retrofit): FilesServerAPI = retrofit.create(FilesServerAPI::class.java)
+
+    @Provides
+    fun provideFolderAPI(retrofit: Retrofit): FoldersAPI = retrofit.create(FoldersAPI::class.java)
 
 }
 

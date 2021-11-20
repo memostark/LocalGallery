@@ -15,10 +15,12 @@ sealed class FileResponse(
 }
 
 class ImageFileResponse(url: String, width: Int, height: Int, creationDate: Date, lastModified: Date): FileResponse(url, width, height, creationDate, lastModified, FileType.Image){
+    constructor(url: String, width: Int, height: Int): this(url, width, height, Date(), Date())
     override fun toFile() = ImageFile(url, width, height, creationDate, lastModified)
 }
 
 class VideoFileResponse(url: String, width: Int, height: Int, creationDate: Date, lastModified: Date, private val duration: Int): FileResponse(url, width, height, creationDate, lastModified, FileType.Video){
+    constructor(url: String, width: Int, height: Int, duration: Int): this(url, width, height, Date(), Date(), duration)
     override fun toFile() = VideoFile(url, width, height, creationDate, lastModified, duration)
 }
 

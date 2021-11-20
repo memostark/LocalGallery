@@ -7,22 +7,27 @@ import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.paging.CombinedLoadStates
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.GridLayoutManager
 import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.databinding.FragmentFoldersListBinding
 import com.guillermonegrete.gallery.files.FilesListFragment
 import com.guillermonegrete.gallery.servers.ServersFragment
+import com.jakewharton.rxbinding4.appcompat.queryTextChanges
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
@@ -79,7 +84,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             }
             foldersList.layoutManager = layoutManager
 
-            messageIcon.setOnClickListener { loadFoldersData() }
+            messageIcon.setOnClickListener { viewModel.getFolders() }
         }
 
         loadFoldersData()
@@ -91,6 +96,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
     }
 
     override fun onDestroyView() {
+        adapter.removeLoadStateListener(loadListener)
         binding.foldersList.adapter = null
         _binding = null
         super.onDestroyView()
@@ -103,12 +109,6 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
 
     private fun setViewModel() {
         viewModel.apply {
-
-            disposable.add(loadingIndicator
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe {binding.loadingBar.isVisible = it }
-            )
 
             disposable.add(urlAvailable
                 .subscribeOn(Schedulers.computation())
@@ -126,45 +126,22 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                     openFileFragment(it)
                 }
             )
-
-            disposable.add(networkError
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe {
-                    setMessageContainer(
-                        it,
-                        getString(R.string.error_message),
-                        R.drawable.ic_refresh_black_24dp
-                    )
-                }
-            )
-
-            disposable.add(rootFolderEmpty
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe {
-                    setMessageContainer(
-                        it,
-                        getString(R.string.folder_empty_message),
-                        R.drawable.ic_folder_open_black_24dp
-                    )
-                }
-            )
         }
     }
 
     private fun loadFoldersData(){
-        disposable.add(viewModel.getFolders()
-            .subscribeOn(Schedulers.io())
+        adapter = FolderAdapter(viewModel)
+        adapter.addLoadStateListener(loadListener)
+        binding.foldersList.adapter = adapter
+        disposable.add(viewModel.pagedFolders
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
-                {
-                    adapter = FolderAdapter(it, viewModel)
-                    binding.foldersList.adapter = adapter
-                },
+                { adapter.submitData(lifecycle, it) },
                 { error -> Timber.e(error, "Error loading folders") }
             )
         )
+
+        viewModel.getFolders()
     }
 
     private fun loadDialogData(){
@@ -196,18 +173,13 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
         searchView.setSearchableInfo(searchManager.getSearchableInfo(activity?.componentName))
         searchView.maxWidth = Int.MAX_VALUE
 
-        searchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener{
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                adapter.filter.filter(query)
-                searchView.clearFocus()
-                return true
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                adapter.filter.filter(newText)
-                return false
-            }
-        })
+        searchView.queryTextChanges()
+            .debounce(300, TimeUnit.MILLISECONDS)
+            .distinctUntilChanged()
+            .subscribe(
+                { viewModel.updateFilter(it) },
+                { Timber.e(it, "Error when querying search view") }
+            )
 
         searchView.setOnQueryTextFocusChangeListener { _, hasFocus ->
             // If keyboard is closed (hasFocus is false) and no text in search
@@ -230,8 +202,8 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                 this.message.text = message
                 messageIcon.setImageResource(icon)
             }
-            foldersList.visibility = if (visible) View.GONE else View.VISIBLE
-            messageContainer.visibility = if (visible) View.VISIBLE else View.GONE
+            foldersList.isGone = visible
+            messageContainer.isVisible = visible
         }
     }
 
@@ -240,5 +212,17 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
         val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         val focusedView = context.currentFocus ?: return
         inputMethodManager.hideSoftInputFromWindow(focusedView.windowToken, 0)
+    }
+
+    private val loadListener  = { loadStates: CombinedLoadStates ->
+        val state = loadStates.refresh
+        binding.loadingBar.isVisible = state is LoadState.Loading
+        binding.messageContainer.isVisible = state is LoadState.Error
+        if(state is LoadState.Error) {
+            Timber.e(state.error, "Load state listener error")
+            setMessageContainer(true, getString(R.string.error_message), R.drawable.ic_refresh_black_24dp)
+        } else if(state is LoadState.NotLoading){
+            setMessageContainer(adapter.itemCount < 1, getString(R.string.folder_empty_message), R.drawable.ic_folder_open_black_24dp)
+        }
     }
 }

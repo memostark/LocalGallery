@@ -2,6 +2,7 @@ package com.guillermonegrete.gallery.data.source
 
 import androidx.paging.PagingData
 import com.guillermonegrete.gallery.data.File
+import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.GetFolderResponse
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
@@ -11,6 +12,8 @@ interface FilesRepository {
     fun updateRepoURL(newURL: String)
 
     fun getFolders(): Single<GetFolderResponse>
+
+    fun getPagedFolders(query: String?, sort: String?): Flowable<PagingData<Folder>>
 
     fun getFiles(folder: String): Single<List<File>>
 
