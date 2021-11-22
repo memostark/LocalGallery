@@ -26,6 +26,9 @@
         <action
             android:id="@+id/action_folders_fragment_dest_to_serversFragment"
             app:destination="@id/servers_fragment_dest" />
+        <action
+            android:id="@+id/action_folders_to_sorting_dialog"
+            app:destination="@id/sorting_dialog" />
     </fragment>
     <fragment
         android:id="@+id/files_fragment_dest"
@@ -46,5 +49,14 @@
         android:name="com.guillermonegrete.gallery.servers.ServersFragment"
         android:label="ServersFragment"
         tools:layout="@layout/dialog_set_server_address"/>
+    <dialog
+        android:id="@+id/sorting_dialog"
+        android:name="com.guillermonegrete.gallery.common.SortingDialog"
+        android:label="SortingDialog"
+        tools:layout="@layout/dialog_file_order_by">
+        <argument
+            android:name="options"
+            app:argType="string[]"/>
+    </dialog>
 
 </navigation>

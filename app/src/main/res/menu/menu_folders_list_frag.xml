@@ -11,4 +11,8 @@
     <item
         android:id="@+id/set_server_menu_item"
         android:title="@string/set_server_menu_title"/>
+    <item
+        android:id="@+id/action_sort"
+        android:title="@string/sort_by"
+        android:icon="@drawable/ic_baseline_sort_by_alpha_24"/>
 </menu>

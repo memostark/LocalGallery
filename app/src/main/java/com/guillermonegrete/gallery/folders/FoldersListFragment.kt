@@ -73,6 +73,12 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                         loadDialogData()
                         true
                     }
+                    R.id.action_sort -> {
+                        val options = listOf("Name", "Count")
+                        val action = FoldersListFragmentDirections.actionFoldersToSortingDialog(options.toTypedArray())
+                        findNavController().navigate(action)
+                        true
+                    }
                     else -> false
                 }
             }
