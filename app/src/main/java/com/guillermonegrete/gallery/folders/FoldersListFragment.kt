@@ -19,6 +19,7 @@ import androidx.paging.LoadState
 import androidx.recyclerview.widget.GridLayoutManager
 import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
+import com.guillermonegrete.gallery.common.SortingDialog
 import com.guillermonegrete.gallery.databinding.FragmentFoldersListBinding
 import com.guillermonegrete.gallery.files.FilesListFragment
 import com.guillermonegrete.gallery.servers.ServersFragment
@@ -74,9 +75,15 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                         true
                     }
                     R.id.action_sort -> {
-                        val options = listOf("Name", "Count")
-                        val action = FoldersListFragmentDirections.actionFoldersToSortingDialog(options.toTypedArray())
+                        val options = arrayOf("name", "count")
+                        val action = FoldersListFragmentDirections.actionFoldersToSortingDialog(options)
                         findNavController().navigate(action)
+                        setFragmentResultListener(SortingDialog.RESULT_KEY) { _, bundle ->
+                            // We use a String here, but any type that can be put in a Bundle is supported
+                            val result = bundle.getString(SortingDialog.SORT_KEY) ?: return@setFragmentResultListener
+                            viewModel.updateFilter(result)
+                            viewModel.getFolders()
+                        }
                         true
                     }
                     else -> false
