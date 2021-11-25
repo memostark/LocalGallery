@@ -19,6 +19,7 @@ import androidx.paging.LoadState
 import androidx.recyclerview.widget.GridLayoutManager
 import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
+import com.guillermonegrete.gallery.common.SortDialogChecked
 import com.guillermonegrete.gallery.common.SortingDialog
 import com.guillermonegrete.gallery.databinding.FragmentFoldersListBinding
 import com.guillermonegrete.gallery.files.FilesListFragment
@@ -40,6 +41,9 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
 
     @Inject lateinit var viewModelFactory: ViewModelProvider.Factory
     private val viewModel by viewModels<FoldersViewModel> { viewModelFactory }
+
+    private var checkedField = 0
+    private var checkedOrder = SortingDialog.DEFAULT_ORDER
 
     private val disposable = CompositeDisposable()
 
@@ -76,12 +80,16 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                     }
                     R.id.action_sort -> {
                         val options = arrayOf("name", "count")
-                        val action = FoldersListFragmentDirections.actionFoldersToSortingDialog(options)
+                        val action = FoldersListFragmentDirections.actionFoldersToSortingDialog(options, SortDialogChecked(checkedField, checkedOrder))
                         findNavController().navigate(action)
                         setFragmentResultListener(SortingDialog.RESULT_KEY) { _, bundle ->
                             // We use a String here, but any type that can be put in a Bundle is supported
-                            val result = bundle.getString(SortingDialog.SORT_KEY) ?: return@setFragmentResultListener
-                            viewModel.updateSort(result)
+                            val result: SortDialogChecked = bundle.getParcelable(SortingDialog.SORT_KEY) ?: return@setFragmentResultListener
+                            checkedField = result.fieldIndex
+                            checkedOrder = result.sortId
+                            val field = options[checkedField]
+                            val order = SortingDialog.sortIdMap[checkedOrder]
+                            viewModel.updateSort("$field,$order")
                             viewModel.getFolders()
                         }
                         true

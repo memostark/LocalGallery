@@ -57,6 +57,9 @@
         <argument
             android:name="options"
             app:argType="string[]"/>
+        <argument
+            android:name="selections"
+            app:argType="com.guillermonegrete.gallery.common.SortDialogChecked"/>
     </dialog>
 
 </navigation>

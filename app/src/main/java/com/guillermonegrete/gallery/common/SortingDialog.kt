@@ -1,6 +1,7 @@
 package com.guillermonegrete.gallery.common
 
 import android.os.Bundle
+import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,13 +13,14 @@ import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.databinding.DialogFileOrderByBinding
+import kotlinx.parcelize.Parcelize
 
 class SortingDialog: BottomSheetDialogFragment() {
 
     private val args: SortingDialogArgs by navArgs()
 
     private var checkedField = 0
-    private var checkedOrder = R.id.ascending_order
+    private var checkedOrder = DEFAULT_ORDER
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val binding = DialogFileOrderByBinding.inflate(inflater, container, false)
@@ -34,8 +36,9 @@ class SortingDialog: BottomSheetDialogFragment() {
                 fieldSort.addView(rb)
             }
 
-            fieldSort.check(checkedField)
-            orderSort.check(checkedOrder)
+            val selections = args.selections
+            fieldSort.check(selections.fieldIndex)
+            orderSort.check(selections.sortId)
 
             fieldSort.setOnCheckedChangeListener { _, i ->
                 checkedField = i
@@ -47,9 +50,7 @@ class SortingDialog: BottomSheetDialogFragment() {
 
             doneButton.setOnClickListener {
                 dismiss()
-                val field = args.options[checkedField]
-                val order = sortIdMap[checkedOrder]
-                setFragmentResult(RESULT_KEY, bundleOf(SORT_KEY to "$field,$order"))
+                setFragmentResult(RESULT_KEY, bundleOf(SORT_KEY to SortDialogChecked(checkedField, checkedOrder)))
             }
 
         }
@@ -58,13 +59,18 @@ class SortingDialog: BottomSheetDialogFragment() {
         return binding.root
     }
 
-    private val sortIdMap = mapOf(
-        R.id.ascending_order to "asc",
-        R.id.descending_order to "desc",
-    )
-
     companion object{
         const val RESULT_KEY = "sort_dialog_result"
         const val SORT_KEY = "sort_key"
+
+        const val DEFAULT_ORDER = R.id.ascending_order
+
+        val sortIdMap = mapOf(
+            DEFAULT_ORDER to "asc",
+            R.id.descending_order to "desc",
+        )
     }
 }
+
+@Parcelize
+data class SortDialogChecked(val fieldIndex: Int, val sortId: Int): Parcelable
