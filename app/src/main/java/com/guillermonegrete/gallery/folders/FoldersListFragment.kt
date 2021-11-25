@@ -81,7 +81,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                         setFragmentResultListener(SortingDialog.RESULT_KEY) { _, bundle ->
                             // We use a String here, but any type that can be put in a Bundle is supported
                             val result = bundle.getString(SortingDialog.SORT_KEY) ?: return@setFragmentResultListener
-                            viewModel.updateFilter(result)
+                            viewModel.updateSort(result)
                             viewModel.getFolders()
                         }
                         true

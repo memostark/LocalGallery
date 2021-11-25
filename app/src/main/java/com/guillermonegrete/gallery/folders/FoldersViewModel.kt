@@ -28,9 +28,9 @@ class FoldersViewModel @Inject constructor(
 
     private val searchQuery: Subject<String> = BehaviorSubject.createDefault("")
 
-    private val filter: Subject<String> = BehaviorSubject.createDefault("")
+    private val sort: Subject<String> = BehaviorSubject.createDefault("")
 
-    val pagedFolders = filter.distinctUntilChanged().switchMap { filter ->
+    val pagedFolders = sort.distinctUntilChanged().switchMap { filter ->
         urlFolder.switchMap {
             searchQuery.switchMap { query ->
                 val finalQuery = if (query.isEmpty()) null else query
@@ -78,6 +78,10 @@ class FoldersViewModel @Inject constructor(
     }
 
     fun updateFilter(query: CharSequence) {
-        filter.onNext(query.toString())
+        searchQuery.onNext(query.toString())
+    }
+
+    fun updateSort(query: CharSequence) {
+        sort.onNext(query.toString())
     }
 }
