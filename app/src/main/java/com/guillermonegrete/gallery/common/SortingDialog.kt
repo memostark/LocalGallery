@@ -37,8 +37,10 @@ class SortingDialog: BottomSheetDialogFragment() {
             }
 
             val selections = args.selections
-            fieldSort.check(selections.fieldIndex)
-            orderSort.check(selections.sortId)
+            checkedField = selections.fieldIndex
+            checkedOrder = selections.sortId
+            fieldSort.check(checkedField)
+            orderSort.check(checkedOrder)
 
             fieldSort.setOnCheckedChangeListener { _, i ->
                 checkedField = i
