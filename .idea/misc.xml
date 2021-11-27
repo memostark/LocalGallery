@@ -5,6 +5,15 @@
       <configuration PROFILE_NAME="Debug" CONFIG_NAME="Debug" />
     </configurations>
   </component>
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/Documentos/Proyectos/Android/Ejemplos/Gallery/app/src/main/res/layout/dialog_file_order_by.xml" value="0.21603260869565216" />
+        <entry key="..\:/Documentos/Proyectos/Android/Ejemplos/Gallery/app/src/main/res/menu/files_list_menu.xml" value="0.36666666666666664" />
+        <entry key="..\:/Documentos/Proyectos/Android/Ejemplos/Gallery/app/src/main/res/menu/menu_folders_list_frag.xml" value="0.36102564102564105" />
+      </map>
+    </option>
+  </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>

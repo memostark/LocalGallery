@@ -19,6 +19,8 @@ import androidx.paging.LoadState
 import androidx.recyclerview.widget.GridLayoutManager
 import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
+import com.guillermonegrete.gallery.common.SortDialogChecked
+import com.guillermonegrete.gallery.common.SortingDialog
 import com.guillermonegrete.gallery.databinding.FragmentFoldersListBinding
 import com.guillermonegrete.gallery.files.FilesListFragment
 import com.guillermonegrete.gallery.servers.ServersFragment
@@ -39,6 +41,9 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
 
     @Inject lateinit var viewModelFactory: ViewModelProvider.Factory
     private val viewModel by viewModels<FoldersViewModel> { viewModelFactory }
+
+    private var checkedField = 0
+    private var checkedOrder = SortingDialog.DEFAULT_ORDER
 
     private val disposable = CompositeDisposable()
 
@@ -73,6 +78,22 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                         loadDialogData()
                         true
                     }
+                    R.id.action_sort -> {
+                        val options = arrayOf("name", "count")
+                        val action = FoldersListFragmentDirections.actionFoldersToSortingDialog(options, SortDialogChecked(checkedField, checkedOrder))
+                        findNavController().navigate(action)
+                        setFragmentResultListener(SortingDialog.RESULT_KEY) { _, bundle ->
+                            // We use a String here, but any type that can be put in a Bundle is supported
+                            val result: SortDialogChecked = bundle.getParcelable(SortingDialog.SORT_KEY) ?: return@setFragmentResultListener
+                            checkedField = result.fieldIndex
+                            checkedOrder = result.sortId
+                            val field = options[checkedField]
+                            val order = SortingDialog.sortIdMap[checkedOrder]
+                            viewModel.updateSort("$field,$order")
+                            viewModel.getFolders()
+                        }
+                        true
+                    }
                     else -> false
                 }
             }
@@ -87,24 +108,16 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             messageIcon.setOnClickListener { viewModel.getFolders() }
         }
 
+        setViewModel()
         loadFoldersData()
     }
 
-    override fun onStart() {
-        super.onStart()
-        setViewModel()
-    }
-
     override fun onDestroyView() {
+        disposable.clear()
         adapter.removeLoadStateListener(loadListener)
         binding.foldersList.adapter = null
         _binding = null
         super.onDestroyView()
-    }
-
-    override fun onStop() {
-        disposable.clear()
-        super.onStop()
     }
 
     private fun setViewModel() {

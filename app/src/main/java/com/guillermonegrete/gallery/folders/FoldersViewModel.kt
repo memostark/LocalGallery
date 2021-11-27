@@ -28,16 +28,24 @@ class FoldersViewModel @Inject constructor(
 
     private val searchQuery: Subject<String> = BehaviorSubject.createDefault("")
 
-    val pagedFolders = urlFolder.switchMap {
-        searchQuery.switchMap { query ->
-            val finalQuery = if(query.isEmpty()) null else query
-            filesRepository.getPagedFolders(finalQuery, null)
-                .map { pagingData ->
-                    pagingData.map { folder -> FolderUI.Model(folder) }.insertSeparators { before: FolderUI.Model?, after: FolderUI.Model? ->
-                        if(before == null && after != null) return@insertSeparators FolderUI.HeaderModel(after.title ?: "")
-                        return@insertSeparators null
-                    }
-                }.toObservable()
+    private val sort: Subject<String> = BehaviorSubject.createDefault("")
+
+    val pagedFolders = sort.distinctUntilChanged().switchMap { filter ->
+        urlFolder.switchMap {
+            searchQuery.switchMap { query ->
+                val finalQuery = if (query.isEmpty()) null else query
+                val finalFilter = if(filter.isEmpty()) null else filter
+                filesRepository.getPagedFolders(finalQuery, finalFilter)
+                    .map { pagingData ->
+                        pagingData.map { folder -> FolderUI.Model(folder) }
+                            .insertSeparators { before: FolderUI.Model?, after: FolderUI.Model? ->
+                                if (before == null && after != null) return@insertSeparators FolderUI.HeaderModel(
+                                    after.title ?: ""
+                                )
+                                return@insertSeparators null
+                            }
+                    }.toObservable()
+            }
         }
     }.toFlowable(BackpressureStrategy.LATEST).cachedIn(viewModelScope)
 
@@ -71,5 +79,9 @@ class FoldersViewModel @Inject constructor(
 
     fun updateFilter(query: CharSequence) {
         searchQuery.onNext(query.toString())
+    }
+
+    fun updateSort(query: CharSequence) {
+        sort.onNext(query.toString())
     }
 }
