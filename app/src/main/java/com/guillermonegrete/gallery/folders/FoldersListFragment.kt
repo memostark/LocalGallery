@@ -108,24 +108,16 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             messageIcon.setOnClickListener { viewModel.getFolders() }
         }
 
+        setViewModel()
         loadFoldersData()
     }
 
-    override fun onStart() {
-        super.onStart()
-        setViewModel()
-    }
-
     override fun onDestroyView() {
+        disposable.clear()
         adapter.removeLoadStateListener(loadListener)
         binding.foldersList.adapter = null
         _binding = null
         super.onDestroyView()
-    }
-
-    override fun onStop() {
-        disposable.clear()
-        super.onStop()
     }
 
     private fun setViewModel() {
