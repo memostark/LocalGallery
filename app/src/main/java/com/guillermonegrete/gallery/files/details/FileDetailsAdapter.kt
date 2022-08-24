@@ -26,6 +26,8 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
 
     val panelTouchSubject = PublishSubject.create<Boolean>()
 
+    private var isSheetVisible = false
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val layout = LayoutInflater.from(parent.context).inflate(viewType, parent, false)
         return when(viewType){
@@ -57,6 +59,8 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
         private val modifiedText: TextView = itemView.findViewById(R.id.modified_date)
         private val bottomSheet: LinearLayout = itemView.findViewById(R.id.bottom_layout)
 
+        private val behaviour = BottomSheetBehavior.from(bottomSheet)
+
         init {
             setSheets()
         }
@@ -68,13 +72,21 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
             bottomSheet.setOnTouchListener { _, _ -> true }
 
             // Hidden state is not considered because it's not enabled for this bottom sheet
-            val behaviour = BottomSheetBehavior.from(bottomSheet)
             behaviour.setBottomSheetCallback(object: BottomSheetBehavior.BottomSheetCallback(){
+                @SuppressLint("NotifyDataSetChanged")
                 override fun onStateChanged(p0: View, p1: Int) {
                     when(p1){
-                        BottomSheetBehavior.STATE_SETTLING,
-                        BottomSheetBehavior.STATE_COLLAPSED,
-                        BottomSheetBehavior.STATE_EXPANDED  -> panelTouchSubject.onNext(false)
+                        BottomSheetBehavior.STATE_COLLAPSED -> {
+                            panelTouchSubject.onNext(false)
+                            isSheetVisible = false
+                            notifyDataSetChanged()
+                        }
+                        BottomSheetBehavior.STATE_EXPANDED  -> {
+                            panelTouchSubject.onNext(false)
+                            isSheetVisible = true
+                            notifyDataSetChanged()
+                        }
+                        BottomSheetBehavior.STATE_SETTLING -> panelTouchSubject.onNext(false)
                         BottomSheetBehavior.STATE_DRAGGING -> panelTouchSubject.onNext(true)
                         else -> {}
                     }
@@ -89,6 +101,7 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
             fileSizeText.text = file.sizeText
             createdText.text = file.creationText
             modifiedText.text = file.modifiedText
+            behaviour.state = if(isSheetVisible) BottomSheetBehavior.STATE_EXPANDED else BottomSheetBehavior.STATE_COLLAPSED
             linkButton.setOnClickListener { openLink(file.name) }
         }
 
