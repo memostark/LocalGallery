@@ -2,6 +2,8 @@ package com.guillermonegrete.gallery.servers
 
 import android.app.Dialog
 import android.os.Bundle
+import android.text.InputFilter
+import android.text.InputType
 import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
@@ -40,20 +42,47 @@ class ServersFragment: DialogFragment(){
 
     private fun bindLayout(){
         val serversAdapter = ServersAdapter()
-        binding.serversList.apply {
-            adapter = serversAdapter
-            layoutManager = LinearLayoutManager(context)
-        }
+        with(binding){
 
-        binding.serverAddressEdit.setText(arguments?.getString(IP_KEY))
-
-        binding.searchServersBtn.setOnClickListener {
-            lifecycleScope.launch {
-                val scanner = ServerScanner()
-                val ip = scanner.search()
-
-                if(ip != null) serversAdapter.addServer(ip)
+            serversList.apply {
+                adapter = serversAdapter
+                layoutManager = LinearLayoutManager(context)
             }
+
+            serverAddressEdit.setText(arguments?.getString(IP_KEY))
+            serverAddressEdit.setSelection(serverAddressEdit.length())
+            serverAddressEdit.inputType = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+
+            val filters = arrayOfNulls<InputFilter>(1)
+            filters[0] = filterIP()
+            serverAddressEdit.filters = filters
+
+
+            searchServersBtn.setOnClickListener {
+                lifecycleScope.launch {
+                    val scanner = ServerScanner()
+                    val ip = scanner.search()
+
+                    if(ip != null) serversAdapter.addServer(ip)
+                }
+            }
+        }
+    }
+
+    private fun filterIP(): InputFilter {
+        return InputFilter { source, start, end, dest, dstart, dend ->
+            if (end > start) {
+                val destTxt = dest.toString()
+                val resultingTxt = (destTxt.substring(0, dstart)
+                        + source.subSequence(start, end)
+                        ) + destTxt.substring(dend)
+                if (!resultingTxt.matches(
+                        Regex("^\\d{1,3}(\\.(\\d{1,3}(\\.(\\d{1,3}(\\.(\\d{1,3})?)?)?)?)?)?")
+                    )
+                )
+                    return@InputFilter ""
+            }
+            null
         }
     }
 

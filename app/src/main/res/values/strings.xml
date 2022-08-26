@@ -10,7 +10,6 @@
     <string name="set_server_menu_title">Set server address</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
-    <string name="server_address_hint">E.g. 172.16.254.1:5000</string>
     <string name="file_item">File item</string>
     <string name="folder_cover_image">Folder cover image</string>
 
@@ -43,5 +42,10 @@
     <!-- File details-->
     <string name="created">Created:</string>
     <string name="modified">Modified:</string>
+
+    <!-- Server search-->
+    <string name="server_address_hint">E.g. 172.16.254.1</string>
+    <string name="servers_found">Servers found:</string>
+    <string name="search_servers">Search servers</string>
 
 </resources>
