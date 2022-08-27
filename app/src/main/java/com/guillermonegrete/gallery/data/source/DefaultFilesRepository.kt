@@ -25,7 +25,7 @@ class DefaultFilesRepository @Inject constructor(
         }
 
     override fun updateRepoURL(newURL: String) {
-        baseUrl = newURL
+        baseUrl = "http://$newURL/"
     }
 
     override fun getFolders(): Single<GetFolderResponse> {

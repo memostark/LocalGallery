@@ -2,8 +2,12 @@ package com.guillermonegrete.gallery.servers
 
 import android.app.Dialog
 import android.os.Bundle
+import android.text.InputFilter
+import android.text.InputType
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.lifecycleScope
@@ -21,16 +25,14 @@ class ServersFragment: DialogFragment(){
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let {
             val builder = AlertDialog.Builder(it)
-            val view = it.layoutInflater.inflate(R.layout.dialog_set_server_address, null)
 
-            _binding = DialogSetServerAddressBinding.bind(view)
+            _binding = DialogSetServerAddressBinding.inflate(it.layoutInflater, null, false)
             bindLayout()
 
-            builder.setView(view)
-                .setMessage("Set server address") // TODO use string resource
+            builder.setView(binding.root)
+                .setMessage(getString(R.string.server_dialog_title)) // TODO use string resource
                 .setPositiveButton(R.string.ok) { _, _ ->
-                    val serverIp = binding.serverAddressEdit.text.toString()
-                    setFragmentResult(REQUEST_KEY, bundleOf(IP_KEY to serverIp))
+                    setServerResult(binding.serverAddressEdit.text.toString())
                 }
                 .setNegativeButton(R.string.cancel) { dialog, _ ->  dialog.cancel() }
 
@@ -39,21 +41,64 @@ class ServersFragment: DialogFragment(){
     }
 
     private fun bindLayout(){
-        val serversAdapter = ServersAdapter()
-        binding.serversList.apply {
-            adapter = serversAdapter
-            layoutManager = LinearLayoutManager(context)
+        val serversAdapter = ServersAdapter {
+            setServerResult(it)
+            dismiss()
         }
 
-        binding.serverAddressEdit.setText(arguments?.getString(IP_KEY))
+        with(binding){
 
-        binding.searchServersBtn.setOnClickListener {
-            lifecycleScope.launch {
-                val scanner = ServerScanner()
-                val ip = scanner.search()
-
-                if(ip != null) serversAdapter.addServer(ip)
+            serversList.apply {
+                adapter = serversAdapter
+                layoutManager = LinearLayoutManager(context)
             }
+
+            serverAddressEdit.apply {
+                setText(arguments?.getString(IP_KEY))
+                setSelection(length())
+                inputType = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+
+                val filters = arrayOfNulls<InputFilter>(1)
+                filters[0] = filterIP()
+                this.filters = filters
+            }
+
+            searchServersBtn.setOnClickListener {
+                lifecycleScope.launch {
+                    val scanner = ServerScanner()
+                    loadingIcon.isVisible = true
+                    val ip = scanner.search()
+
+                    if(ip != null) {
+                        serversAdapter.addServer(ip.trimStart('/'))
+                    } else {
+                        Toast.makeText(context, "No server found", Toast.LENGTH_SHORT).show()
+                    }
+
+                    loadingIcon.isVisible = false
+                }
+            }
+        }
+    }
+
+    private fun setServerResult(ip: String) {
+        setFragmentResult(REQUEST_KEY, bundleOf(IP_KEY to ip))
+    }
+
+    private fun filterIP(): InputFilter {
+        return InputFilter { source, start, end, dest, dstart, dend ->
+            if (end > start) {
+                val destTxt = dest.toString()
+                val resultingTxt = (destTxt.substring(0, dstart)
+                        + source.subSequence(start, end)
+                        ) + destTxt.substring(dend)
+                if (!resultingTxt.matches(
+                        Regex("^\\d{1,3}(\\.(\\d{1,3}(\\.(\\d{1,3}(\\.(\\d{1,3})?)?)?)?)?)?")
+                    )
+                )
+                    return@InputFilter ""
+            }
+            null
         }
     }
 
