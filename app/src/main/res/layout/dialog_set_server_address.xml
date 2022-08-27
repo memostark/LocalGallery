@@ -25,7 +25,8 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/servers_list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        tools:listitem="@layout/server_item"/>
 
     <Button
         android:id="@+id/search_servers_btn"
@@ -33,4 +34,12 @@
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
         android:text="@string/search_servers"/>
+
+    <ProgressBar
+        android:id="@+id/loading_icon"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        tools:visibility="visible"/>
 </LinearLayout>

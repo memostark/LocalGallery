@@ -47,5 +47,6 @@
     <string name="server_address_hint">E.g. 172.16.254.1</string>
     <string name="servers_found">Servers found:</string>
     <string name="search_servers">Search servers</string>
+    <string name="server_dialog_title">Set server address</string>
 
 </resources>

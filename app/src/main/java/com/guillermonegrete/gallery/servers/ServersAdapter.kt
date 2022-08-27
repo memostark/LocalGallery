@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.guillermonegrete.gallery.databinding.ServerItemBinding
 
-class ServersAdapter: RecyclerView.Adapter<ServersAdapter.ViewHolder>() {
+class ServersAdapter(private val listener: Listener): RecyclerView.Adapter<ServersAdapter.ViewHolder>() {
 
     private val servers = mutableListOf<String>()
 
@@ -27,10 +27,20 @@ class ServersAdapter: RecyclerView.Adapter<ServersAdapter.ViewHolder>() {
         }
     }
 
-    class ViewHolder(private val binding: ServerItemBinding): RecyclerView.ViewHolder(binding.root){
+    inner class ViewHolder(private val binding: ServerItemBinding): RecyclerView.ViewHolder(binding.root){
+
+        init {
+            binding.serverIp.setOnClickListener {
+                listener.onItemClick(binding.serverIp.text.toString())
+            }
+        }
 
         fun bind(text: String){
             binding.serverIp.text = text
         }
+    }
+
+    fun interface Listener {
+        fun onItemClick(ip: String)
     }
 }
