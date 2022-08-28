@@ -15,4 +15,9 @@
         android:id="@+id/action_sort"
         android:title="@string/sort_by"
         android:icon="@drawable/ic_baseline_sort_by_alpha_24"/>
+
+    <item
+        android:id="@+id/night_mode_menu_item"
+        android:title="@string/night_mode"
+        android:checkable="true" />
 </menu>

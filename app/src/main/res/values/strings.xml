@@ -27,6 +27,9 @@
     <string name="video_length_placeholder">0:00</string>
     <string name="folders">Folders</string>
 
+    <!-- Folders list-->
+    <string name="night_mode">Night mode</string>
+
     <!-- Files list-->
     <string name="files">Files</string>
     <string name="sort_by">Sort by</string>

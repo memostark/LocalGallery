@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -71,6 +72,10 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             // Set up toolbar
             toolbar.setTitle(R.string.app_name)
             toolbar.inflateMenu(R.menu.menu_folders_list_frag)
+
+            val nightModeItem = toolbar.menu.findItem(R.id.night_mode_menu_item)
+            nightModeItem.isChecked = AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES
+
             setSearchViewConfig(toolbar.menu)
             toolbar.setOnMenuItemClickListener { item ->
                 when(item.itemId){
@@ -91,6 +96,15 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                             val order = SortingDialog.sortIdMap[checkedOrder]
                             viewModel.updateSort("$field,$order")
                             viewModel.getFolders()
+                        }
+                        true
+                    }
+                    R.id.night_mode_menu_item -> {
+                        nightModeItem.isChecked = !nightModeItem.isChecked
+                        if (nightModeItem.isChecked) {
+                            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                        } else {
+                            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
                         }
                         true
                     }
