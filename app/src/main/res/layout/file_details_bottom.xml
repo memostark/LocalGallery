@@ -23,7 +23,7 @@
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
         android:paddingBottom="32dp"
-        android:background="@android:color/white">
+        android:background="?android:colorBackground">
 
         <ImageView
             android:id="@+id/imageView"
@@ -111,9 +111,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:barrierDirection="right"
-            app:constraint_referenced_ids="textView4, textView3"
-            tools:layout_editor_absoluteX="208dp"
-            tools:layout_editor_absoluteY="130dp" />
+            app:constraint_referenced_ids="textView4, textView3"/>
 
         <TextView
             android:id="@+id/modified_date"
