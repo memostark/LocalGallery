@@ -107,7 +107,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                 .subscribe({ it.forEach { row ->
                     adapter.snapshot().items[row.pos].width = row.size.width
                     adapter.snapshot().items[row.pos].height = row.size.height
-                }}, { error -> Timber.e(error,"Error loading files") }
+                }}, { error -> Timber.e(error,"Error updating rows") }
                 )
         )
 

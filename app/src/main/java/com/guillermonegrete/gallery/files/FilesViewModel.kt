@@ -29,7 +29,7 @@ class FilesViewModel @Inject constructor(
     private val folderName: Subject<String> = PublishSubject.create()
     private val filter: Subject<String> = BehaviorSubject.createDefault("")
 
-    var dataSize = 0
+    private var dataSize = 0
 
     private val arMin = 2.0f
     private val arMax = 3.0f
@@ -39,7 +39,7 @@ class FilesViewModel @Inject constructor(
     var cachedFileList: Flowable<PagingData<File>> = filter.distinctUntilChanged().switchMap { filter ->
         folderName.distinctUntilChanged().switchMap { folder ->
             dataSize = 0
-            val finalFilter = if(filter.isEmpty()) null else filter
+            val finalFilter = filter.ifEmpty { null }
             filesRepository.getPagedFiles(folder, finalFilter).toObservable()
         }
     }.map { pagingData ->
@@ -79,17 +79,19 @@ class FilesViewModel @Inject constructor(
                     // Ratio too big, remove last and add the rest as a row
                     val pop = tempSizes.removeLast()
                     val popFile = tempList.removeLast()
-                    arSum -= getAspectRatio(pop)
+                    val popRatio = getAspectRatio(pop)
+                    arSum -= popRatio
                     normalizeHeights(tempSizes, width / arSum)
                     val files = updateSizes(tempList, tempSizes)
                     val unfinishedCount = unfinishedRow.size
-                    updateUnfinishedRow(tempSizes, index, unfinishedCount)
+                    // index minus one because the current item is not part of this row but the next
+                    updateUnfinishedRow(tempSizes, index - 1, unfinishedCount)
                     tempList.clear()
                     tempSizes.clear()
                     unfinishedRow.clear()
                     tempSizes.add(pop)
                     tempList.add(popFile)
-                    arSum = getAspectRatio(pop)
+                    arSum = popRatio
                     if(unfinishedCount < 1) files else files.subList(unfinishedCount, files.size)
                 }
                 index == dataSize -> {
@@ -163,13 +165,15 @@ class FilesViewModel @Inject constructor(
 
     /**
      * Sometimes the last items of a page can't complete a full row, when new data is added a row is completed
-     * and their sizes potentially changed, this updates the size of those items.
+     * and their sizes potentially changed, this updates the size of those items. The position of the last item
+     * in [tempSizes] is given by [endIndex], and [unfinishedCount] is how many items need an update.
      */
-    private fun updateUnfinishedRow(tempSizes: List<Size>, itemIndex: Int, unfinishedCount: Int) {
-        val i = itemIndex - tempSizes.size
+    private fun updateUnfinishedRow(tempSizes: List<Size>, endIndex: Int, unfinishedCount: Int) {
+        if (unfinishedCount == 0) return
+        val start = endIndex - tempSizes.size
         val rows = arrayListOf<UpdatedRow>()
-        for((zi, newIndex) in ((i + 1)..(i + unfinishedCount)).withIndex()){
-            rows.add(UpdatedRow(newIndex - 1,  tempSizes[zi]))
+        for((zi, newIndex) in (start until endIndex).withIndex()){
+            rows.add(UpdatedRow(newIndex, tempSizes[zi]))
         }
         updateRows.onNext(rows)
     }
