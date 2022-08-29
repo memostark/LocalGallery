@@ -1,12 +1,15 @@
 <resources>
 
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
+    <!-- Base application theme. All configurations should inherit it -->
+    <style name="BaseTheme" parent="Theme.AppCompat.DayNight.DarkActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
+
+    <!-- Placeholder, no changes for this configuration (default).
+    But other configurations use it to customize their style (e.g. night configuration) -->
+    <style name="AppTheme" parent="BaseTheme"/>
 
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>

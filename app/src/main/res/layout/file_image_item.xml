@@ -9,7 +9,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:contentDescription="@string/file_item"
-        android:scaleType="fitXY"
-        android:background="#DADADA"
+        android:scaleType="fitCenter"
         tools:srcCompat="@drawable/ic_image_24dp"/>
 </FrameLayout>

@@ -10,7 +10,6 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.File
 import com.guillermonegrete.gallery.data.ImageFile
@@ -61,8 +60,7 @@ class FilesAdapter(
                 .load(item.name)
                 .placeholder(R.drawable.ic_image_24dp)
                 .override(item.width, item.height)
-                .centerCrop()
-                .transition(DrawableTransitionOptions.withCrossFade())
+                .centerCrop() // stretch the image to fit the view to avoid showing gaps
                 .into(image)
         }
     }

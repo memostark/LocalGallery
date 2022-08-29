@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -21,6 +22,7 @@ import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.common.SortDialogChecked
 import com.guillermonegrete.gallery.common.SortingDialog
+import com.guillermonegrete.gallery.data.source.SettingsRepository
 import com.guillermonegrete.gallery.databinding.FragmentFoldersListBinding
 import com.guillermonegrete.gallery.files.FilesListFragment
 import com.guillermonegrete.gallery.servers.ServersFragment
@@ -41,6 +43,8 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
 
     @Inject lateinit var viewModelFactory: ViewModelProvider.Factory
     private val viewModel by viewModels<FoldersViewModel> { viewModelFactory }
+
+    @Inject lateinit var preferences: SettingsRepository
 
     private var checkedField = 0
     private var checkedOrder = SortingDialog.DEFAULT_ORDER
@@ -71,6 +75,10 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             // Set up toolbar
             toolbar.setTitle(R.string.app_name)
             toolbar.inflateMenu(R.menu.menu_folders_list_frag)
+
+            val nightModeItem = toolbar.menu.findItem(R.id.night_mode_menu_item)
+            nightModeItem.isChecked = AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES
+
             setSearchViewConfig(toolbar.menu)
             toolbar.setOnMenuItemClickListener { item ->
                 when(item.itemId){
@@ -92,6 +100,13 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                             viewModel.updateSort("$field,$order")
                             viewModel.getFolders()
                         }
+                        true
+                    }
+                    R.id.night_mode_menu_item -> {
+                        nightModeItem.isChecked = !nightModeItem.isChecked
+                        val mode = if (nightModeItem.isChecked) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+                        preferences.setNightMode(mode)
+                        AppCompatDelegate.setDefaultNightMode(mode)
                         true
                     }
                     else -> false
