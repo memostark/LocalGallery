@@ -22,6 +22,7 @@ import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.common.SortDialogChecked
 import com.guillermonegrete.gallery.common.SortingDialog
+import com.guillermonegrete.gallery.data.source.SettingsRepository
 import com.guillermonegrete.gallery.databinding.FragmentFoldersListBinding
 import com.guillermonegrete.gallery.files.FilesListFragment
 import com.guillermonegrete.gallery.servers.ServersFragment
@@ -42,6 +43,8 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
 
     @Inject lateinit var viewModelFactory: ViewModelProvider.Factory
     private val viewModel by viewModels<FoldersViewModel> { viewModelFactory }
+
+    @Inject lateinit var preferences: SettingsRepository
 
     private var checkedField = 0
     private var checkedOrder = SortingDialog.DEFAULT_ORDER
@@ -101,11 +104,9 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                     }
                     R.id.night_mode_menu_item -> {
                         nightModeItem.isChecked = !nightModeItem.isChecked
-                        if (nightModeItem.isChecked) {
-                            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-                        } else {
-                            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-                        }
+                        val mode = if (nightModeItem.isChecked) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+                        preferences.setNightMode(mode)
+                        AppCompatDelegate.setDefaultNightMode(mode)
                         true
                     }
                     else -> false

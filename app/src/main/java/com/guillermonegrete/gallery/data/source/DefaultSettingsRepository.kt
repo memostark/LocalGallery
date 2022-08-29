@@ -1,7 +1,9 @@
 package com.guillermonegrete.gallery.data.source
 
 import android.content.Context
-import android.preference.PreferenceManager
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.edit
+import androidx.preference.PreferenceManager
 import io.reactivex.rxjava3.core.Single
 import javax.inject.Inject
 
@@ -23,7 +25,18 @@ class DefaultSettingsRepository @Inject constructor(context: Context): SettingsR
         editor.apply()
     }
 
+    override fun getNightMode(): Int {
+        return preferences.getInt(NIGHT_MODE_KEY, AppCompatDelegate.MODE_NIGHT_YES)
+    }
+
+    override fun setNightMode(mode: Int) {
+        preferences.edit {
+            putInt(NIGHT_MODE_KEY, mode)
+        }
+    }
+
     companion object{
         const val SERVER_URL_KEY = "server_url"
+        const val NIGHT_MODE_KEY = "night_mode"
     }
 }

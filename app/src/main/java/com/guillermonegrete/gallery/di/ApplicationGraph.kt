@@ -1,6 +1,7 @@
 package com.guillermonegrete.gallery.di
 
 import android.content.Context
+import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.folders.FoldersListFragment
 import com.guillermonegrete.gallery.folders.FoldersModule
 import com.guillermonegrete.gallery.ViewModelBuilder
@@ -29,4 +30,6 @@ interface ApplicationGraph {
     fun inject(fragment: FilesListFragment)
 
     fun inject(fragment: FileDetailsFragment)
+
+    fun inject(app: MyApplication)
 }

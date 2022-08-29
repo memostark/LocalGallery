@@ -9,4 +9,8 @@ interface SettingsRepository {
     fun getServerUrl(): Single<String>
 
     fun saveServerURL(url: String)
+
+    fun getNightMode(): Int
+
+    fun setNightMode(mode: Int)
 }
