@@ -56,8 +56,11 @@
             android:layout_height="wrap_content"
             android:background="?android:selectableItemBackground"
             android:contentDescription="@string/open_in_browser"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
             android:tint="#2196F3"
             android:padding="4dp"
+            android:scaleType="fitCenter"
             app:layout_constraintBottom_toBottomOf="@+id/file_name_text"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/file_name_text"
@@ -68,7 +71,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintGuide_begin="30dp" />
+            app:layout_constraintGuide_begin="8dp" />
 
         <androidx.constraintlayout.widget.Barrier
             android:id="@+id/barrier_bottom"
@@ -132,6 +135,29 @@
             android:text="@string/modified"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView3" />
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/tags_chip_group"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/modified_date">
+
+        </com.google.android.material.chip.ChipGroup>
+
+        <ImageButton
+            android:id="@+id/edit_btn"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?android:selectableItemBackground"
+            android:scaleType="fitCenter"
+            android:padding="8dp"
+            android:tint="?colorOnSurface"
+            app:layout_constraintBottom_toBottomOf="@+id/modified_date"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat="@drawable/ic_baseline_edit_24" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -32,7 +32,7 @@ class FilesPageSource(
 
     private fun toLoadResult(response: PagedFileResponse, nextPageNumber: Int): LoadResult<Int, File> {
         return LoadResult.Page(
-            data = response.items.map { fileResponse -> fileResponse.toFile() },
+            data = response.items.map { fileResponse ->  println(fileResponse); fileResponse.toFile() },
             prevKey = if (nextPageNumber > 0) nextPageNumber - 1 else null,
             nextKey = if (nextPageNumber < response.totalPages - 1) nextPageNumber + 1 else null
         )

@@ -6,17 +6,19 @@ import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
+import androidx.core.view.children
+import androidx.core.view.isVisible
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.File
 import com.guillermonegrete.gallery.data.ImageFile
+import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.data.VideoFile
 import com.guillermonegrete.gallery.files.FileDiffCallback
 import io.reactivex.rxjava3.subjects.PublishSubject
@@ -59,10 +61,27 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
         private val modifiedText: TextView = itemView.findViewById(R.id.modified_date)
         private val bottomSheet: LinearLayout = itemView.findViewById(R.id.bottom_layout)
 
+        private val editButton: ImageButton = itemView.findViewById(R.id.edit_btn)
+        private val addTagChip: Chip = itemView.findViewById(R.id.add_tag)
+        private val tagGroups: ChipGroup = itemView.findViewById(R.id.tags_chip_group)
+
         private val behaviour = BottomSheetBehavior.from(bottomSheet)
 
         init {
             setSheets()
+
+            editButton.setOnClickListener {
+                addTagChip.isVisible = true
+//                tagGroups.
+                tagGroups.children.forEach {
+                    (it as Chip).isCloseIconVisible = true
+                }
+                addTagChip.isCloseIconVisible = false
+            }
+
+            addTagChip.setOnClickListener {
+                // open bottom sheet to add tag
+            }
         }
 
         @SuppressLint("ClickableViewAccessibility")
@@ -103,6 +122,16 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
             modifiedText.text = file.modifiedText
             behaviour.state = if(isSheetVisible) BottomSheetBehavior.STATE_EXPANDED else BottomSheetBehavior.STATE_COLLAPSED
             linkButton.setOnClickListener { openLink(file.name) }
+
+            setTags(file.tags)
+        }
+
+        private fun setTags(tags: List<Tag>) {
+            tags.forEach {
+                val chip =  Chip(itemView.context)
+                chip.text = it.name
+                tagGroups.addView(chip)
+            }
         }
 
         private fun openLink(item: String){
