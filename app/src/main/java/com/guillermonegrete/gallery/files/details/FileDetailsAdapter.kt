@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.navigation.findNavController
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -66,10 +67,6 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
 
         init {
             setSheets()
-
-            editButton.setOnClickListener {
-
-            }
         }
 
         @SuppressLint("ClickableViewAccessibility")
@@ -110,6 +107,11 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
             modifiedText.text = file.modifiedText
             behaviour.state = if(isSheetVisible) BottomSheetBehavior.STATE_EXPANDED else BottomSheetBehavior.STATE_COLLAPSED
             linkButton.setOnClickListener { openLink(file.name) }
+
+            editButton.setOnClickListener {
+                val action = FileDetailsFragmentDirections.fileDetailsToAddTagFragment(file.tags.toTypedArray())
+                itemView.findNavController().navigate(action)
+            }
 
             setTags(file.tags)
         }

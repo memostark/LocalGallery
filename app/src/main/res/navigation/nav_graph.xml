@@ -43,7 +43,11 @@
         android:id="@+id/fileDetailsFragment"
         android:name="com.guillermonegrete.gallery.files.details.FileDetailsFragment"
         android:label="fragment_file_details"
-        tools:layout="@layout/fragment_file_details" />
+        tools:layout="@layout/fragment_file_details" >
+        <action
+            android:id="@+id/fileDetails_to_addTagFragment"
+            app:destination="@id/addTagFragment" />
+    </fragment>
     <dialog
         android:id="@+id/servers_fragment_dest"
         android:name="com.guillermonegrete.gallery.servers.ServersFragment"
@@ -60,6 +64,15 @@
         <argument
             android:name="selections"
             app:argType="com.guillermonegrete.gallery.common.SortDialogChecked"/>
+    </dialog>
+    <dialog
+        android:id="@+id/addTagFragment"
+        android:name="com.guillermonegrete.gallery.files.details.AddTagFragment"
+        android:label="AddTagFragment"
+        tools:layout="@layout/fragment_add_tag">
+        <argument
+            android:name="tags"
+            app:argType="com.guillermonegrete.gallery.data.Tag[]"/>
     </dialog>
 
 </navigation>
