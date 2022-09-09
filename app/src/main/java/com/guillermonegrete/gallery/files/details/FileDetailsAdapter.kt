@@ -7,8 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.core.view.children
-import androidx.core.view.isVisible
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -62,7 +60,6 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
         private val bottomSheet: LinearLayout = itemView.findViewById(R.id.bottom_layout)
 
         private val editButton: ImageButton = itemView.findViewById(R.id.edit_btn)
-        private val addTagChip: Chip = itemView.findViewById(R.id.add_tag)
         private val tagGroups: ChipGroup = itemView.findViewById(R.id.tags_chip_group)
 
         private val behaviour = BottomSheetBehavior.from(bottomSheet)
@@ -71,16 +68,7 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
             setSheets()
 
             editButton.setOnClickListener {
-                addTagChip.isVisible = true
-//                tagGroups.
-                tagGroups.children.forEach {
-                    (it as Chip).isCloseIconVisible = true
-                }
-                addTagChip.isCloseIconVisible = false
-            }
 
-            addTagChip.setOnClickListener {
-                // open bottom sheet to add tag
             }
         }
 
@@ -127,6 +115,7 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
         }
 
         private fun setTags(tags: List<Tag>) {
+            tagGroups.removeAllViews()
             tags.forEach {
                 val chip =  Chip(itemView.context)
                 chip.text = it.name
