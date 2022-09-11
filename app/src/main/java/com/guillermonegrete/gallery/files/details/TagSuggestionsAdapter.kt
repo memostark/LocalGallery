@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.databinding.TagSuggestionItemBinding
 
-class TagSuggestionsAdapter: ListAdapter<Tag, TagSuggestionsAdapter.ViewHolder>(TagDiffCallback) {
+class TagSuggestionsAdapter(private val listener: (Tag, TagSuggestionsAdapter) -> Unit): ListAdapter<Tag, TagSuggestionsAdapter.ViewHolder>(TagDiffCallback) {
 
     private var unfilteredList = listOf<Tag>()
 
@@ -21,7 +21,13 @@ class TagSuggestionsAdapter: ListAdapter<Tag, TagSuggestionsAdapter.ViewHolder>(
         holder.bind(getItem(position))
     }
 
-    class ViewHolder(val binding: TagSuggestionItemBinding): RecyclerView.ViewHolder(binding.root){
+    inner class ViewHolder(val binding: TagSuggestionItemBinding): RecyclerView.ViewHolder(binding.root){
+
+        init {
+            binding.root.setOnClickListener {
+                listener(getItem(absoluteAdapterPosition), this@TagSuggestionsAdapter)
+            }
+        }
 
         fun bind(tag: Tag){
             binding.tagNameText.text = tag.name

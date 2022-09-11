@@ -9,6 +9,7 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.databinding.FragmentAddTagBinding
 import java.util.*
@@ -42,7 +43,11 @@ class AddTagFragment: BottomSheetDialogFragment() {
                 tagsGroup.addView(chip, tagsGroup.childCount - 1)
             }
 
-            val adapter = TagSuggestionsAdapter()
+            val adapter = TagSuggestionsAdapter { tag, adapter ->
+                addChip(tagsGroup, tag.name)
+                dummySuggestions.remove(tag)
+                adapter.modifyList(dummySuggestions.toList())
+            }
 
             newTagEdit.setOnEditorActionListener { v, actionId, _ ->
                 if(actionId == EditorInfo.IME_ACTION_DONE){
@@ -52,13 +57,7 @@ class AddTagFragment: BottomSheetDialogFragment() {
                     // if tag is already applied, skip
                     if(tags.any { it.name == text }) return@setOnEditorActionListener true
 
-                    val chip =  Chip(context)
-                    chip.text = text
-                    chip.isCloseIconVisible = true
-                    chip.setOnCloseIconClickListener {
-                        tagsGroup.removeView(it)
-                    }
-                    tagsGroup.addView(chip, tagsGroup.childCount - 1)
+                    addChip(tagsGroup, text)
 
                     dummySuggestions.removeAll { it.name == text }
                     adapter.modifyList(dummySuggestions.toList())
@@ -67,6 +66,8 @@ class AddTagFragment: BottomSheetDialogFragment() {
                 }
                 false
             }
+
+            adapter.currentList
 
             adapter.modifyList(dummySuggestions.toList())
             savedTagsList.adapter = adapter
@@ -80,5 +81,13 @@ class AddTagFragment: BottomSheetDialogFragment() {
         return binding.root
     }
 
-
+    private fun addChip(tagsGroup: ChipGroup, name: String) {
+        val chip =  Chip(context)
+        chip.text = name
+        chip.isCloseIconVisible = true
+        chip.setOnCloseIconClickListener {
+            tagsGroup.removeView(it)
+        }
+        tagsGroup.addView(chip, tagsGroup.childCount - 1)
+    }
 }
