@@ -1,22 +1,43 @@
 package com.guillermonegrete.gallery.files.details
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.core.widget.doAfterTextChanged
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.databinding.FragmentAddTagBinding
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import timber.log.Timber
 import java.util.*
+import javax.inject.Inject
 
 class AddTagFragment: BottomSheetDialogFragment() {
 
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+    private val viewModel by viewModels<AddTagViewModel> { viewModelFactory }
+
+    private lateinit var adapter: TagSuggestionsAdapter
+
+    private val disposable = CompositeDisposable()
+
     private val args: AddTagFragmentArgs by navArgs()
+
+    override fun onAttach(context: Context) {
+        (context.applicationContext as MyApplication).appComponent.inject(this)
+        super.onAttach(context)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -31,6 +52,8 @@ class AddTagFragment: BottomSheetDialogFragment() {
             Tag("recommendation", Date(), 2),
         )
 
+        setupViewModel()
+
         with(binding){
             val tags = args.tags.toList()
             tags.forEach { tag ->
@@ -43,7 +66,7 @@ class AddTagFragment: BottomSheetDialogFragment() {
                 tagsGroup.addView(chip, tagsGroup.childCount - 1)
             }
 
-            val adapter = TagSuggestionsAdapter { tag, adapter ->
+            adapter = TagSuggestionsAdapter { tag, adapter ->
                 addChip(tagsGroup, tag.name)
                 dummySuggestions.remove(tag)
                 adapter.modifyList(dummySuggestions.toList())
@@ -67,9 +90,6 @@ class AddTagFragment: BottomSheetDialogFragment() {
                 false
             }
 
-            adapter.currentList
-
-            adapter.modifyList(dummySuggestions.toList())
             savedTagsList.adapter = adapter
 
             newTagEdit.doAfterTextChanged {
@@ -79,6 +99,16 @@ class AddTagFragment: BottomSheetDialogFragment() {
         }
 
         return binding.root
+    }
+
+    private fun setupViewModel() {
+        disposable.add(viewModel.getAllTags()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { adapter.modifyList(it.toList()) },
+                { Timber.e(it) }
+            )
+        )
     }
 
     private fun addChip(tagsGroup: ChipGroup, name: String) {
