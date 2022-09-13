@@ -14,10 +14,12 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.guillermonegrete.gallery.MyApplication
+import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.databinding.FragmentAddTagBinding
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import timber.log.Timber
+import java.util.*
 import javax.inject.Inject
 
 class AddTagFragment: BottomSheetDialogFragment() {
@@ -58,9 +60,8 @@ class AddTagFragment: BottomSheetDialogFragment() {
                 tagsGroup.addView(chip, tagsGroup.childCount - 1)
             }
 
-            adapter = TagSuggestionsAdapter { tag, adapter ->
-                addChip(tagsGroup, tag.name)
-                adapter.remove(tag)
+            adapter = TagSuggestionsAdapter { tag ->
+                addChip(tagsGroup, tag)
             }
 
             newTagEdit.setOnEditorActionListener { v, actionId, _ ->
@@ -71,10 +72,7 @@ class AddTagFragment: BottomSheetDialogFragment() {
                     // if tag is already applied, skip
                     if(tags.any { it.name == text }) return@setOnEditorActionListener true
 
-                    addChip(tagsGroup, text)
-
-                    adapter.getUnfilteredList().removeAll { it.name == text }
-                    adapter.modifyList(adapter.getUnfilteredList())
+                    addChip(tagsGroup, Tag(text, Date(), 0)) // Set id as 0 to indicate to the backend the tag is new
 
                     return@setOnEditorActionListener true
                 }
@@ -106,13 +104,27 @@ class AddTagFragment: BottomSheetDialogFragment() {
         )
     }
 
-    private fun addChip(tagsGroup: ChipGroup, name: String) {
-        val chip =  Chip(context)
-        chip.text = name
-        chip.isCloseIconVisible = true
-        chip.setOnCloseIconClickListener {
-            tagsGroup.removeView(it)
-        }
-        tagsGroup.addView(chip, tagsGroup.childCount - 1)
+    /**
+     * Call the backend to create/add a [tag] to the file. If successful add a new chip to the to [tagsGroup]
+     */
+    private fun addChip(tagsGroup: ChipGroup, tag: Tag) {
+
+        disposable.add(viewModel
+            .addTag(args.fileId, tag)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ newTag ->
+                // Creates and adds chip view
+                val chip =  Chip(context)
+                chip.text = newTag.name
+                chip.isCloseIconVisible = true
+                chip.setOnCloseIconClickListener {
+                    tagsGroup.removeView(it)
+                }
+                tagsGroup.addView(chip, tagsGroup.childCount - 1)
+
+                // No longer show the tag in the suggestions list
+                adapter.remove(newTag)
+            }, { Timber.e(it) })
+        )
     }
 }

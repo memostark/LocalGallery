@@ -13,6 +13,7 @@ sealed class File(
     val creationDate: Date,
     val lastModified: Date,
     val tags: List<Tag>,
+    val id: Long,
 ) {
     val filename: String =  try { JavaFile(URL(name).path).name ?: name } catch (e: Exception) { name } // Maybe it will be better if backend gives the filename
     val sizeText: String = "${width}x$height"
@@ -28,7 +29,8 @@ class ImageFile(
     creationDate: Date = Date(),
     lastModified: Date = Date(),
     tags: List<Tag> = listOf(),
-): File(name, width, height, creationDate, lastModified, tags){
+    id: Long,
+): File(name, width, height, creationDate, lastModified, tags, id){
     // To make testing easier when comparing and simulate a data class
     override fun equals(other: Any?) =
         if(other is ImageFile) name == other.name && width == other.width && height == other.height else false
@@ -43,4 +45,5 @@ class VideoFile(
     lastModified: Date,
     val duration: Int,
     tags: List<Tag> = listOf(),
-): File(name, width, height, creationDate, lastModified, tags)
+    id: Long,
+): File(name, width, height, creationDate, lastModified, tags, id)

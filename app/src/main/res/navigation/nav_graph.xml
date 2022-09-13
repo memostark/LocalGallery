@@ -71,6 +71,9 @@
         android:label="AddTagFragment"
         tools:layout="@layout/fragment_add_tag">
         <argument
+            android:name="file_id"
+            app:argType="long"/>
+        <argument
             android:name="tags"
             app:argType="com.guillermonegrete.gallery.data.Tag[]"/>
     </dialog>

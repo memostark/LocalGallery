@@ -6,4 +6,6 @@ import io.reactivex.rxjava3.core.Single
 interface TagRepository {
 
     fun getTags(): Single<Set<Tag>>
+
+    fun addTag(fileId: Long, tag: Tag): Single<Tag>
 }

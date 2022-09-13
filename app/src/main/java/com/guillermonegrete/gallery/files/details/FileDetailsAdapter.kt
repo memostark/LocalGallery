@@ -109,7 +109,7 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
             linkButton.setOnClickListener { openLink(file.name) }
 
             editButton.setOnClickListener {
-                val action = FileDetailsFragmentDirections.fileDetailsToAddTagFragment(file.tags.toTypedArray())
+                val action = FileDetailsFragmentDirections.fileDetailsToAddTagFragment(file.id, file.tags.toTypedArray())
                 itemView.findNavController().navigate(action)
             }
 
