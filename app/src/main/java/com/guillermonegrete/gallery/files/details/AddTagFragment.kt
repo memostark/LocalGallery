@@ -14,12 +14,10 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.guillermonegrete.gallery.MyApplication
-import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.databinding.FragmentAddTagBinding
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import timber.log.Timber
-import java.util.*
 import javax.inject.Inject
 
 class AddTagFragment: BottomSheetDialogFragment() {
@@ -46,12 +44,6 @@ class AddTagFragment: BottomSheetDialogFragment() {
     ): View {
         val binding = FragmentAddTagBinding.inflate(inflater, container, false)
 
-        val dummySuggestions = mutableSetOf(
-            Tag("option", Date(), 0),
-            Tag("suggestion", Date(), 1),
-            Tag("recommendation", Date(), 2),
-        )
-
         setupViewModel()
 
         with(binding){
@@ -68,8 +60,7 @@ class AddTagFragment: BottomSheetDialogFragment() {
 
             adapter = TagSuggestionsAdapter { tag, adapter ->
                 addChip(tagsGroup, tag.name)
-                dummySuggestions.remove(tag)
-                adapter.modifyList(dummySuggestions.toList())
+                adapter.remove(tag)
             }
 
             newTagEdit.setOnEditorActionListener { v, actionId, _ ->
@@ -82,8 +73,8 @@ class AddTagFragment: BottomSheetDialogFragment() {
 
                     addChip(tagsGroup, text)
 
-                    dummySuggestions.removeAll { it.name == text }
-                    adapter.modifyList(dummySuggestions.toList())
+                    adapter.getUnfilteredList().removeAll { it.name == text }
+                    adapter.modifyList(adapter.getUnfilteredList())
 
                     return@setOnEditorActionListener true
                 }
@@ -105,8 +96,12 @@ class AddTagFragment: BottomSheetDialogFragment() {
         disposable.add(viewModel.getAllTags()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
-                { adapter.modifyList(it.toList()) },
-                { Timber.e(it) }
+                {
+                    // Remove tags that are already applied
+                    val newList = it.toMutableSet()
+                    newList.removeAll(args.tags.toSet())
+                    adapter.modifyList(newList)
+                }, { Timber.e(it) }
             )
         )
     }

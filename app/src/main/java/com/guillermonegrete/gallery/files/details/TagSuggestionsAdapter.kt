@@ -10,7 +10,7 @@ import com.guillermonegrete.gallery.databinding.TagSuggestionItemBinding
 
 class TagSuggestionsAdapter(private val listener: (Tag, TagSuggestionsAdapter) -> Unit): ListAdapter<Tag, TagSuggestionsAdapter.ViewHolder>(TagDiffCallback) {
 
-    private var unfilteredList = listOf<Tag>()
+    private var unfilteredSet = mutableSetOf<Tag>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -34,20 +34,27 @@ class TagSuggestionsAdapter(private val listener: (Tag, TagSuggestionsAdapter) -
         }
     }
 
-    fun modifyList(list : List<Tag>) {
-        unfilteredList = list
-        submitList(list)
+    fun getUnfilteredList() = unfilteredSet
+
+    fun remove(tag: Tag){
+        unfilteredSet.remove(tag)
+        submitList(unfilteredSet.toList())
+    }
+
+    fun modifyList(list : Set<Tag>) {
+        unfilteredSet = list.toMutableSet()
+        submitList(list.toList())
     }
 
     fun filter(query: CharSequence) {
         val list = mutableListOf<Tag>()
 
         if(query.isNotEmpty()) {
-            list.addAll(unfilteredList.filter {
+            list.addAll(unfilteredSet.filter {
                 it.name.lowercase().contains(query.toString().lowercase())
             })
         } else {
-            list.addAll(unfilteredList)
+            list.addAll(unfilteredSet)
         }
 
         submitList(list)
