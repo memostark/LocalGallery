@@ -9,4 +9,6 @@ class DefaultTagRepository @Inject constructor (private val tagService: TagServi
     override fun getTags() = tagService.getAllTags()
 
     override fun addTag(fileId: Long, tag: Tag): Single<Tag> = tagService.addTag(fileId, tag)
+
+    override fun deleteTagFromFile(fileId: Long, id: Long) = tagService.deleteTagFromFile(fileId, id)
 }

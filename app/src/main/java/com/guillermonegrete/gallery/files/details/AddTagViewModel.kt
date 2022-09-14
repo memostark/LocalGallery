@@ -10,4 +10,6 @@ class AddTagViewModel @Inject constructor (private val tagRepository: TagReposit
     fun getAllTags() = tagRepository.getTags()
 
     fun addTag(id: Long, tag: Tag) = tagRepository.addTag(id, tag)
+
+    fun deleteTagFromFile(fileId: Long, id: Long) = tagRepository.deleteTagFromFile(fileId, id)
 }

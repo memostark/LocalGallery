@@ -28,6 +28,9 @@ class AddTagFragment: BottomSheetDialogFragment() {
     lateinit var viewModelFactory: ViewModelProvider.Factory
     private val viewModel by viewModels<AddTagViewModel> { viewModelFactory }
 
+    private  var _binding: FragmentAddTagBinding? = null
+    private val binding get() = _binding!!
+
     private lateinit var adapter: TagSuggestionsAdapter
 
     private val disposable = CompositeDisposable()
@@ -44,7 +47,7 @@ class AddTagFragment: BottomSheetDialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val binding = FragmentAddTagBinding.inflate(inflater, container, false)
+        _binding = FragmentAddTagBinding.inflate(inflater, container, false)
 
         setupViewModel()
 
@@ -55,7 +58,7 @@ class AddTagFragment: BottomSheetDialogFragment() {
                 chip.text = tag.name
                 chip.isCloseIconVisible = true
                 chip.setOnCloseIconClickListener {
-                    tagsGroup.removeView(it)
+                    removeChip(it, tag)
                 }
                 tagsGroup.addView(chip, tagsGroup.childCount - 1)
             }
@@ -90,6 +93,11 @@ class AddTagFragment: BottomSheetDialogFragment() {
         return binding.root
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
+    }
+
     private fun setupViewModel() {
         disposable.add(viewModel.getAllTags()
             .observeOn(AndroidSchedulers.mainThread())
@@ -117,8 +125,8 @@ class AddTagFragment: BottomSheetDialogFragment() {
                 val chip =  Chip(context)
                 chip.text = newTag.name
                 chip.isCloseIconVisible = true
-                chip.setOnCloseIconClickListener {
-                    tagsGroup.removeView(it)
+                chip.setOnCloseIconClickListener { view ->
+                    removeChip(view, newTag)
                 }
                 tagsGroup.addView(chip, tagsGroup.childCount - 1)
 
@@ -127,4 +135,14 @@ class AddTagFragment: BottomSheetDialogFragment() {
             }, { Timber.e(it) })
         )
     }
+
+    private fun removeChip(chipView: View, tag: Tag) {
+
+        disposable.add(
+            viewModel.deleteTagFromFile(args.fileId, tag.id)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ binding.tagsGroup.removeView(chipView) }, { Timber.e(it) })
+        )
+    }
+
 }
