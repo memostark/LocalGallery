@@ -1,12 +1,15 @@
 package com.guillermonegrete.gallery.files.details
 
 import android.content.Context
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import androidx.core.os.bundleOf
 import androidx.core.widget.doAfterTextChanged
+import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
@@ -98,6 +101,11 @@ class AddTagFragment: BottomSheetDialogFragment() {
         _binding = null
     }
 
+    override fun onCancel(dialog: DialogInterface) {
+        super.onCancel(dialog)
+        setFragmentResult(REQUEST_KEY, bundleOf(TAGS_KEY to adapter.currentList))
+    }
+
     private fun setupViewModel() {
         disposable.add(viewModel.getAllTags()
             .observeOn(AndroidSchedulers.mainThread())
@@ -143,6 +151,11 @@ class AddTagFragment: BottomSheetDialogFragment() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ binding.tagsGroup.removeView(chipView) }, { Timber.e(it) })
         )
+    }
+
+    companion object{
+        const val TAGS_KEY = "tags_key"
+        const val REQUEST_KEY = "tag_frag_request"
     }
 
 }
