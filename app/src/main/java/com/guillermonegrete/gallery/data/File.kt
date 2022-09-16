@@ -12,7 +12,7 @@ sealed class File(
     var height: Int,
     val creationDate: Date,
     val lastModified: Date,
-    val tags: List<Tag>,
+    var tags: List<Tag>,
     val id: Long,
 ) {
     val filename: String =  try { JavaFile(URL(name).path).name ?: name } catch (e: Exception) { name } // Maybe it will be better if backend gives the filename

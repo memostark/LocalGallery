@@ -6,7 +6,6 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.FragmentResultListener
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.ViewModelProvider
@@ -19,9 +18,7 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
-import com.guillermonegrete.gallery.data.ImageFile
 import com.guillermonegrete.gallery.data.Tag
-import com.guillermonegrete.gallery.data.VideoFile
 import com.guillermonegrete.gallery.databinding.FragmentFileDetailsBinding
 import com.guillermonegrete.gallery.files.FilesViewModel
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -52,15 +49,13 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        childFragmentManager.setFragmentResultListener(AddTagFragment.REQUEST_KEY,
-            this) { _, result ->
+        setFragmentResultListener(AddTagFragment.REQUEST_KEY) { _, result ->
+            // Instead of using the snapshot list, the recommended approach to update an item is updating a cache source
+            // and reloading from there (like a database) as explained here: https://stackoverflow.com/a/63139535/10244759
+            // However this reload may force to reload the images which may be more wasteful
             val newTags = result.getParcelableArrayList<Tag>(AddTagFragment.TAGS_KEY) ?: return@setFragmentResultListener
             val pos = binding.fileDetailsViewpager.currentItem
-            when(val oldFile = adapter.snapshot().items[pos]){
-                // TODO remove this conversion, try to use a copy method or some way that automatically copies new fields added to the data class
-                is ImageFile -> ImageFile(oldFile.name, oldFile.width, oldFile.height, oldFile.creationDate, oldFile.lastModified, newTags, oldFile.id)
-                is VideoFile -> VideoFile(oldFile.name, oldFile.width, oldFile.height, oldFile.creationDate, oldFile.lastModified, oldFile.duration, newTags, oldFile.id)
-            }
+            adapter.snapshot().items[pos].tags = newTags
             adapter.notifyItemChanged(pos)
         }
     }

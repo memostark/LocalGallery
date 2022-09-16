@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import androidx.core.os.bundleOf
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
@@ -24,6 +23,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import timber.log.Timber
 import java.util.*
 import javax.inject.Inject
+import kotlin.collections.ArrayList
 
 class AddTagFragment: BottomSheetDialogFragment() {
 
@@ -55,7 +55,7 @@ class AddTagFragment: BottomSheetDialogFragment() {
         setupViewModel()
 
         with(binding){
-            val tags = args.tags.toList()
+            val tags = viewModel.appliedTags
             tags.forEach { tag ->
                 val chip =  Chip(context)
                 chip.text = tag.name
@@ -103,10 +103,17 @@ class AddTagFragment: BottomSheetDialogFragment() {
 
     override fun onCancel(dialog: DialogInterface) {
         super.onCancel(dialog)
-        setFragmentResult(REQUEST_KEY, bundleOf(TAGS_KEY to adapter.currentList))
+        setFragmentResult(
+            REQUEST_KEY,
+            Bundle().apply {
+                putParcelableArrayList(TAGS_KEY, ArrayList(viewModel.appliedTags))
+            }
+        )
     }
 
     private fun setupViewModel() {
+        viewModel.appliedTags.addAll(args.tags)
+
         disposable.add(viewModel.getAllTags()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
@@ -147,7 +154,7 @@ class AddTagFragment: BottomSheetDialogFragment() {
     private fun removeChip(chipView: View, tag: Tag) {
 
         disposable.add(
-            viewModel.deleteTagFromFile(args.fileId, tag.id)
+            viewModel.deleteTagFromFile(args.fileId, tag)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ binding.tagsGroup.removeView(chipView) }, { Timber.e(it) })
         )
