@@ -24,4 +24,11 @@
         <item name="android:layout_marginBottom">8dp</item>
     </style>
 
+
+    <!-- Apply to dialog when the layout needs to readjust to avoid the keyboard from blocking it-->
+    <style name="AdjustResizeDialogStyle" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowSoftInputMode">adjustResize|stateHidden</item>
+    </style>
+
 </resources>
