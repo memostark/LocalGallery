@@ -39,6 +39,10 @@ class TagSuggestionsAdapter(private val listener: (Tag) -> Unit): ListAdapter<Ta
         submitList(unfilteredSet.toList())
     }
 
+    fun add(tag: Tag){
+        if (unfilteredSet.add(tag)) submitList(unfilteredSet.toList())
+    }
+
     fun modifyList(list : Set<Tag>) {
         unfilteredSet = list.toMutableSet()
         submitList(list.toList())

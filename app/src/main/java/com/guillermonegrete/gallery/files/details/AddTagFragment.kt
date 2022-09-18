@@ -164,7 +164,11 @@ class AddTagFragment: BottomSheetDialogFragment() {
         disposable.add(
             viewModel.deleteTagFromFile(args.fileId, tag)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ binding.tagsGroup.removeView(chipView) }, { Timber.e(it) })
+                .subscribe({
+                    binding.tagsGroup.removeView(chipView)
+                    adapter.add(tag)
+                   }, { Timber.e(it) }
+                )
         )
     }
 
