@@ -19,7 +19,10 @@ class MainActivity : AppCompatActivity(R.layout.activity_main){
         bottomNavigationView.setupWithNavController(navController)
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            bottomNavigationView.isGone = destination.id == R.id.fileDetailsFragment
+            bottomNavigationView.isGone = when (destination.id) {
+                R.id.fileDetailsFragment, R.id.addTagFragment -> true
+                else -> false
+            }
         }
     }
 }
