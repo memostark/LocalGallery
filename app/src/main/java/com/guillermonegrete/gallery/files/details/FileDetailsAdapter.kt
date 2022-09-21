@@ -143,6 +143,8 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
             Glide.with(itemView.context)
                 .load(file.name)
                 .into(fileImage)
+            // fit_start places the image at the top, fit_center is the default
+            fileImage.scaleType = if(isSheetVisible) ImageView.ScaleType.FIT_START else ImageView.ScaleType.FIT_CENTER
         }
     }
 
