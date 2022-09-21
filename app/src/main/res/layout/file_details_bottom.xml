@@ -22,7 +22,6 @@
         android:layout_height="match_parent"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
-        android:paddingBottom="32dp"
         android:background="?android:colorBackground">
 
         <ImageView
@@ -140,6 +139,8 @@
             android:layout_width="0dp"
             android:layout_height="150dp"
             android:layout_marginTop="16dp"
+            android:paddingBottom="32dp"
+            android:clipToPadding="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/modified_date">
