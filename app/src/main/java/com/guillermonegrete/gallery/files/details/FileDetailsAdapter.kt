@@ -11,6 +11,7 @@ import androidx.navigation.findNavController
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.android.exoplayer2.ui.PlayerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
@@ -148,5 +149,15 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
         }
     }
 
-    inner class VideoViewHolder(itemView: View): ViewHolder(itemView)
+    inner class VideoViewHolder(itemView: View): ViewHolder(itemView){
+
+        private val player: PlayerView = itemView.findViewById(R.id.exo_player_view)
+
+        override fun bind(file: File) {
+            super.bind(file)
+            player.layoutParams = player.layoutParams.apply {
+                height = if(isSheetVisible) ViewGroup.LayoutParams.WRAP_CONTENT else ViewGroup.LayoutParams.MATCH_PARENT
+            }
+        }
+    }
 }
