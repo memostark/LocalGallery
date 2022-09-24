@@ -2,11 +2,16 @@ package com.guillermonegrete.gallery.files.details
 
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.exoplayer2.Player
@@ -17,6 +22,7 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
+import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.databinding.FragmentFileDetailsBinding
 import com.guillermonegrete.gallery.files.FilesViewModel
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -43,6 +49,21 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
     override fun onAttach(context: Context) {
         (context.applicationContext as MyApplication).appComponent.inject(this)
         super.onAttach(context)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setFragmentResultListener(AddTagFragment.REQUEST_KEY) { _, result ->
+            // Instead of using the snapshot list, the recommended approach to update an item is updating a cache source
+            // and reloading from there (like a database) as explained here: https://stackoverflow.com/a/63139535/10244759
+            // However this reload may force to reload the images which may be more wasteful
+            val newTags = result.getParcelableArrayList<Tag>(AddTagFragment.TAGS_KEY) ?: return@setFragmentResultListener
+            val pos = binding.fileDetailsViewpager.currentItem
+            adapter.snapshot().items[pos].tags = newTags
+            adapter.notifyItemChanged(pos)
+        }
+
+        setUIChangesListeners()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -105,19 +126,43 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
         exoPlayer = null
     }
 
+    /**
+     * Used to detect when the status bar becomes visible (for example when the keyboard shows up).
+     * Hide again the bar if that's the case.
+     */
+    private fun setUIChangesListeners() {
+        val decorView = activity?.window?.decorView ?: return
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            decorView.setOnApplyWindowInsetsListener { _, insets ->
+                if (insets.isVisible(WindowInsetsCompat.Type.systemBars())) hideStatusBar()
+                insets
+            }
+        } else {
+            @Suppress("DEPRECATION")
+            decorView.setOnSystemUiVisibilityChangeListener { visibility ->
+                // System bars are visible
+                if (visibility and View.SYSTEM_UI_FLAG_FULLSCREEN == 0) hideStatusBar()
+            }
+        }
+    }
+
     private fun hideStatusBar(){
-        (activity as AppCompatActivity).supportActionBar?.hide()
+        (activity as AppCompatActivity?)?.supportActionBar?.hide()
 
         val window = activity?.window ?: return
-        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
-
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowInsetsControllerCompat(window, window.decorView).let { controller ->
+            controller.hide(WindowInsetsCompat.Type.systemBars())
+            controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
     }
 
     private fun showStatusBar(){
-        (activity as AppCompatActivity).supportActionBar?.show()
+        (activity as AppCompatActivity?)?.supportActionBar?.show()
 
         val window = activity?.window ?: return
-        window.decorView.systemUiVisibility = 0
+        WindowCompat.setDecorFitsSystemWindows(window, true)
+        WindowInsetsControllerCompat(window, window.decorView).show(WindowInsetsCompat.Type.systemBars())
     }
 
     private fun initializePlayer(){

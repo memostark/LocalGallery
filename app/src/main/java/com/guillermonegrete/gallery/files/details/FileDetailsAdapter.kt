@@ -6,17 +6,19 @@ import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
+import androidx.navigation.findNavController
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.android.exoplayer2.ui.PlayerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.File
 import com.guillermonegrete.gallery.data.ImageFile
+import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.data.VideoFile
 import com.guillermonegrete.gallery.files.FileDiffCallback
 import io.reactivex.rxjava3.subjects.PublishSubject
@@ -58,6 +60,9 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
         private val createdText: TextView = itemView.findViewById(R.id.creation_date)
         private val modifiedText: TextView = itemView.findViewById(R.id.modified_date)
         private val bottomSheet: LinearLayout = itemView.findViewById(R.id.bottom_layout)
+
+        private val editButton: ImageButton = itemView.findViewById(R.id.edit_btn)
+        private val tagGroups: ChipGroup = itemView.findViewById(R.id.tags_chip_group)
 
         private val behaviour = BottomSheetBehavior.from(bottomSheet)
 
@@ -103,6 +108,22 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
             modifiedText.text = file.modifiedText
             behaviour.state = if(isSheetVisible) BottomSheetBehavior.STATE_EXPANDED else BottomSheetBehavior.STATE_COLLAPSED
             linkButton.setOnClickListener { openLink(file.name) }
+
+            editButton.setOnClickListener {
+                val action = FileDetailsFragmentDirections.fileDetailsToAddTagFragment(file.id, file.tags.toTypedArray())
+                itemView.findNavController().navigate(action)
+            }
+
+            setTags(file.tags)
+        }
+
+        private fun setTags(tags: List<Tag>) {
+            tagGroups.removeAllViews()
+            tags.forEach {
+                val chip =  Chip(itemView.context)
+                chip.text = it.name
+                tagGroups.addView(chip)
+            }
         }
 
         private fun openLink(item: String){
@@ -123,8 +144,20 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
             Glide.with(itemView.context)
                 .load(file.name)
                 .into(fileImage)
+            // fit_start places the image at the top, fit_center is the default
+            fileImage.scaleType = if(isSheetVisible) ImageView.ScaleType.FIT_START else ImageView.ScaleType.FIT_CENTER
         }
     }
 
-    inner class VideoViewHolder(itemView: View): ViewHolder(itemView)
+    inner class VideoViewHolder(itemView: View): ViewHolder(itemView){
+
+        private val player: PlayerView = itemView.findViewById(R.id.exo_player_view)
+
+        override fun bind(file: File) {
+            super.bind(file)
+            player.layoutParams = player.layoutParams.apply {
+                height = if(isSheetVisible) ViewGroup.LayoutParams.WRAP_CONTENT else ViewGroup.LayoutParams.MATCH_PARENT
+            }
+        }
+    }
 }

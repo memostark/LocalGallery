@@ -8,9 +8,9 @@
         android:id="@+id/file_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:srcCompat="@tools:sample/avatars"
         android:background="@android:color/black"
-        android:contentDescription="@string/file_image_view_desc" />
+        android:contentDescription="@string/file_image_view_desc"
+        tools:srcCompat="@tools:sample/avatars"/>
 
     <include layout="@layout/file_details_bottom"/>
 

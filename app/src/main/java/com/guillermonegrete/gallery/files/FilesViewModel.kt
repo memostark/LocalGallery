@@ -157,8 +157,9 @@ class FilesViewModel @Inject constructor(
     private fun updateSizes(files: List<File>, sizes: List<Size>): List<File>{
         return sizes.mapIndexed { index, newSize ->
             when(val oldFile = files[index]){
-                is ImageFile -> ImageFile(oldFile.name, newSize.width, newSize.height, oldFile.creationDate, oldFile.lastModified)
-                is VideoFile -> VideoFile(oldFile.name, newSize.width, newSize.height, oldFile.creationDate, oldFile.lastModified, oldFile.duration)
+                // TODO remove this conversion, try to use a copy method or some way that automatically copies new fields added to the data class
+                is ImageFile -> ImageFile(oldFile.name, newSize.width, newSize.height, oldFile.creationDate, oldFile.lastModified, oldFile.tags, oldFile.id)
+                is VideoFile -> VideoFile(oldFile.name, newSize.width, newSize.height, oldFile.creationDate, oldFile.lastModified, oldFile.duration, oldFile.tags, oldFile.id)
             }
         }
     }

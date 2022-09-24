@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Base application theme. All configurations should inherit it -->
-    <style name="BaseTheme" parent="Theme.AppCompat.DayNight.DarkActionBar">
+    <style name="BaseTheme" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
@@ -22,6 +22,13 @@
         <item name="android:paddingLeft">8dp</item>
         <item name="android:paddingRight">8dp</item>
         <item name="android:layout_marginBottom">8dp</item>
+    </style>
+
+
+    <!-- Apply to dialog when the layout needs to readjust to avoid the keyboard from blocking it-->
+    <style name="AdjustResizeDialogStyle" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowSoftInputMode">adjustResize|stateHidden</item>
     </style>
 
 </resources>

@@ -41,7 +41,7 @@ class DefaultFilesRepository @Inject constructor(
     override fun getFiles(folder: String): Single<List<File>> {
         return fileAPI.getFiles(baseUrl, folder).map { list ->
             // This map should not be necessary later because a Moshi adapter should handle the file object creation
-            list.map { response -> response.toFile() }
+            list.map { response -> println(response); response.toFile() }
         }
     }
 
