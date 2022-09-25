@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.View
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -40,6 +41,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
     // Default values for the checked items in the sorting dialog
     private var checkedField = 0
     private var checkedOrder = SortingDialog.DEFAULT_ORDER
+    private var tagId = SortingDialog.NO_TAG_ID
 
     override fun onAttach(context: Context) {
         (context.applicationContext as MyApplication).appComponent.inject(this)
@@ -131,19 +133,19 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
 
     private fun showSortDialog(){
         val options = arrayOf("filename", "creationDate", "lastModified")
-        val action = FilesListFragmentDirections.actionFilesToSortingDialog(options, SortDialogChecked(checkedField, checkedOrder))
+        val action = FilesListFragmentDirections.actionFilesToSortingDialog(options, SortDialogChecked(checkedField, checkedOrder, tagId), 1)
         findNavController().navigate(action)
         setFragmentResultListener(SortingDialog.RESULT_KEY) { _, bundle ->
             val result: SortDialogChecked = bundle.getParcelable(SortingDialog.SORT_KEY) ?: return@setFragmentResultListener
-            if(checkedField != result.fieldIndex || checkedOrder != result.sortId) {
+            if(checkedField != result.fieldIndex || checkedOrder != result.sortId || tagId != result.tagId) {
                 checkedField = result.fieldIndex
                 checkedOrder = result.sortId
+                tagId = result.tagId
+                Toast.makeText(context, "Tag id $tagId", Toast.LENGTH_SHORT).show()
                 val field = options[checkedField]
                 val order = SortingDialog.sortIdMap[checkedOrder]
 
-                // Because ascending is the default order, don't add it to the string filter
-                val filter = if(order == "asc") field else "$field,desc"
-                viewModel.setFilter(filter)
+                viewModel.setFilter("$field,$order")
                 viewModel.setFolderName(arguments?.getString(FOLDER_KEY) ?: "")
             }
         }

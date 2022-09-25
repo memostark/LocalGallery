@@ -7,9 +7,11 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <!-- Placeholder, no changes for this configuration (default).
-    But other configurations use it to customize their style (e.g. night configuration) -->
-    <style name="AppTheme" parent="BaseTheme"/>
+    <!-- Set light mode (default) configurations.
+     Other configurations use it to customize their style (e.g. night configuration) -->
+    <style name="AppTheme" parent="BaseTheme">
+        <item name="bottomSheetDialogTheme">@style/Theme.MaterialComponents.Light.BottomSheetDialog</item>
+    </style>
 
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
@@ -21,7 +23,7 @@
         <item name="android:paddingEnd">8dp</item>
         <item name="android:paddingLeft">8dp</item>
         <item name="android:paddingRight">8dp</item>
-        <item name="android:layout_marginBottom">8dp</item>
+        <item name="android:layout_marginBottom">4dp</item>
     </style>
 
 
@@ -29,6 +31,18 @@
     <style name="AdjustResizeDialogStyle" parent="Theme.Design.Light.BottomSheetDialog">
         <item name="android:windowIsFloating">false</item>
         <item name="android:windowSoftInputMode">adjustResize|stateHidden</item>
+    </style>
+
+    <style name="Widget.Gallery.Chip.Choice" parent="Widget.MaterialComponents.Chip.Choice">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Gallery.Chip.Choice</item>
+    </style>
+
+    <!-- Disabling elevation overlays because when chip's default background/surface
+         composite are combined with elevation overlays in a highly elevated dialog,
+         the resulting color becomes too light and causes contrast
+         issues. -->
+    <style name="ThemeOverlay.Gallery.Chip.Choice" parent="">
+        <item name="elevationOverlayEnabled">false</item>
     </style>
 
 </resources>

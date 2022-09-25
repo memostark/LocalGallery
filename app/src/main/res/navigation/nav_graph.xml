@@ -67,6 +67,10 @@
         <argument
             android:name="selections"
             app:argType="com.guillermonegrete.gallery.common.SortDialogChecked"/>
+        <argument
+            android:name="folder_id"
+            android:defaultValue="0L"
+            app:argType="long"/>
     </dialog>
     <dialog
         android:id="@+id/addTagFragment"

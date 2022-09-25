@@ -3,7 +3,7 @@
 
     <style name="AppTheme" parent="BaseTheme">
         <!--  The default bottom sheet theme is light, this one is the dark theme-->
-        <item name="bottomSheetDialogTheme">@style/Theme.Design.BottomSheetDialog</item>
+        <item name="bottomSheetDialogTheme">@style/Theme.MaterialComponents.BottomSheetDialog</item>
     </style>
 
     <style name="AdjustResizeDialogStyle" parent="Theme.Design.BottomSheetDialog">
