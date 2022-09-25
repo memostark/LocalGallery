@@ -38,6 +38,9 @@
         <action
             android:id="@+id/open_file_details"
             app:destination="@id/fileDetailsFragment" />
+        <action
+            android:id="@+id/action_files_to_sorting_dialog"
+            app:destination="@id/sorting_dialog" />
     </fragment>
     <fragment
         android:id="@+id/fileDetailsFragment"
