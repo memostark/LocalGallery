@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.View
-import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -115,7 +114,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                 )
         )
 
-        viewModel.setFolderName(folder.name)
+        viewModel.setFolderName(folder)
     }
 
     private fun setFileClickEvent(){
@@ -142,12 +141,14 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                 checkedField = result.fieldIndex
                 checkedOrder = result.sortId
                 tagId = result.tagId
-                Toast.makeText(context, "Tag id $tagId", Toast.LENGTH_SHORT).show()
+
                 val field = options[checkedField]
                 val order = SortingDialog.sortIdMap[checkedOrder]
 
+                viewModel.setTag(tagId)
                 viewModel.setFilter("$field,$order")
-                viewModel.setFolderName(arguments?.getString(FOLDER_KEY) ?: "")
+                val folder: Folder = requireArguments().getParcelable(FOLDER_KEY) ?: return@setFragmentResultListener
+                viewModel.setFolderName(folder)
             }
         }
     }

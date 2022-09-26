@@ -35,4 +35,13 @@ interface FilesServerAPI{
         @Query("sort") sort: String? = null,
         @Query("size") size: Int = 30,
     ): Single<PagedFileResponse>
+
+    @GET("folders/{folderId}/tags/{tagId}")
+    fun getPagedFilesByTag(
+        @Path(value="folderId") folderId: Long,
+        @Path(value="tagId") tagId: Long,
+        @Query("page") page: Int,
+        @Query("sort") sort: String? = null,
+        @Query("size") size: Int = 30,
+    ): Single<PagedFileResponse>
 }
