@@ -22,6 +22,7 @@ import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.common.SortDialogChecked
 import com.guillermonegrete.gallery.common.SortingDialog
+import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.source.SettingsRepository
 import com.guillermonegrete.gallery.databinding.FragmentFoldersListBinding
 import com.guillermonegrete.gallery.files.FilesListFragment
@@ -145,20 +146,11 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                     setMessageContainer(!it, getString(R.string.no_address_message), R.drawable.ic_settings_input_antenna_black_24dp)
                 }
             )
-
-            disposable.add(openFolder
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe {
-                    hideKeyboard()
-                    openFileFragment(it)
-                }
-            )
         }
     }
 
     private fun loadFoldersData(){
-        adapter = FolderAdapter(viewModel)
+        adapter = FolderAdapter()
         adapter.addLoadStateListener(loadListener)
         binding.foldersList.adapter = adapter
         disposable.add(viewModel.pagedFolders
@@ -166,6 +158,17 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             .subscribe(
                 { adapter.submitData(lifecycle, it) },
                 { error -> Timber.e(error, "Error loading folders") }
+            )
+        )
+
+        disposable.add(adapter.clickSubject
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                {
+                    hideKeyboard()
+                    openFileFragment(Folder(it))
+                },
+                { error -> Timber.e(error, "Error on clicking folder") }
             )
         )
 
@@ -183,9 +186,9 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
         )
     }
 
-    private fun openFileFragment(folder: String){
+    private fun openFileFragment(folder: Folder){
         val bundle = Bundle()
-        bundle.putString(FilesListFragment.FOLDER_KEY, folder)
+        bundle.putParcelable(FilesListFragment.FOLDER_KEY, folder)
         findNavController().navigate(R.id.files_fragment_dest, bundle)
     }
 

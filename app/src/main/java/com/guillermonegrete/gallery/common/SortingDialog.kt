@@ -1,5 +1,6 @@
 package com.guillermonegrete.gallery.common
 
+import android.content.Context
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.LayoutInflater
@@ -12,26 +13,33 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.setFragmentResult
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
-import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.databinding.ChoiceChipBinding
 import com.guillermonegrete.gallery.databinding.DialogFileOrderByBinding
+import com.guillermonegrete.gallery.tags.TagRepository
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.parcelize.Parcelize
 import timber.log.Timber
 import java.util.*
+import javax.inject.Inject
 
 class SortingDialog: BottomSheetDialogFragment() {
 
     private val args: SortingDialogArgs by navArgs()
 
+    @Inject lateinit var tagRepository: TagRepository
     private val disposable = CompositeDisposable()
 
     private var checkedField = 0
     private var checkedOrder = DEFAULT_ORDER
     private var checkedTagId = NO_TAG_ID
+
+    override fun onAttach(context: Context) {
+        (context.applicationContext as MyApplication).appComponent.inject(this)
+        super.onAttach(context)
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val binding = DialogFileOrderByBinding.inflate(inflater, container, false)
@@ -68,7 +76,7 @@ class SortingDialog: BottomSheetDialogFragment() {
 
             // handle tags
             if(args.folderId != 0L) {
-                disposable.add(Single.just((1..20).map { Tag("placeholder$it", Date(), it.toLong()) })
+                disposable.add(tagRepository.getTags(args.folderId)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(
                         { tags ->

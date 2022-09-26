@@ -18,6 +18,7 @@ import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.common.SortDialogChecked
 import com.guillermonegrete.gallery.common.SortingDialog
+import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.databinding.FragmentFilesListBinding
 import com.guillermonegrete.gallery.files.details.FileDetailsFragment
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -52,14 +53,14 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentFilesListBinding.bind(view)
-        val folder = arguments?.getString(FOLDER_KEY) ?: ""
+        val folder: Folder = requireArguments().getParcelable(FOLDER_KEY) ?: return
 
         with(binding){
-            toolbar.title = folder
+            toolbar.title = folder.name
             toolbar.inflateMenu(R.menu.files_list_menu)
             toolbar.setOnMenuItemClickListener {
                 if(it.itemId == R.id.action_sort){
-                    showSortDialog()
+                    showSortDialog(folder.id)
                     return@setOnMenuItemClickListener true
                 }
                 false
@@ -81,7 +82,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         setFileClickEvent()
     }
 
-    private fun bindViewModel(folder: String){
+    private fun bindViewModel(folder: Folder){
         adapter.addLoadStateListener(loadListener)
         val list = binding.filesList
 
@@ -114,7 +115,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                 )
         )
 
-        viewModel.setFolderName(folder)
+        viewModel.setFolderName(folder.name)
     }
 
     private fun setFileClickEvent(){
@@ -131,9 +132,9 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         findNavController().navigate(R.id.fileDetailsFragment, bundle)
     }
 
-    private fun showSortDialog(){
+    private fun showSortDialog(id: Long) {
         val options = arrayOf("filename", "creationDate", "lastModified")
-        val action = FilesListFragmentDirections.actionFilesToSortingDialog(options, SortDialogChecked(checkedField, checkedOrder, tagId), 1)
+        val action = FilesListFragmentDirections.actionFilesToSortingDialog(options, SortDialogChecked(checkedField, checkedOrder, tagId), id)
         findNavController().navigate(action)
         setFragmentResultListener(SortingDialog.RESULT_KEY) { _, bundle ->
             val result: SortDialogChecked = bundle.getParcelable(SortingDialog.SORT_KEY) ?: return@setFragmentResultListener

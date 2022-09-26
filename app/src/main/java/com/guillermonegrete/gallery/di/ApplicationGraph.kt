@@ -5,6 +5,7 @@ import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.folders.FoldersListFragment
 import com.guillermonegrete.gallery.folders.FoldersModule
 import com.guillermonegrete.gallery.ViewModelBuilder
+import com.guillermonegrete.gallery.common.SortingDialog
 import com.guillermonegrete.gallery.files.FilesListFragment
 import com.guillermonegrete.gallery.files.FilesModule
 import com.guillermonegrete.gallery.files.details.AddTagFragment
@@ -35,6 +36,8 @@ interface ApplicationGraph {
     fun inject(fragment: FileDetailsFragment)
 
     fun inject(fragment: AddTagFragment)
+
+    fun inject(fragment: SortingDialog)
 
     fun inject(app: MyApplication)
 }

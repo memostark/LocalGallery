@@ -8,6 +8,8 @@ interface TagRepository {
 
     fun getTags(): Single<Set<Tag>>
 
+    fun getTags(folderId: Long): Single<Set<Tag>>
+
     fun addTag(fileId: Long, tag: Tag): Single<Tag>
 
     fun deleteTagFromFile(fileId: Long, id: Long): Completable

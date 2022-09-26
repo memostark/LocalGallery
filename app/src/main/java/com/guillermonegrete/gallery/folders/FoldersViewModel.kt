@@ -22,8 +22,6 @@ class FoldersViewModel @Inject constructor(
 
     val urlAvailable: BehaviorSubject<Boolean> = BehaviorSubject.createDefault(false)
 
-    val openFolder: Subject<String> = PublishSubject.create()
-
     private val urlFolder: Subject<String> = PublishSubject.create()
 
     private val searchQuery: Subject<String> = BehaviorSubject.createDefault("")
@@ -33,8 +31,8 @@ class FoldersViewModel @Inject constructor(
     val pagedFolders = sort.distinctUntilChanged().switchMap { filter ->
         urlFolder.switchMap {
             searchQuery.switchMap { query ->
-                val finalQuery = if (query.isEmpty()) null else query
-                val finalFilter = if(filter.isEmpty()) null else filter
+                val finalQuery = query.ifEmpty { null }
+                val finalFilter = filter.ifEmpty { null }
                 filesRepository.getPagedFolders(finalQuery, finalFilter)
                     .map { pagingData ->
                         pagingData.map { folder -> FolderUI.Model(folder) }
@@ -71,10 +69,6 @@ class FoldersViewModel @Inject constructor(
             urlAvailable.onNext(true)
             urlFolder.onNext(serverUrl)
         }
-    }
-
-    fun openFolder(folder: String){
-        openFolder.onNext(folder)
     }
 
     fun updateFilter(query: CharSequence) {
