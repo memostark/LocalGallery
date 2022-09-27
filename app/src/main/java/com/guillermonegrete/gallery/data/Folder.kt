@@ -18,4 +18,8 @@ data class Folder(
 
     @IgnoredOnParcel
     var title: String? = null
+
+    companion object {
+        val NULL_FOLDER = Folder("", "", 0)
+    }
 }

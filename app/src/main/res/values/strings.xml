@@ -41,6 +41,7 @@
     <string name="ascending">Ascending</string>
     <string name="descending">Descending</string>
     <string name="done">Done</string>
+    <string name="files_toolbar_title">All files</string>
 
     <!-- File details-->
     <string name="created">Created:</string>

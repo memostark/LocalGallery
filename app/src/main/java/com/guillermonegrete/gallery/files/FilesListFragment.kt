@@ -57,10 +57,10 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentFilesListBinding.bind(view)
-        val folder: Folder = requireArguments().getParcelable(FOLDER_KEY) ?: return
+        val folder: Folder = arguments?.getParcelable(FOLDER_KEY) ?: Folder.NULL_FOLDER
 
         with(binding){
-            toolbar.title = folder.name
+            toolbar.title = folder.name.ifEmpty { getString(R.string.files_toolbar_title) }
             toolbar.inflateMenu(R.menu.files_list_menu)
             toolbar.setOnMenuItemClickListener {
                 if(it.itemId == R.id.action_sort){
