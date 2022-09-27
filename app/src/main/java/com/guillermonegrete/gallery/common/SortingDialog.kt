@@ -103,6 +103,11 @@ class SortingDialog: BottomSheetDialogFragment() {
         return binding.root
     }
 
+    override fun onDestroyView() {
+        disposable.clear()
+        super.onDestroyView()
+    }
+
     companion object{
         const val RESULT_KEY = "sort_dialog_result"
         const val SORT_KEY = "sort_key"

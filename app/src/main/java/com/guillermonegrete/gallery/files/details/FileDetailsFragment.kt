@@ -126,6 +126,17 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
         exoPlayer = null
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        val decorView = activity?.window?.decorView ?: return
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            decorView.setOnApplyWindowInsetsListener(null)
+        } else {
+            @Suppress("DEPRECATION")
+            decorView.setOnSystemUiVisibilityChangeListener(null)
+        }
+    }
+
     /**
      * Used to detect when the status bar becomes visible (for example when the keyboard shows up).
      * Hide again the bar if that's the case.
