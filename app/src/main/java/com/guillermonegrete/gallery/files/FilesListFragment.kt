@@ -64,7 +64,8 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
             toolbar.inflateMenu(R.menu.files_list_menu)
             toolbar.setOnMenuItemClickListener {
                 if(it.itemId == R.id.action_sort){
-                    showSortDialog(folder.id)
+                    val id = if(folder == Folder.NULL_FOLDER) SortingDialog.GET_ALL_TAGS else folder.id
+                    showSortDialog(id)
                     return@setOnMenuItemClickListener true
                 }
                 false
@@ -152,7 +153,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
 
                 viewModel.setTag(tagId)
                 viewModel.setFilter("$field,$order")
-                val folder: Folder = requireArguments().getParcelable(FOLDER_KEY) ?: return@setFragmentResultListener
+                val folder: Folder = arguments?.getParcelable(FOLDER_KEY) ?: Folder.NULL_FOLDER
                 viewModel.setFolderName(folder)
             }
         }

@@ -75,8 +75,10 @@ class SortingDialog: BottomSheetDialogFragment() {
             }
 
             // handle tags
-            if(args.folderId != 0L) {
-                disposable.add(tagRepository.getTags(args.folderId)
+            val folderId = args.folderId
+            if(folderId != 0L) {
+                val tagSource = if(folderId == GET_ALL_TAGS) tagRepository.getTags() else tagRepository.getTags(folderId)
+                disposable.add(tagSource
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(
                         { tags ->
@@ -114,6 +116,11 @@ class SortingDialog: BottomSheetDialogFragment() {
 
         const val DEFAULT_ORDER = R.id.descending_order
         const val NO_TAG_ID = 0L
+
+        /**
+         * Used to indicate to get all the tags instead of just the tags of a specific folder
+         */
+        const val GET_ALL_TAGS = -1L
 
         val sortIdMap = mapOf(
             R.id.ascending_order to "asc",

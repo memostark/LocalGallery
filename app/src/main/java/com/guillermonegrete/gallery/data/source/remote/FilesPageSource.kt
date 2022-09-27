@@ -29,7 +29,9 @@ class FilesPageSource(
     private fun getFilesSource(nextPageNumber: Int): Single<PagedFileResponse> {
         return if(folder.name.isNotEmpty()) {
             if(tagId == 0L) filesApi.getPagedFiles(baseUrl, folder.name, nextPageNumber, sort) else filesApi.getPagedFilesByTag(folder.id, tagId, nextPageNumber, sort)
-        } else filesApi.getPagedFiles(baseUrl, nextPageNumber, sort)
+        } else {
+            if(tagId == 0L) filesApi.getPagedFiles(baseUrl, nextPageNumber, sort) else filesApi.getAllFilesByTag(tagId, nextPageNumber, sort)
+        }
     }
 
     private fun toLoadResult(response: PagedFileResponse, nextPageNumber: Int): LoadResult<Int, File> {
