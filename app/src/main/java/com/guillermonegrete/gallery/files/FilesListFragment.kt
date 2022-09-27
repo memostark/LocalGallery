@@ -47,6 +47,11 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         (context.applicationContext as MyApplication).appComponent.inject(this)
         super.onAttach(context)
         adapter = FilesAdapter(viewModel)
+
+        // Reset tags because the ViewModel is shared it may have a previous configuration
+        // Reset in this method instead of onCreateView() to avoid resetting everytime the user navigates back to this fragment (e.g. from details frag)
+        viewModel.setTag(SortingDialog.NO_TAG_ID)
+        viewModel.setFilter("")
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
