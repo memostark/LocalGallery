@@ -7,15 +7,17 @@ import android.view.View
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.GridLayoutManager
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
-import com.guillermonegrete.gallery.databinding.DialogFileOrderByBinding
+import com.guillermonegrete.gallery.common.SortDialogChecked
+import com.guillermonegrete.gallery.common.SortingDialog
+import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.databinding.FragmentFilesListBinding
 import com.guillermonegrete.gallery.files.details.FileDetailsFragment
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -37,26 +39,33 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
     private lateinit var adapter: FilesAdapter
 
     // Default values for the checked items in the sorting dialog
-    private var checkedField = R.id.by_name
-    private var checkedOrder = R.id.ascending_order
+    private var checkedField = 0
+    private var checkedOrder = SortingDialog.DEFAULT_ORDER
+    private var tagId = SortingDialog.NO_TAG_ID
 
     override fun onAttach(context: Context) {
         (context.applicationContext as MyApplication).appComponent.inject(this)
         super.onAttach(context)
         adapter = FilesAdapter(viewModel)
+
+        // Reset tags because the ViewModel is shared it may have a previous configuration
+        // Reset in this method instead of onCreateView() to avoid resetting everytime the user navigates back to this fragment (e.g. from details frag)
+        viewModel.setTag(SortingDialog.NO_TAG_ID)
+        viewModel.setFilter("")
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentFilesListBinding.bind(view)
-        val folder = arguments?.getString(FOLDER_KEY) ?: ""
+        val folder: Folder = arguments?.getParcelable(FOLDER_KEY) ?: Folder.NULL_FOLDER
 
         with(binding){
-            toolbar.title = folder
+            toolbar.title = folder.name.ifEmpty { getString(R.string.files_toolbar_title) }
             toolbar.inflateMenu(R.menu.files_list_menu)
             toolbar.setOnMenuItemClickListener {
                 if(it.itemId == R.id.action_sort){
-                    showSortDialog()
+                    val id = if(folder == Folder.NULL_FOLDER) SortingDialog.GET_ALL_TAGS else folder.id
+                    showSortDialog(id)
                     return@setOnMenuItemClickListener true
                 }
                 false
@@ -78,7 +87,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         setFileClickEvent()
     }
 
-    private fun bindViewModel(folder: String){
+    private fun bindViewModel(folder: Folder){
         adapter.addLoadStateListener(loadListener)
         val list = binding.filesList
 
@@ -128,50 +137,26 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         findNavController().navigate(R.id.fileDetailsFragment, bundle)
     }
 
-    private val fieldIdMap = mapOf(
-        R.id.by_name to "filename",
-        R.id.by_creation to "creationDate",
-        R.id.by_last_modified to "lastModified",
-    )
+    private fun showSortDialog(id: Long) {
+        val options = arrayOf("filename", "creationDate", "lastModified")
+        val action = FilesListFragmentDirections.actionFilesToSortingDialog(options, SortDialogChecked(checkedField, checkedOrder, tagId), id)
+        findNavController().navigate(action)
+        setFragmentResultListener(SortingDialog.RESULT_KEY) { _, bundle ->
+            val result: SortDialogChecked = bundle.getParcelable(SortingDialog.SORT_KEY) ?: return@setFragmentResultListener
+            if(checkedField != result.fieldIndex || checkedOrder != result.sortId || tagId != result.tagId) {
+                checkedField = result.fieldIndex
+                checkedOrder = result.sortId
+                tagId = result.tagId
 
-    private val sortIdMap = mapOf(
-        R.id.ascending_order to "asc",
-        R.id.descending_order to "desc",
-    )
+                val field = options[checkedField]
+                val order = SortingDialog.sortIdMap[checkedOrder]
 
-    private fun showSortDialog(){
-        val dialog = BottomSheetDialog(requireContext())
-        val binding = DialogFileOrderByBinding.inflate(layoutInflater)
-        dialog.setContentView(binding.root)
-
-        var changed = false
-
-        binding.fieldSort.check(checkedField)
-        binding.fieldSort.setOnCheckedChangeListener { _, checkedId ->
-            changed = true
-            checkedField = checkedId
-        }
-
-        binding.orderSort.check(checkedOrder)
-        binding.orderSort.setOnCheckedChangeListener { _, checkedId ->
-            changed = true
-            checkedOrder = checkedId
-        }
-
-        binding.doneButton.setOnClickListener {
-            if(changed) {
-                val field = fieldIdMap[checkedField] ?: "filename"
-                val sort = sortIdMap[checkedOrder] ?: "asc"
-
-                // Because ascending is the default order, don't add it to the string filter
-                val filter = if(sort == "asc") field else "$field,desc"
-                viewModel.setFilter(filter)
-                viewModel.setFolderName(arguments?.getString(FOLDER_KEY) ?: "")
+                viewModel.setTag(tagId)
+                viewModel.setFilter("$field,$order")
+                val folder: Folder = arguments?.getParcelable(FOLDER_KEY) ?: Folder.NULL_FOLDER
+                viewModel.setFolderName(folder)
             }
-            dialog.dismiss()
         }
-
-        dialog.show()
     }
 
     companion object{

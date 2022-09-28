@@ -2,17 +2,16 @@ package com.guillermonegrete.gallery.files
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
 import androidx.paging.flatMap
 import androidx.paging.map
 import androidx.paging.rxjava3.cachedIn
 import com.guillermonegrete.gallery.data.File
+import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.ImageFile
 import com.guillermonegrete.gallery.data.VideoFile
 import com.guillermonegrete.gallery.data.source.FilesRepository
 import com.guillermonegrete.gallery.data.source.SettingsRepository
 import io.reactivex.rxjava3.core.BackpressureStrategy
-import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
 import io.reactivex.rxjava3.subjects.Subject
@@ -26,8 +25,9 @@ class FilesViewModel @Inject constructor(
     val openDetails: Subject<Int> = PublishSubject.create()
     val updateRows: Subject<List<UpdatedRow>> = PublishSubject.create()
 
-    private val folderName: Subject<String> = PublishSubject.create()
+    private val folderName: Subject<Folder> = PublishSubject.create()
     private val filter: Subject<String> = BehaviorSubject.createDefault("")
+    private val tag: Subject<Long> = BehaviorSubject.createDefault(0L)
 
     private var dataSize = 0
 
@@ -36,11 +36,13 @@ class FilesViewModel @Inject constructor(
 
     var width = 0
 
-    var cachedFileList: Flowable<PagingData<File>> = filter.distinctUntilChanged().switchMap { filter ->
-        folderName.distinctUntilChanged().switchMap { folder ->
-            dataSize = 0
-            val finalFilter = filter.ifEmpty { null }
-            filesRepository.getPagedFiles(folder, finalFilter).toObservable()
+    var cachedFileList = tag.distinctUntilChanged().switchMap { tagId ->
+        filter.distinctUntilChanged().switchMap { filter ->
+            folderName.distinctUntilChanged().switchMap { folder ->
+                dataSize = 0
+                val finalFilter = filter.ifEmpty { null }
+                filesRepository.getPagedFiles(folder, tagId, finalFilter).toObservable()
+            }
         }
     }.map { pagingData ->
         pagingData.map { dataSize++; it }
@@ -115,12 +117,16 @@ class FilesViewModel @Inject constructor(
         openDetails.onNext(index)
     }
 
-    fun setFolderName(name: String){
-        folderName.onNext(name)
+    fun setFolderName(folder: Folder){
+        folderName.onNext(folder)
     }
 
     fun setFilter(filterBy: String){
         filter.onNext(filterBy)
+    }
+
+    fun setTag(tagId: Long){
+        tag.onNext(tagId)
     }
 
     @Synchronized

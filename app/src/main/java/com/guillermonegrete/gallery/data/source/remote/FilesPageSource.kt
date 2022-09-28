@@ -9,8 +9,9 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 class FilesPageSource(
     private val filesApi: FilesServerAPI,
     private val baseUrl: String,
-    private val folder: String,
-    private val sort: String?
+    private val folder: Folder,
+    private val sort: String?,
+    private val tagId: Long
 ): RxPagingSource<Int, File>() {
 
     override fun loadSingle(params: LoadParams<Int>): Single<LoadResult<Int, File>> {
@@ -22,12 +23,15 @@ class FilesPageSource(
     }
 
     /**
-     * If folder is not empty, get files from endpoint url/folder/{folder_name}
+     * If folder is not empty, get files from endpoint /folder/{folder_name} or if a tag filter is set (tagId is not zero) then from /folder/{folderId}/tags/{tagId}
      * else get it from the files/ endpoint
      */
     private fun getFilesSource(nextPageNumber: Int): Single<PagedFileResponse> {
-        return if(folder.isNotEmpty())
-            filesApi.getPagedFiles(baseUrl, folder, nextPageNumber, sort) else filesApi.getPagedFiles(baseUrl, nextPageNumber, sort)
+        return if(folder.name.isNotEmpty()) {
+            if(tagId == 0L) filesApi.getPagedFiles(baseUrl, folder.name, nextPageNumber, sort) else filesApi.getPagedFilesByTag(folder.id, tagId, nextPageNumber, sort)
+        } else {
+            if(tagId == 0L) filesApi.getPagedFiles(baseUrl, nextPageNumber, sort) else filesApi.getAllFilesByTag(tagId, nextPageNumber, sort)
+        }
     }
 
     private fun toLoadResult(response: PagedFileResponse, nextPageNumber: Int): LoadResult<Int, File> {

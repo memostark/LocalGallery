@@ -6,9 +6,10 @@ sealed class FolderUI {
     data class Model(
         val name: String,
         val coverUrl: String,
-        val count: Int
+        val count: Int,
+        val id: Long,
     ) : FolderUI() {
-        constructor(folder: Folder) : this(folder.name, folder.coverUrl, folder.count){
+        constructor(folder: Folder) : this(folder.name, folder.coverUrl, folder.count, folder.id){
             title = folder.title
         }
 

@@ -5,6 +5,8 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/folders_fragment_dest">
 
+    <!-- Destination fot the bottom tab, can't combine with the files_fragment_dest
+    destination because the bottom tab gets selected when navigating to files_fragment_dest -->
     <fragment
         android:id="@+id/all_files_dest"
         android:name="com.guillermonegrete.gallery.files.FilesListFragment"
@@ -13,6 +15,9 @@
         <action
             android:id="@+id/open_file_details"
             app:destination="@id/fileDetailsFragment" />
+        <action
+            android:id="@+id/action_files_to_sorting_dialog"
+            app:destination="@id/sorting_dialog" />
     </fragment>
 
     <fragment
@@ -38,6 +43,9 @@
         <action
             android:id="@+id/open_file_details"
             app:destination="@id/fileDetailsFragment" />
+        <action
+            android:id="@+id/action_files_to_sorting_dialog"
+            app:destination="@id/sorting_dialog" />
     </fragment>
     <fragment
         android:id="@+id/fileDetailsFragment"
@@ -64,6 +72,10 @@
         <argument
             android:name="selections"
             app:argType="com.guillermonegrete.gallery.common.SortDialogChecked"/>
+        <argument
+            android:name="folder_id"
+            android:defaultValue="0L"
+            app:argType="long"/>
     </dialog>
     <dialog
         android:id="@+id/addTagFragment"

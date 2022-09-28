@@ -10,16 +10,17 @@ import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.databinding.FolderItemBinding
 import com.guillermonegrete.gallery.databinding.FolderNameItemBinding
 import com.guillermonegrete.gallery.folders.models.FolderUI
+import io.reactivex.rxjava3.subjects.PublishSubject
 
-class FolderAdapter(
-    private val viewModel: FoldersViewModel
-): PagingDataAdapter<FolderUI, RecyclerView.ViewHolder>(FolderDiffCallback)/*, Filterable*/ {
+class FolderAdapter : PagingDataAdapter<FolderUI, RecyclerView.ViewHolder>(FolderDiffCallback) {
+
+    val clickSubject: PublishSubject<FolderUI.Model> = PublishSubject.create()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         return when(viewType) {
             R.layout.folder_name_item -> NameViewHolder(FolderNameItemBinding.inflate(inflater, parent, false))
-            else -> ViewHolder(viewModel, FolderItemBinding.inflate(inflater, parent, false))
+            else -> ViewHolder(FolderItemBinding.inflate(inflater, parent, false))
         }
     }
 
@@ -39,29 +40,7 @@ class FolderAdapter(
         }
     }
 
-    /*override fun getFilter(): Filter {
-        return object: Filter(){
-            override fun performFiltering(constraint: CharSequence?): FilterResults {
-                filteredFolders = if(constraint.isNullOrBlank()){
-                    data.folders
-                }else{
-                    data.folders.filter { it.name.toLowerCase(Locale.getDefault()).contains(constraint) }
-                }
-
-                val filterResults = FilterResults()
-                filterResults.values = filteredFolders
-                return filterResults
-            }
-
-            override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
-                filteredFolders = results?.values as List<Folder>
-                notifyDataSetChanged()
-            }
-        }
-    }*/
-
-    class ViewHolder(
-        private val viewModel: FoldersViewModel,
+    inner class ViewHolder(
         private val binding: FolderItemBinding,
     ): RecyclerView.ViewHolder(binding.root){
 
@@ -77,7 +56,10 @@ class FolderAdapter(
                     item.count
                 )
 
-                itemView.setOnClickListener { viewModel.openFolder(item.name) }
+                itemView.setOnClickListener {
+                    val folder = getItem(absoluteAdapterPosition)
+                    if(folder is FolderUI.Model) clickSubject.onNext(folder)
+                }
             }
         }
     }

@@ -45,9 +45,9 @@ class DefaultFilesRepository @Inject constructor(
         }
     }
 
-    override fun getPagedFiles(folder: String, sort: String?): Flowable<PagingData<File>> {
+    override fun getPagedFiles(folder: Folder, tagId: Long, sort: String?): Flowable<PagingData<File>> {
         return Pager(PagingConfig(pageSize = 20)) {
-            FilesPageSource(fileAPI, baseUrl, folder, sort)
+            FilesPageSource(fileAPI, baseUrl, folder, sort, tagId)
         }.flowable
     }
 
