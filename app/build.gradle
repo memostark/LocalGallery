@@ -37,6 +37,15 @@ android {
     buildFeatures {
         viewBinding true
     }
+
+    sourceSets {
+        main {
+            java {
+                // needed so the nav directions classes are updated, taken from: https://stackoverflow.com/a/62568138/10244759
+                srcDirs += 'build/generated/source/navigation-args'
+            }
+        }
+    }
 }
 
 dependencies {
