@@ -16,7 +16,7 @@ class HostSelectionInterceptor(private val settings: SettingsRepository): Interc
 
         val host: String = settings.getServerURL()
 
-        val newUrl = request.url().newBuilder()
+        val newUrl = request.url.newBuilder()
             .host(host)
             .build()
 

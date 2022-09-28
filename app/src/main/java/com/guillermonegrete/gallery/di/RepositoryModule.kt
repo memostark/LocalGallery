@@ -1,5 +1,6 @@
 package com.guillermonegrete.gallery.di
 
+import com.guillermonegrete.gallery.BuildConfig
 import com.guillermonegrete.gallery.common.HostSelectionInterceptor
 import com.guillermonegrete.gallery.data.*
 import com.guillermonegrete.gallery.data.source.DefaultFilesRepository
@@ -19,6 +20,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -46,9 +48,15 @@ object RepositoryModule {
 
     @Provides
     fun provideOkHttp(settingsRepository: SettingsRepository): OkHttpClient {
-        return OkHttpClient.Builder()
+        val clientBuilder = OkHttpClient.Builder()
             .addInterceptor(HostSelectionInterceptor(settingsRepository))
-            .build()
+
+        if(BuildConfig.DEBUG) {
+            val interceptor = HttpLoggingInterceptor()
+            interceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
+            clientBuilder.addInterceptor(interceptor)
+        }
+        return clientBuilder.build()
     }
 
     @Provides
@@ -58,7 +66,7 @@ object RepositoryModule {
     fun provideFolderAPI(retrofit: Retrofit): FoldersAPI = retrofit.create(FoldersAPI::class.java)
 
     @Provides
-    fun provideTagService(retrofit: Retrofit) = retrofit.create(TagService::class.java)
+    fun provideTagService(retrofit: Retrofit): TagService = retrofit.create(TagService::class.java)
 
 }
 

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "307548091633",
+    "project_id": "gallery-57824",
+    "storage_bucket": "gallery-57824.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:307548091633:android:fd964ff11a1ab1397de550",
+        "android_client_info": {
+          "package_name": "com.guillermonegrete.gallery"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "307548091633-tudjthbik5s3pn458veqatv4klk3v5ci.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCVj5pjK8GIemTji0IDXLPg9c6B1ZAMMxA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "307548091633-tudjthbik5s3pn458veqatv4klk3v5ci.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

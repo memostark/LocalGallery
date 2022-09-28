@@ -4,6 +4,8 @@ plugins {
     id 'kotlin-kapt'
     id 'kotlin-parcelize'
     id 'androidx.navigation.safeargs.kotlin'
+    id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
 }
 
 android {
@@ -72,6 +74,9 @@ dependencies {
     implementation "com.squareup.retrofit2:converter-moshi:$retrofit_version"
     implementation "com.squareup.retrofit2:adapter-rxjava3:$retrofit_version"
 
+    // Okhttp
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.9.3'
+
     // Moshi
     def moshi_version = "1.12.0"
     implementation "com.squareup.moshi:moshi-kotlin:$moshi_version"
@@ -80,6 +85,11 @@ dependencies {
     // RxJava
     implementation 'io.reactivex.rxjava3:rxjava:3.1.2'
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
+
+    // Firebase crashlytics
+    implementation platform('com.google.firebase:firebase-bom:30.5.0')
+    // When using the BoM, you don't specify versions in Firebase library dependencies
+    implementation 'com.google.firebase:firebase-crashlytics-ktx'
 
     // Glide
     implementation 'com.github.bumptech.glide:glide:4.9.0'
