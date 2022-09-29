@@ -14,12 +14,10 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.ViewPager2
+import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.SimpleExoPlayer
-import com.google.android.exoplayer2.source.ProgressiveMediaSource
-import com.google.android.exoplayer2.ui.PlayerView
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
-import com.google.android.exoplayer2.util.Util
+import com.google.android.exoplayer2.ui.StyledPlayerView
 import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.Tag
@@ -38,9 +36,9 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
     @Inject lateinit var viewModelFactory: ViewModelProvider.Factory
     private val viewModel by activityViewModels<FilesViewModel> { viewModelFactory }
-    private var exoPlayer: SimpleExoPlayer? = null
+    private var exoPlayer: ExoPlayer? = null
 
-    private var currentPlayerView: PlayerView? = null
+    private var currentPlayerView: StyledPlayerView? = null
 
     private val disposable = CompositeDisposable()
 
@@ -177,7 +175,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
     }
 
     private fun initializePlayer(){
-        if (exoPlayer == null) exoPlayer = SimpleExoPlayer.Builder(requireContext()).build()
+        if (exoPlayer == null) exoPlayer = ExoPlayer.Builder(requireContext()).build()
 
         val viewPager: ViewPager2 = binding.fileDetailsViewpager
         setPagerListener(viewPager)
@@ -195,8 +193,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                 player.seekTo(0)
 
                 // If playerView exists it means is a video item, create Media Source and setup ExoPlayer
-                val playerView: PlayerView = page.findViewById(R.id.exo_player_view) ?: return@setPageTransformer
-                val dataSourceFactory = DefaultDataSourceFactory(context, Util.getUserAgent(requireContext(), "player"))
+                val playerView: StyledPlayerView = page.findViewById(R.id.exo_player_view) ?: return@setPageTransformer
 
                 // Detach player from previous view and update with current view
                 currentPlayerView?.player = null
@@ -205,10 +202,8 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
                 val file = adapter.snapshot()[pageIndex] ?: return@setPageTransformer
 
-                val extractorMediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
-                    .createMediaSource(Uri.parse(file.name))
-
-                player.prepare(extractorMediaSource)
+                player.setMediaItem(MediaItem.fromUri(file.name))
+                player.prepare()
                 player.repeatMode = Player.REPEAT_MODE_ONE
                 player.playWhenReady = false
             }
