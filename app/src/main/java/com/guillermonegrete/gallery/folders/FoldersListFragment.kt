@@ -5,7 +5,6 @@ import android.content.Context
 import android.os.Bundle
 import android.view.*
 import android.view.inputmethod.InputMethodManager
-import android.widget.*
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.isGone
@@ -62,7 +61,6 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
 
         setFragmentResultListener(ServersFragment.REQUEST_KEY) { _, bundle ->
             val ip = bundle.getString(ServersFragment.IP_KEY) ?: return@setFragmentResultListener
-            Toast.makeText(context, "New ip: $ip", Toast.LENGTH_SHORT).show()
             viewModel.updateServerUrl(ip)
             loadFoldersData()
         }
@@ -140,7 +138,6 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
         viewModel.apply {
 
             disposable.add(urlAvailable
-                .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe{
                     setMessageContainer(!it, getString(R.string.no_address_message), R.drawable.ic_settings_input_antenna_black_24dp)
