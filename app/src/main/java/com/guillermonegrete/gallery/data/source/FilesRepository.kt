@@ -9,8 +9,6 @@ import io.reactivex.rxjava3.core.Single
 
 interface FilesRepository {
 
-    fun updateRepoURL(newURL: String)
-
     fun getFolders(): Single<GetFolderResponse>
 
     fun getPagedFolders(query: String?, sort: String?): Flowable<PagingData<Folder>>

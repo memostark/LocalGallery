@@ -8,14 +8,13 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 
 class FoldersPageSource(
     private val foldersAPI: FoldersAPI,
-    private val baseUrl: String,
     private val query: String?,
     private val sort: String?
 ): RxPagingSource<Int, Folder>()  {
 
     override fun loadSingle(params: LoadParams<Int>): Single<LoadResult<Int, Folder>> {
         val nextPageNumber = params.key ?: 0
-        return foldersAPI.getFolders(baseUrl, nextPageNumber, query, sort)
+        return foldersAPI.getFolders(nextPageNumber, query, sort)
             .subscribeOn(Schedulers.io())
             .map { toLoadResult(it, nextPageNumber) }
             .onErrorReturn { LoadResult.Error(it) }

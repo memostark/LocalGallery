@@ -8,7 +8,6 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 
 class FilesPageSource(
     private val filesApi: FilesServerAPI,
-    private val baseUrl: String,
     private val folder: Folder,
     private val sort: String?,
     private val tagId: Long
@@ -28,9 +27,9 @@ class FilesPageSource(
      */
     private fun getFilesSource(nextPageNumber: Int): Single<PagedFileResponse> {
         return if(folder.name.isNotEmpty()) {
-            if(tagId == 0L) filesApi.getPagedFiles(baseUrl, folder.name, nextPageNumber, sort) else filesApi.getPagedFilesByTag(folder.id, tagId, nextPageNumber, sort)
+            if(tagId == 0L) filesApi.getPagedFiles(folder.name, nextPageNumber, sort) else filesApi.getPagedFilesByTag(folder.id, tagId, nextPageNumber, sort)
         } else {
-            if(tagId == 0L) filesApi.getPagedFiles(baseUrl, nextPageNumber, sort) else filesApi.getAllFilesByTag(tagId, nextPageNumber, sort)
+            if(tagId == 0L) filesApi.getAllFiles(nextPageNumber, sort) else filesApi.getAllFilesByTag(tagId, nextPageNumber, sort)
         }
     }
 

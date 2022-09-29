@@ -10,19 +10,17 @@ import retrofit2.http.Query
 
 interface FilesServerAPI{
 
-    @GET("{baseUrl}folders")
-    fun getFolders(@Path(value="baseUrl", encoded = true)  baseUrl: String): Single<GetFolderResponse>
+    @GET("folders")
+    fun getFolders(): Single<GetFolderResponse>
 
-    @GET("{baseUrl}folders/{path}")
+    @GET("folders/{folderName}")
     fun getFiles(
-        @Path(value="baseUrl", encoded = true)  baseUrl: String,
-        @Path(value="path", encoded = false)  path: String
+        @Path(value="folderName", encoded = false) folderName: String
     ): Single<List<FileResponse>>
 
-    @GET("{baseUrl}folders/{path}")
+    @GET("folders/{folderName}")
     fun getPagedFiles(
-        @Path(value="baseUrl", encoded = true)  baseUrl: String,
-        @Path(value="path", encoded = false)  path: String,
+        @Path(value="folderName", encoded = false) folderName: String,
         @Query("page") page: Int,
         @Query("sort") sort: String? = null,
         @Query("size") size: Int = 30,
@@ -37,9 +35,8 @@ interface FilesServerAPI{
         @Query("size") size: Int = 30,
     ): Single<PagedFileResponse>
 
-    @GET("{baseUrl}files")
-    fun getPagedFiles(
-        @Path(value="baseUrl", encoded = true)  baseUrl: String,
+    @GET("files")
+    fun getAllFiles(
         @Query("page") page: Int,
         @Query("sort") sort: String? = null,
         @Query("size") size: Int = 30,
