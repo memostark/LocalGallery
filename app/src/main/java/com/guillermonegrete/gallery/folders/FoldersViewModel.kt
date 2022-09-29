@@ -20,7 +20,7 @@ class FoldersViewModel @Inject constructor(
     private val filesRepository: FilesRepository
 ): ViewModel() {
 
-    val urlAvailable: BehaviorSubject<Boolean> = BehaviorSubject.createDefault(false)
+    val urlAvailable: Subject<Boolean> = PublishSubject.create()
 
     private val urlFolder: Subject<String> = PublishSubject.create()
 
