@@ -14,18 +14,14 @@ class FakeFileServerAPI(folderServiceData: LinkedHashMap<Folder, List<FileRespon
     var filesMap = folderServiceData.mapKeys { it.key.name } as LinkedHashMap<String, List<FileResponse>>
 
 
-    override fun getFolders(
-        @Path(encoded = false, value = "baseUrl") baseUrl: String
-    ): Single<GetFolderResponse> = Single.just(GetFolderResponse("Name", folders.toList()))
+    override fun getFolders(): Single<GetFolderResponse> = Single.just(GetFolderResponse("Name", folders.toList()))
 
     override fun getFiles(
-        @Path(encoded = true, value = "baseUrl") baseUrl: String,
-        @Path(encoded = false, value = "path") path: String
-    ): Single<List<FileResponse>> = Single.just(filesMap[path])
+        @Path(encoded = false, value = "path") folderName: String
+    ): Single<List<FileResponse>> = Single.just(filesMap[folderName])
 
     override fun getPagedFiles(
-        baseUrl: String,
-        path: String,
+        folderName: String,
         page: Int,
         sort: String?,
         size: Int
@@ -33,8 +29,26 @@ class FakeFileServerAPI(folderServiceData: LinkedHashMap<Folder, List<FileRespon
         TODO("Not yet implemented")
     }
 
-    override fun getPagedFiles(
-        baseUrl: String,
+    override fun getPagedFilesByTag(
+        folderId: Long,
+        tagId: Long,
+        page: Int,
+        sort: String?,
+        size: Int
+    ): Single<PagedFileResponse> {
+        TODO("Not yet implemented")
+    }
+
+    override fun getAllFiles(
+        page: Int,
+        sort: String?,
+        size: Int
+    ): Single<PagedFileResponse> {
+        TODO("Not yet implemented")
+    }
+
+    override fun getAllFilesByTag(
+        tagId: Long,
         page: Int,
         sort: String?,
         size: Int

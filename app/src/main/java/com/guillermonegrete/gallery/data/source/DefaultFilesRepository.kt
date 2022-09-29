@@ -1,6 +1,5 @@
 package com.guillermonegrete.gallery.data.source
 
-import android.util.Patterns
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -19,27 +18,18 @@ class DefaultFilesRepository @Inject constructor(
     private val foldersAPI: FoldersAPI
 ): FilesRepository {
 
-    private var baseUrl = ""
-        set(newUrl){
-            field = if(Patterns.WEB_URL.matcher(newUrl).matches()) newUrl else BASE_URL
-        }
-
-    override fun updateRepoURL(newURL: String) {
-        baseUrl = "http://$newURL/"
-    }
-
     override fun getFolders(): Single<GetFolderResponse> {
-        return fileAPI.getFolders(baseUrl)
+        return fileAPI.getFolders()
     }
 
     override fun getPagedFolders(query: String?, sort: String?): Flowable<PagingData<Folder>> {
         return Pager(PagingConfig(pageSize = 20)) {
-            FoldersPageSource(foldersAPI, baseUrl, query, sort)
+            FoldersPageSource(foldersAPI, query, sort)
         }.flowable
     }
 
     override fun getFiles(folder: String): Single<List<File>> {
-        return fileAPI.getFiles(baseUrl, folder).map { list ->
+        return fileAPI.getFiles(folder).map { list ->
             // This map should not be necessary later because a Moshi adapter should handle the file object creation
             list.map { response -> println(response); response.toFile() }
         }
@@ -47,7 +37,7 @@ class DefaultFilesRepository @Inject constructor(
 
     override fun getPagedFiles(folder: Folder, tagId: Long, sort: String?): Flowable<PagingData<File>> {
         return Pager(PagingConfig(pageSize = 20)) {
-            FilesPageSource(fileAPI, baseUrl, folder, sort, tagId)
+            FilesPageSource(fileAPI, folder, sort, tagId)
         }.flowable
     }
 

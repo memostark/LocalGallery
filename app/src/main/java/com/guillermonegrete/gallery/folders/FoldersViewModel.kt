@@ -47,17 +47,11 @@ class FoldersViewModel @Inject constructor(
         }
     }.toFlowable(BackpressureStrategy.LATEST).cachedIn(viewModelScope)
 
-    init {
-        val url = settings.getServerURL()
-        filesRepository.updateRepoURL(url)
-    }
-
     fun getDialogData(): Single<String> {
         return settings.getServerUrl()
     }
 
     fun updateServerUrl(url: String) {
-        filesRepository.updateRepoURL(url)
         settings.saveServerURL(url)
     }
 
