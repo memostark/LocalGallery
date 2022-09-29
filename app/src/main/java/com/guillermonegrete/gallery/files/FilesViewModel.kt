@@ -27,6 +27,11 @@ class FilesViewModel @Inject constructor(
     private val filter: Subject<String> = BehaviorSubject.createDefault("")
     private val tag: Subject<Long> = BehaviorSubject.createDefault(0L)
 
+    /**
+     * Used to notify if the position was changed by swiping in the details view.
+     */
+    val newFilePos: Subject<Int> = PublishSubject.create()
+
     private var dataSize = 0
 
     private val arMin = 2.0f
@@ -120,6 +125,10 @@ class FilesViewModel @Inject constructor(
 
     fun setTag(tagId: Long){
         tag.onNext(tagId)
+    }
+
+    fun setNewPos(pos: Int){
+        newFilePos.onNext(pos)
     }
 
     @Synchronized

@@ -117,6 +117,12 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                     adapter.snapshot().items[row.pos].width = row.size.width
                     adapter.snapshot().items[row.pos].height = row.size.height
                 }}, { error -> Timber.e(error,"Error updating rows") }
+                ),
+            viewModel.newFilePos.
+                observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    { (binding.filesList.layoutManager as GridLayoutManager).scrollToPositionWithOffset(it, 0) },
+                    { error -> Timber.e(error) }
                 )
         )
 

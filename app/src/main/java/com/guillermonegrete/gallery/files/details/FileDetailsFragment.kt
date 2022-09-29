@@ -1,7 +1,6 @@
 package com.guillermonegrete.gallery.files.details
 
 import android.content.Context
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -44,6 +43,8 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
     private lateinit var adapter: FileDetailsAdapter
 
+    private var index = 0
+
     override fun onAttach(context: Context) {
         (context.applicationContext as MyApplication).appComponent.inject(this)
         super.onAttach(context)
@@ -80,7 +81,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
     private fun setUpViewModel() {
         binding.fileDetailsViewpager.adapter = adapter
 
-        val index = arguments?.getInt(FILE_INDEX_KEY) ?: 0
+        index = arguments?.getInt(FILE_INDEX_KEY) ?: 0
 
         disposable.add(viewModel.cachedFileList
             .subscribeOn(Schedulers.io())
@@ -106,6 +107,9 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
     }
 
     override fun onDestroyView() {
+        val pagerPos = binding.fileDetailsViewpager.currentItem
+        if(pagerPos != index + 1) viewModel.setNewPos(pagerPos)
+
         binding.fileDetailsViewpager.adapter = null
         _binding = null
         disposable.clear()
