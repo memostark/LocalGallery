@@ -121,7 +121,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
             viewModel.newFilePos.
                 observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                    { (binding.filesList.layoutManager as GridLayoutManager).scrollToPositionWithOffset(it, 0) },
+                    { layoutManager.scrollToPositionWithOffset(it, 0) },
                     { error -> Timber.e(error) }
                 )
         )

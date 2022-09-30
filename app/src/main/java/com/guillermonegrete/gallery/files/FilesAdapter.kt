@@ -53,7 +53,7 @@ class FilesAdapter(
 
         fun bind(item: File){
             itemView.layoutParams = FrameLayout.LayoutParams(item.width, item.height)
-            val realPos = bindingAdapterPosition - 1
+            val realPos = absoluteAdapterPosition
             image.setOnClickListener { viewModel.openFilesDetails(realPos) }
 
             Glide.with(itemView)

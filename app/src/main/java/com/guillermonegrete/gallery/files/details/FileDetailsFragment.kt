@@ -89,7 +89,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
             .subscribe(
                 {
                     adapter.submitData(lifecycle, it)
-                    binding.fileDetailsViewpager.setCurrentItem(index + 1, false)
+                    binding.fileDetailsViewpager.setCurrentItem(index, false)
                 },
                 { error -> Timber.e(error, "Error loading files") }
             )
@@ -108,7 +108,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
     override fun onDestroyView() {
         val pagerPos = binding.fileDetailsViewpager.currentItem
-        if(pagerPos != index + 1) viewModel.setNewPos(pagerPos)
+        if(pagerPos != index) viewModel.setNewPos(pagerPos)
 
         binding.fileDetailsViewpager.adapter = null
         _binding = null
