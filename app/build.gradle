@@ -112,9 +112,6 @@ dependencies {
     implementation "androidx.paging:paging-runtime-ktx:$paging_version"
     implementation "androidx.paging:paging-rxjava3:$paging_version"
 
-    // Kotlin
-    implementation "androidx.fragment:fragment-ktx:1.2.0-beta2"
-
     // LeakCanary
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
 

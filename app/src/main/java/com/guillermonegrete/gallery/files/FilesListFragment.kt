@@ -117,6 +117,17 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                     adapter.snapshot().items[row.pos].width = row.size.width
                     adapter.snapshot().items[row.pos].height = row.size.height
                 }}, { error -> Timber.e(error,"Error updating rows") }
+                ),
+            viewModel.newFilePos.
+                observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    {
+                        // Hide the appbar because it pushes the layout which sometimes makes the item
+                        // not fully visible
+                        binding.appbar.setExpanded(false)
+                        layoutManager.scrollToPosition(it)
+                    },
+                    { error -> Timber.e(error) }
                 )
         )
 
