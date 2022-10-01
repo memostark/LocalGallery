@@ -72,6 +72,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
             }
         }
         bindViewModel(folder)
+        setFileClickEvent()
     }
 
     override fun onDestroyView() {
@@ -80,11 +81,6 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         disposable.clear()
         adapter.removeLoadStateListener(loadListener)
         super.onDestroyView()
-    }
-
-    override fun onStart() {
-        super.onStart()
-        setFileClickEvent()
     }
 
     private fun bindViewModel(folder: Folder){
