@@ -76,6 +76,7 @@ class AddTagFragment: BottomSheetDialogFragment() {
 
             adapter = TagSuggestionsAdapter { tag ->
                 addChip(tagsGroup, tag)
+                if (newTagEdit.text.isNotEmpty()) newTagEdit.setText("")
             }
 
             newTagEdit.setOnEditorActionListener { v, actionId, _ ->
