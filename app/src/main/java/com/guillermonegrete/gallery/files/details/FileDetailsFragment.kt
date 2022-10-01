@@ -108,7 +108,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
     override fun onDestroyView() {
         val pagerPos = binding.fileDetailsViewpager.currentItem
-        if(pagerPos != index) viewModel.setNewPos(pagerPos)
+        viewModel.setNewPos(pagerPos)
 
         binding.fileDetailsViewpager.adapter = null
         _binding = null

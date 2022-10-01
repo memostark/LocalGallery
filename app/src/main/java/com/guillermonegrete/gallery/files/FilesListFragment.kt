@@ -121,7 +121,12 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
             viewModel.newFilePos.
                 observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                    { layoutManager.scrollToPositionWithOffset(it, 0) },
+                    {
+                        // Hide the appbar because it pushes the layout which sometimes makes the item
+                        // not fully visible
+                        binding.appbar.setExpanded(false)
+                        layoutManager.scrollToPosition(it)
+                    },
                     { error -> Timber.e(error) }
                 )
         )
