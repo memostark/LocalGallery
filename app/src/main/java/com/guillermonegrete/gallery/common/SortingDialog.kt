@@ -17,12 +17,12 @@ import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.databinding.ChoiceChipBinding
 import com.guillermonegrete.gallery.databinding.DialogFileOrderByBinding
+import com.guillermonegrete.gallery.files.SortField
 import com.guillermonegrete.gallery.tags.TagRepository
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.parcelize.Parcelize
 import timber.log.Timber
-import java.util.*
 import javax.inject.Inject
 
 class SortingDialog: BottomSheetDialogFragment() {
@@ -32,7 +32,6 @@ class SortingDialog: BottomSheetDialogFragment() {
     @Inject lateinit var tagRepository: TagRepository
     private val disposable = CompositeDisposable()
 
-    private var checkedField = 0
     private var checkedOrder = Order.DEFAULT
     private var checkedTagId = NO_TAG_ID
 
@@ -47,22 +46,22 @@ class SortingDialog: BottomSheetDialogFragment() {
         with(binding){
             fieldSort.removeAllViews()
 
-            args.options.mapIndexed { index, option ->
+            args.options.map { option ->
                 val rb = RadioButton(ContextThemeWrapper(context, R.style.SortDialogRadioButton)).apply {
-                    text = option.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
-                    id = index
+                    text = option.display
+                    id = option.id
                 }
                 fieldSort.addView(rb)
             }
 
             val selections = args.selections
-            checkedField = selections.fieldIndex
+            var checkedField = selections.field
             checkedOrder = selections.sort
-            fieldSort.check(checkedField)
+            fieldSort.check(checkedField.ordinal)
             orderSort.check(checkedOrder.id)
 
             fieldSort.setOnCheckedChangeListener { _, i ->
-                checkedField = i
+                checkedField = SortField.fromInteger(i)
             }
 
             orderSort.setOnCheckedChangeListener { _, i ->
@@ -137,13 +136,17 @@ class SortingDialog: BottomSheetDialogFragment() {
     }
 }
 
+/**
+ * Class used to pass the [display] text and [id] for the RadioButton.
+ *
+ * Because enums can't be passed through nav args this class is required.
+ */
+@Parcelize
+data class Field(val display: String, val id: Int): Parcelable
+
 @Parcelize
 data class SortDialogChecked(
-    /**
-     * The position in the array of the selected field.
-     * The array is the other nav arg of the sorting dialog
-     */
-    val fieldIndex: Int,
+    val field: SortField,
     val sort: SortingDialog.Order,
     val tagId: Long = 0L,
 ): Parcelable

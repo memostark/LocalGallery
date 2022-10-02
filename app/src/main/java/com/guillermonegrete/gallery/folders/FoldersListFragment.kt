@@ -25,6 +25,7 @@ import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.source.SettingsRepository
 import com.guillermonegrete.gallery.databinding.FragmentFoldersListBinding
 import com.guillermonegrete.gallery.files.FilesListFragment
+import com.guillermonegrete.gallery.files.SortField
 import com.guillermonegrete.gallery.servers.ServersFragment
 import com.jakewharton.rxbinding4.appcompat.queryTextChanges
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -46,7 +47,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
 
     @Inject lateinit var preferences: SettingsRepository
 
-    private var checkedField = 0
+    private var checkedField = SortField.DEFAULT_FOLDER
     private var checkedOrder = SortingDialog.Order.DEFAULT
 
     private val disposable = CompositeDisposable()
@@ -86,17 +87,16 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                         true
                     }
                     R.id.action_sort -> {
-                        val options = arrayOf("name", "count")
+                        val options = SortField.toDisplayArray(listOf(SortField.NAME, SortField.COUNT))
                         val action = FoldersListFragmentDirections.actionFoldersToSortingDialog(options, SortDialogChecked(checkedField, checkedOrder))
                         findNavController().navigate(action)
                         setFragmentResultListener(SortingDialog.RESULT_KEY) { _, bundle ->
                             // We use a String here, but any type that can be put in a Bundle is supported
                             val result: SortDialogChecked = bundle.getParcelable(SortingDialog.SORT_KEY) ?: return@setFragmentResultListener
-                            checkedField = result.fieldIndex
+                            checkedField = result.field
                             checkedOrder = result.sort
-                            val field = options[checkedField]
 
-                            viewModel.updateSort("$field,${checkedOrder.oder}")
+                            viewModel.updateSort("${checkedField.field},${checkedOrder.oder}")
                             viewModel.getFolders()
                         }
                         true

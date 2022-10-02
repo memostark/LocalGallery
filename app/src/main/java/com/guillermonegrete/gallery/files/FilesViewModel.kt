@@ -21,7 +21,7 @@ class FilesViewModel @Inject constructor(
     private val filesRepository: FilesRepository,
 ): ViewModel() {
 
-    private val defaultFilter: String = "${FilesSorting.DEFAULT.field},${SortingDialog.Order.DEFAULT.oder}"
+    private val defaultFilter: String = "${SortField.DEFAULT.field},${SortingDialog.Order.DEFAULT.oder}"
 
     val openDetails: Subject<Int> = PublishSubject.create()
     val updateRows: Subject<List<UpdatedRow>> = PublishSubject.create()

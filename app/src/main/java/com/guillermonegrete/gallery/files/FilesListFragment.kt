@@ -39,7 +39,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
     private lateinit var adapter: FilesAdapter
 
     // Default values for the checked items in the sorting dialog
-    private var checkedField = FilesSorting.DEFAULT
+    private var checkedField = SortField.DEFAULT
     private var checkedOrder = SortingDialog.Order.DEFAULT
     private var tagId = SortingDialog.NO_TAG_ID
 
@@ -145,12 +145,13 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
     }
 
     private fun showSortDialog(id: Long) {
-        val action = FilesListFragmentDirections.actionFilesToSortingDialog(FilesSorting.toArray(), SortDialogChecked(checkedField.ordinal, checkedOrder, tagId), id)
+        val options = SortField.toDisplayArray(listOf(SortField.FILENAME, SortField.CREATED, SortField.MODIFIED))
+        val action = FilesListFragmentDirections.actionFilesToSortingDialog(options, SortDialogChecked(checkedField, checkedOrder, tagId), id)
         findNavController().navigate(action)
         setFragmentResultListener(SortingDialog.RESULT_KEY) { _, bundle ->
             val result: SortDialogChecked = bundle.getParcelable(SortingDialog.SORT_KEY) ?: return@setFragmentResultListener
-            if(checkedField.ordinal != result.fieldIndex || checkedOrder != result.sort || tagId != result.tagId) {
-                checkedField = FilesSorting.fromInteger(result.fieldIndex)
+            if(checkedField != result.field || checkedOrder != result.sort || tagId != result.tagId) {
+                checkedField = result.field
                 checkedOrder = result.sort
                 tagId = result.tagId
 
