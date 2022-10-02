@@ -5,8 +5,10 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.insertSeparators
 import androidx.paging.map
 import androidx.paging.rxjava3.cachedIn
+import com.guillermonegrete.gallery.common.Order
 import com.guillermonegrete.gallery.data.source.FilesRepository
 import com.guillermonegrete.gallery.data.source.SettingsRepository
+import com.guillermonegrete.gallery.files.SortField
 import com.guillermonegrete.gallery.folders.models.FolderUI
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Single
@@ -20,11 +22,13 @@ class FoldersViewModel @Inject constructor(
     private val filesRepository: FilesRepository
 ): ViewModel() {
 
+    private val defaultFilter: String = "${DEFAULT_FIELD.field},${Order.DEFAULT.oder}"
+
     val urlAvailable: Subject<Boolean> = PublishSubject.create()
 
     private val urlFolder: Subject<String> = PublishSubject.create()
 
-    private val searchQuery: Subject<String> = BehaviorSubject.createDefault("")
+    private val searchQuery: Subject<String> = BehaviorSubject.createDefault(defaultFilter)
 
     private val sort: Subject<String> = BehaviorSubject.createDefault("")
 
@@ -32,7 +36,7 @@ class FoldersViewModel @Inject constructor(
         urlFolder.switchMap {
             searchQuery.switchMap { query ->
                 val finalQuery = query.ifEmpty { null }
-                val finalFilter = filter.ifEmpty { null }
+                val finalFilter = filter.ifEmpty { defaultFilter }
                 filesRepository.getPagedFolders(finalQuery, finalFilter)
                     .map { pagingData ->
                         pagingData.map { folder -> FolderUI.Model(folder) }
@@ -71,5 +75,9 @@ class FoldersViewModel @Inject constructor(
 
     fun updateSort(query: CharSequence) {
         sort.onNext(query.toString())
+    }
+
+    companion object{
+        val DEFAULT_FIELD = SortField.NAME
     }
 }

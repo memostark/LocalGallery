@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.flatMap
 import androidx.paging.map
 import androidx.paging.rxjava3.cachedIn
+import com.guillermonegrete.gallery.common.Order
 import com.guillermonegrete.gallery.data.File
 import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.ImageFile
@@ -20,11 +21,13 @@ class FilesViewModel @Inject constructor(
     private val filesRepository: FilesRepository,
 ): ViewModel() {
 
+    private val defaultFilter: String = "${SortField.DEFAULT.field},${Order.DEFAULT.oder}"
+
     val openDetails: Subject<Int> = PublishSubject.create()
     val updateRows: Subject<List<UpdatedRow>> = PublishSubject.create()
 
     private val folderName: Subject<Folder> = PublishSubject.create()
-    private val filter: Subject<String> = BehaviorSubject.createDefault("")
+    private val filter: Subject<String> = BehaviorSubject.createDefault(defaultFilter)
     private val tag: Subject<Long> = BehaviorSubject.createDefault(0L)
 
     /**
@@ -43,7 +46,7 @@ class FilesViewModel @Inject constructor(
         filter.distinctUntilChanged().switchMap { filter ->
             folderName.distinctUntilChanged().switchMap { folder ->
                 dataSize = 0
-                val finalFilter = filter.ifEmpty { null }
+                val finalFilter = filter.ifEmpty { defaultFilter }
                 filesRepository.getPagedFiles(folder, tagId, finalFilter).toObservable()
             }
         }

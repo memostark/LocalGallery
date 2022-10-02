@@ -17,12 +17,12 @@ import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.databinding.ChoiceChipBinding
 import com.guillermonegrete.gallery.databinding.DialogFileOrderByBinding
+import com.guillermonegrete.gallery.files.SortField
 import com.guillermonegrete.gallery.tags.TagRepository
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.parcelize.Parcelize
 import timber.log.Timber
-import java.util.*
 import javax.inject.Inject
 
 class SortingDialog: BottomSheetDialogFragment() {
@@ -32,8 +32,7 @@ class SortingDialog: BottomSheetDialogFragment() {
     @Inject lateinit var tagRepository: TagRepository
     private val disposable = CompositeDisposable()
 
-    private var checkedField = 0
-    private var checkedOrder = DEFAULT_ORDER
+    private var checkedOrder = Order.DEFAULT
     private var checkedTagId = NO_TAG_ID
 
     override fun onAttach(context: Context) {
@@ -47,31 +46,33 @@ class SortingDialog: BottomSheetDialogFragment() {
         with(binding){
             fieldSort.removeAllViews()
 
-            args.options.mapIndexed { index, option ->
+            args.options.map { option ->
                 val rb = RadioButton(ContextThemeWrapper(context, R.style.SortDialogRadioButton)).apply {
-                    text = option.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
-                    id = index
+                    text = option.display
+                    id = option.id
                 }
                 fieldSort.addView(rb)
             }
 
             val selections = args.selections
-            checkedField = selections.fieldIndex
-            checkedOrder = selections.sortId
-            fieldSort.check(checkedField)
-            orderSort.check(checkedOrder)
+            var checkedField = selections.field
+            checkedOrder = selections.sort
+            fieldSort.check(checkedField.ordinal)
+            orderSort.check(checkedOrder.id)
 
             fieldSort.setOnCheckedChangeListener { _, i ->
-                checkedField = i
+                checkedField = SortField.fromInteger(i)
             }
 
             orderSort.setOnCheckedChangeListener { _, i ->
-                checkedOrder = i
+                checkedOrder = Order.fromInteger(i)
             }
 
             doneButton.setOnClickListener {
                 dismiss()
-                setFragmentResult(RESULT_KEY, bundleOf(SORT_KEY to SortDialogChecked(checkedField, checkedOrder, checkedTagId)))
+                if(selections.field != checkedField || selections.sort != checkedOrder || selections.tagId != checkedTagId) {
+                    setFragmentResult(RESULT_KEY, bundleOf(SORT_KEY to SortDialogChecked(checkedField, checkedOrder, checkedTagId)))
+                }
             }
 
             // handle tags
@@ -86,7 +87,10 @@ class SortingDialog: BottomSheetDialogFragment() {
                             tags.forEach { tag ->
                                 val chip =  ChoiceChipBinding.inflate(LayoutInflater.from(context)).root
                                 chip.text = tag.name
-                                if (tag.id == args.selections.tagId) chip.isChecked = true
+                                if (tag.id == args.selections.tagId) {
+                                    checkedTagId = tag.id
+                                    chip.isChecked = true
+                                }
                                 chip.setOnCheckedChangeListener { _, isChecked ->
                                     if(isChecked) checkedTagId = tag.id
                                     else if (checkedTagId == tag.id) checkedTagId = NO_TAG_ID // unselected
@@ -114,24 +118,40 @@ class SortingDialog: BottomSheetDialogFragment() {
         const val RESULT_KEY = "sort_dialog_result"
         const val SORT_KEY = "sort_key"
 
-        const val DEFAULT_ORDER = R.id.descending_order
         const val NO_TAG_ID = 0L
 
         /**
          * Used to indicate to get all the tags instead of just the tags of a specific folder
          */
         const val GET_ALL_TAGS = -1L
-
-        val sortIdMap = mapOf(
-            R.id.ascending_order to "asc",
-            DEFAULT_ORDER to "desc",
-        )
     }
 }
 
+enum class Order(val id: Int, val oder: String){
+    ASC(R.id.ascending_order, "asc"),
+    DESC(R.id.descending_order, "desc");
+
+    companion object {
+
+        fun fromInteger(id: Int): Order {
+            return values().firstOrNull { it.id == id} ?: DEFAULT
+        }
+
+        val DEFAULT = ASC
+    }
+}
+
+/**
+ * Class used to pass the [display] text and [id] for the RadioButton.
+ *
+ * Because enums can't be passed through nav args this class is required.
+ */
+@Parcelize
+data class Field(val display: String, val id: Int): Parcelable
+
 @Parcelize
 data class SortDialogChecked(
-    val fieldIndex: Int,
-    val sortId: Int,
+    val field: SortField,
+    val sort: Order,
     val tagId: Long = 0L,
 ): Parcelable

@@ -15,6 +15,7 @@ import androidx.paging.LoadState
 import androidx.recyclerview.widget.GridLayoutManager
 import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
+import com.guillermonegrete.gallery.common.Order
 import com.guillermonegrete.gallery.common.SortDialogChecked
 import com.guillermonegrete.gallery.common.SortingDialog
 import com.guillermonegrete.gallery.data.Folder
@@ -39,8 +40,8 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
     private lateinit var adapter: FilesAdapter
 
     // Default values for the checked items in the sorting dialog
-    private var checkedField = 0
-    private var checkedOrder = SortingDialog.DEFAULT_ORDER
+    private var checkedField = SortField.DEFAULT
+    private var checkedOrder = Order.DEFAULT
     private var tagId = SortingDialog.NO_TAG_ID
 
     override fun onAttach(context: Context) {
@@ -51,7 +52,13 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         // Reset tags because the ViewModel is shared it may have a previous configuration
         // Reset in this method instead of onCreateView() to avoid resetting everytime the user navigates back to this fragment (e.g. from details frag)
         viewModel.setTag(SortingDialog.NO_TAG_ID)
-        viewModel.setFilter("")
+        val isAllFiles =  arguments?.getParcelable<Folder>(FOLDER_KEY) == null
+        if(isAllFiles) {
+            // Default sort for all files (most recent)
+            checkedField = SortField.CREATED
+            checkedOrder = Order.DESC
+        }
+        viewModel.setFilter("${checkedField.field},${checkedOrder.oder}")
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -59,12 +66,13 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         _binding = FragmentFilesListBinding.bind(view)
         val folder: Folder = arguments?.getParcelable(FOLDER_KEY) ?: Folder.NULL_FOLDER
 
+        val id = if(folder == Folder.NULL_FOLDER) SortingDialog.GET_ALL_TAGS else folder.id
+
         with(binding){
             toolbar.title = folder.name.ifEmpty { getString(R.string.files_toolbar_title) }
             toolbar.inflateMenu(R.menu.files_list_menu)
             toolbar.setOnMenuItemClickListener {
                 if(it.itemId == R.id.action_sort){
-                    val id = if(folder == Folder.NULL_FOLDER) SortingDialog.GET_ALL_TAGS else folder.id
                     showSortDialog(id)
                     return@setOnMenuItemClickListener true
                 }
@@ -145,24 +153,19 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
     }
 
     private fun showSortDialog(id: Long) {
-        val options = arrayOf("filename", "creationDate", "lastModified")
+        val options = SortField.toDisplayArray(listOf(SortField.FILENAME, SortField.CREATED, SortField.MODIFIED))
         val action = FilesListFragmentDirections.actionFilesToSortingDialog(options, SortDialogChecked(checkedField, checkedOrder, tagId), id)
         findNavController().navigate(action)
         setFragmentResultListener(SortingDialog.RESULT_KEY) { _, bundle ->
             val result: SortDialogChecked = bundle.getParcelable(SortingDialog.SORT_KEY) ?: return@setFragmentResultListener
-            if(checkedField != result.fieldIndex || checkedOrder != result.sortId || tagId != result.tagId) {
-                checkedField = result.fieldIndex
-                checkedOrder = result.sortId
-                tagId = result.tagId
+            checkedField = result.field
+            checkedOrder = result.sort
+            tagId = result.tagId
 
-                val field = options[checkedField]
-                val order = SortingDialog.sortIdMap[checkedOrder]
-
-                viewModel.setTag(tagId)
-                viewModel.setFilter("$field,$order")
-                val folder: Folder = arguments?.getParcelable(FOLDER_KEY) ?: Folder.NULL_FOLDER
-                viewModel.setFolderName(folder)
-            }
+            viewModel.setTag(tagId)
+            viewModel.setFilter("${checkedField.field},${checkedOrder.oder}")
+            val folder: Folder = arguments?.getParcelable(FOLDER_KEY) ?: Folder.NULL_FOLDER
+            viewModel.setFolderName(folder)
         }
     }
 
