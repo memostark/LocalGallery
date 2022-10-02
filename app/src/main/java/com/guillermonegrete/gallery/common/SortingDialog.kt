@@ -70,7 +70,9 @@ class SortingDialog: BottomSheetDialogFragment() {
 
             doneButton.setOnClickListener {
                 dismiss()
-                setFragmentResult(RESULT_KEY, bundleOf(SORT_KEY to SortDialogChecked(checkedField, checkedOrder, checkedTagId)))
+                if(selections.field != checkedField || selections.sort != checkedOrder || selections.tagId != checkedTagId) {
+                    setFragmentResult(RESULT_KEY, bundleOf(SORT_KEY to SortDialogChecked(checkedField, checkedOrder, checkedTagId)))
+                }
             }
 
             // handle tags
@@ -85,7 +87,10 @@ class SortingDialog: BottomSheetDialogFragment() {
                             tags.forEach { tag ->
                                 val chip =  ChoiceChipBinding.inflate(LayoutInflater.from(context)).root
                                 chip.text = tag.name
-                                if (tag.id == args.selections.tagId) chip.isChecked = true
+                                if (tag.id == args.selections.tagId) {
+                                    checkedTagId = tag.id
+                                    chip.isChecked = true
+                                }
                                 chip.setOnCheckedChangeListener { _, isChecked ->
                                     if(isChecked) checkedTagId = tag.id
                                     else if (checkedTagId == tag.id) checkedTagId = NO_TAG_ID // unselected

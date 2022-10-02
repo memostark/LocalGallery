@@ -158,16 +158,14 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         findNavController().navigate(action)
         setFragmentResultListener(SortingDialog.RESULT_KEY) { _, bundle ->
             val result: SortDialogChecked = bundle.getParcelable(SortingDialog.SORT_KEY) ?: return@setFragmentResultListener
-            if(checkedField != result.field || checkedOrder != result.sort || tagId != result.tagId) {
-                checkedField = result.field
-                checkedOrder = result.sort
-                tagId = result.tagId
+            checkedField = result.field
+            checkedOrder = result.sort
+            tagId = result.tagId
 
-                viewModel.setTag(tagId)
-                viewModel.setFilter("${checkedField.field},${checkedOrder.oder}")
-                val folder: Folder = arguments?.getParcelable(FOLDER_KEY) ?: Folder.NULL_FOLDER
-                viewModel.setFolderName(folder)
-            }
+            viewModel.setTag(tagId)
+            viewModel.setFilter("${checkedField.field},${checkedOrder.oder}")
+            val folder: Folder = arguments?.getParcelable(FOLDER_KEY) ?: Folder.NULL_FOLDER
+            viewModel.setFolderName(folder)
         }
     }
 
