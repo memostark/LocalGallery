@@ -47,7 +47,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
     @Inject lateinit var preferences: SettingsRepository
 
     private var checkedField = 0
-    private var checkedOrder = SortingDialog.DEFAULT_ORDER
+    private var checkedOrder = SortingDialog.Order.DEFAULT
 
     private val disposable = CompositeDisposable()
 
@@ -93,10 +93,10 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                             // We use a String here, but any type that can be put in a Bundle is supported
                             val result: SortDialogChecked = bundle.getParcelable(SortingDialog.SORT_KEY) ?: return@setFragmentResultListener
                             checkedField = result.fieldIndex
-                            checkedOrder = result.sortId
+                            checkedOrder = result.sort
                             val field = options[checkedField]
-                            val order = SortingDialog.sortIdMap[checkedOrder]
-                            viewModel.updateSort("$field,$order")
+
+                            viewModel.updateSort("$field,${checkedOrder.oder}")
                             viewModel.getFolders()
                         }
                         true

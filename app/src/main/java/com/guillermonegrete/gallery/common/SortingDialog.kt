@@ -33,7 +33,7 @@ class SortingDialog: BottomSheetDialogFragment() {
     private val disposable = CompositeDisposable()
 
     private var checkedField = 0
-    private var checkedOrder = DEFAULT_ORDER
+    private var checkedOrder = Order.DEFAULT
     private var checkedTagId = NO_TAG_ID
 
     override fun onAttach(context: Context) {
@@ -57,16 +57,16 @@ class SortingDialog: BottomSheetDialogFragment() {
 
             val selections = args.selections
             checkedField = selections.fieldIndex
-            checkedOrder = selections.sortId
+            checkedOrder = selections.sort
             fieldSort.check(checkedField)
-            orderSort.check(checkedOrder)
+            orderSort.check(checkedOrder.id)
 
             fieldSort.setOnCheckedChangeListener { _, i ->
                 checkedField = i
             }
 
             orderSort.setOnCheckedChangeListener { _, i ->
-                checkedOrder = i
+                checkedOrder = Order.fromInteger(i)
             }
 
             doneButton.setOnClickListener {
@@ -114,24 +114,36 @@ class SortingDialog: BottomSheetDialogFragment() {
         const val RESULT_KEY = "sort_dialog_result"
         const val SORT_KEY = "sort_key"
 
-        const val DEFAULT_ORDER = R.id.descending_order
         const val NO_TAG_ID = 0L
 
         /**
          * Used to indicate to get all the tags instead of just the tags of a specific folder
          */
         const val GET_ALL_TAGS = -1L
+    }
 
-        val sortIdMap = mapOf(
-            R.id.ascending_order to "asc",
-            DEFAULT_ORDER to "desc",
-        )
+    enum class Order(val id: Int, val oder: String){
+        ASC(R.id.ascending_order, "asc"),
+        DESC(R.id.descending_order, "desc");
+
+        companion object {
+
+            fun fromInteger(id: Int): Order {
+                return values().firstOrNull { it.id == id} ?: DEFAULT
+            }
+
+            val DEFAULT = DESC
+        }
     }
 }
 
 @Parcelize
 data class SortDialogChecked(
+    /**
+     * The position in the array of the selected field.
+     * The array is the other nav arg of the sorting dialog
+     */
     val fieldIndex: Int,
-    val sortId: Int,
+    val sort: SortingDialog.Order,
     val tagId: Long = 0L,
 ): Parcelable
