@@ -19,6 +19,7 @@ import androidx.paging.LoadState
 import androidx.recyclerview.widget.GridLayoutManager
 import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
+import com.guillermonegrete.gallery.common.Order
 import com.guillermonegrete.gallery.common.SortDialogChecked
 import com.guillermonegrete.gallery.common.SortingDialog
 import com.guillermonegrete.gallery.data.Folder
@@ -47,8 +48,8 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
 
     @Inject lateinit var preferences: SettingsRepository
 
-    private var checkedField = SortField.DEFAULT_FOLDER
-    private var checkedOrder = SortingDialog.Order.DEFAULT
+    private var checkedField = FoldersViewModel.DEFAULT_FIELD
+    private var checkedOrder = Order.DEFAULT
 
     private val disposable = CompositeDisposable()
 

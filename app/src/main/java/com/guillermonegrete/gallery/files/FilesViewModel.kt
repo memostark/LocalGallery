@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.flatMap
 import androidx.paging.map
 import androidx.paging.rxjava3.cachedIn
-import com.guillermonegrete.gallery.common.SortingDialog
+import com.guillermonegrete.gallery.common.Order
 import com.guillermonegrete.gallery.data.File
 import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.ImageFile
@@ -21,7 +21,7 @@ class FilesViewModel @Inject constructor(
     private val filesRepository: FilesRepository,
 ): ViewModel() {
 
-    private val defaultFilter: String = "${SortField.DEFAULT.field},${SortingDialog.Order.DEFAULT.oder}"
+    private val defaultFilter: String = "${SortField.DEFAULT.field},${Order.DEFAULT.oder}"
 
     val openDetails: Subject<Int> = PublishSubject.create()
     val updateRows: Subject<List<UpdatedRow>> = PublishSubject.create()

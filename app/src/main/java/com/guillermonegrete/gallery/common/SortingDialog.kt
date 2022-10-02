@@ -120,19 +120,19 @@ class SortingDialog: BottomSheetDialogFragment() {
          */
         const val GET_ALL_TAGS = -1L
     }
+}
 
-    enum class Order(val id: Int, val oder: String){
-        ASC(R.id.ascending_order, "asc"),
-        DESC(R.id.descending_order, "desc");
+enum class Order(val id: Int, val oder: String){
+    ASC(R.id.ascending_order, "asc"),
+    DESC(R.id.descending_order, "desc");
 
-        companion object {
+    companion object {
 
-            fun fromInteger(id: Int): Order {
-                return values().firstOrNull { it.id == id} ?: DEFAULT
-            }
-
-            val DEFAULT = DESC
+        fun fromInteger(id: Int): Order {
+            return values().firstOrNull { it.id == id} ?: DEFAULT
         }
+
+        val DEFAULT = ASC
     }
 }
 
@@ -147,6 +147,6 @@ data class Field(val display: String, val id: Int): Parcelable
 @Parcelize
 data class SortDialogChecked(
     val field: SortField,
-    val sort: SortingDialog.Order,
+    val sort: Order,
     val tagId: Long = 0L,
 ): Parcelable

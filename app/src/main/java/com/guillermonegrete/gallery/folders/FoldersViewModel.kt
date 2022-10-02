@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.insertSeparators
 import androidx.paging.map
 import androidx.paging.rxjava3.cachedIn
-import com.guillermonegrete.gallery.common.SortingDialog
+import com.guillermonegrete.gallery.common.Order
 import com.guillermonegrete.gallery.data.source.FilesRepository
 import com.guillermonegrete.gallery.data.source.SettingsRepository
 import com.guillermonegrete.gallery.files.SortField
@@ -22,7 +22,7 @@ class FoldersViewModel @Inject constructor(
     private val filesRepository: FilesRepository
 ): ViewModel() {
 
-    private val defaultFilter: String = "${SortField.DEFAULT_FOLDER.field},${SortingDialog.Order.DEFAULT.oder}"
+    private val defaultFilter: String = "${DEFAULT_FIELD.field},${Order.DEFAULT.oder}"
 
     val urlAvailable: Subject<Boolean> = PublishSubject.create()
 
@@ -75,5 +75,9 @@ class FoldersViewModel @Inject constructor(
 
     fun updateSort(query: CharSequence) {
         sort.onNext(query.toString())
+    }
+
+    companion object{
+        val DEFAULT_FIELD = SortField.NAME
     }
 }
