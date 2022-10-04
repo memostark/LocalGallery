@@ -11,7 +11,6 @@ import androidx.navigation.findNavController
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.google.android.exoplayer2.ui.PlayerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
@@ -22,11 +21,15 @@ import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.data.VideoFile
 import com.guillermonegrete.gallery.files.FileDiffCallback
 import io.reactivex.rxjava3.subjects.PublishSubject
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>(FileDiffCallback){
 
-    val panelTouchSubject = PublishSubject.create<Boolean>()
+    val panelTouchSubject: PublishSubject<Boolean> = PublishSubject.create()
+
+    private val formatter = SimpleDateFormat("dd MMM yyyy HH:mm:ss", Locale.getDefault())
 
     private var isSheetVisible = false
 
@@ -104,8 +107,8 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
         open fun bind(file: File){
             nameText.text = file.filename
             fileSizeText.text = file.sizeText
-            createdText.text = file.creationText
-            modifiedText.text = file.modifiedText
+            createdText.text = formatter.format(file.creationDate)
+            modifiedText.text = formatter.format(file.lastModified)
             behaviour.state = if(isSheetVisible) BottomSheetBehavior.STATE_EXPANDED else BottomSheetBehavior.STATE_COLLAPSED
             linkButton.setOnClickListener { openLink(file.name) }
 
