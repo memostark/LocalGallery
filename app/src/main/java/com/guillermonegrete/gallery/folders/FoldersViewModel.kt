@@ -33,17 +33,16 @@ class FoldersViewModel @Inject constructor(
     private val sort: Subject<String> = BehaviorSubject.createDefault("")
 
     val pagedFolders = sort.distinctUntilChanged().switchMap { filter ->
-        urlFolder.switchMap {
-            searchQuery.switchMap { query ->
+        urlFolder.distinctUntilChanged().switchMap {
+            searchQuery.distinctUntilChanged().switchMap { query ->
                 val finalQuery = query.ifEmpty { null }
                 val finalFilter = filter.ifEmpty { defaultFilter }
                 filesRepository.getPagedFolders(finalQuery, finalFilter)
                     .map { pagingData ->
                         pagingData.map { folder -> FolderUI.Model(folder) }
                             .insertSeparators { before: FolderUI.Model?, after: FolderUI.Model? ->
-                                if (before == null && after != null) return@insertSeparators FolderUI.HeaderModel(
-                                    after.title ?: ""
-                                )
+                                if (before == null && after != null)
+                                    return@insertSeparators FolderUI.HeaderModel(after.title ?: "")
                                 return@insertSeparators null
                             }
                     }.toObservable()
