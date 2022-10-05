@@ -80,21 +80,17 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
             bottomSheet.setOnTouchListener { _, _ -> true }
 
             // Hidden state is not considered because it's not enabled for this bottom sheet
-            behaviour.setBottomSheetCallback(object: BottomSheetBehavior.BottomSheetCallback(){
-                @SuppressLint("NotifyDataSetChanged")
+            behaviour.addBottomSheetCallback(object: BottomSheetBehavior.BottomSheetCallback(){
                 override fun onStateChanged(p0: View, p1: Int) {
                     when(p1){
                         BottomSheetBehavior.STATE_COLLAPSED -> {
-                            panelTouchSubject.onNext(false)
                             isSheetVisible = false
-                            notifyDataSetChanged()
+                            panelTouchSubject.onNext(false)
                         }
                         BottomSheetBehavior.STATE_EXPANDED  -> {
-                            panelTouchSubject.onNext(false)
                             isSheetVisible = true
-                            notifyDataSetChanged()
+                            panelTouchSubject.onNext(false)
                         }
-                        BottomSheetBehavior.STATE_SETTLING -> panelTouchSubject.onNext(false)
                         BottomSheetBehavior.STATE_DRAGGING -> panelTouchSubject.onNext(true)
                         else -> {}
                     }
