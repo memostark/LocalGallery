@@ -1,5 +1,6 @@
 package com.guillermonegrete.gallery.files.details
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
@@ -78,8 +79,10 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
         initializePlayer()
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun setUpViewModel() {
-        binding.fileDetailsViewpager.adapter = adapter
+        val viewpager = binding.fileDetailsViewpager
+        viewpager.adapter = adapter
 
         index = arguments?.getInt(FILE_INDEX_KEY) ?: 0
 
@@ -89,7 +92,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
             .subscribe(
                 {
                     adapter.submitData(lifecycle, it)
-                    binding.fileDetailsViewpager.setCurrentItem(index, false)
+                    viewpager.setCurrentItem(index, false)
                 },
                 { error -> Timber.e(error, "Error loading files") }
             )
@@ -97,9 +100,17 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
         disposable.add(adapter.panelTouchSubject.distinctUntilChanged()
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({  panelTouched ->
+            .subscribe({ panelTouched ->
+                    // User finished touching, update adapter to update bottom sheet
+                    if(!panelTouched) {
+                        // Use post() to avoid: "IllegalStateException: Cannot call this method while RecyclerView is computing a layout or scrolling"
+                        viewpager.post {
+                            adapter.notifyDataSetChanged()
+                        }
+                    }
+
                     // Prevents clunky sideways movement when dragging the bottom panel
-                    binding.fileDetailsViewpager.isUserInputEnabled = !panelTouched
+                    viewpager.isUserInputEnabled = !panelTouched
                 },
                 { error -> Timber.e(error, "Error detecting panel touch") }
             )
