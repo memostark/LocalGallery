@@ -155,13 +155,9 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
      * Hide again the bar if that's the case.
      */
     private fun setUIChangesListeners() {
-        val decorView = activity?.window?.decorView ?: return
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            decorView.setOnApplyWindowInsetsListener { _, insets ->
-                if (insets.isVisible(WindowInsetsCompat.Type.systemBars())) hideStatusBar()
-                insets
-            }
-        } else {
+        // SDKs 30+ automatically hide the bar
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            val decorView = activity?.window?.decorView ?: return
             @Suppress("DEPRECATION")
             decorView.setOnSystemUiVisibilityChangeListener { visibility ->
                 // System bars are visible
@@ -174,7 +170,9 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
         (activity as AppCompatActivity?)?.supportActionBar?.hide()
 
         val window = activity?.window ?: return
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        // Must be true, otherwise empty space will be left where the bottom navigation bar was located.
+        // This affected mainly phones without physical navigation bar buttons
+        WindowCompat.setDecorFitsSystemWindows(window, true)
         WindowInsetsControllerCompat(window, window.decorView).let { controller ->
             controller.hide(WindowInsetsCompat.Type.systemBars())
             controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
@@ -185,7 +183,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
         (activity as AppCompatActivity?)?.supportActionBar?.show()
 
         val window = activity?.window ?: return
-        WindowCompat.setDecorFitsSystemWindows(window, true)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         WindowInsetsControllerCompat(window, window.decorView).show(WindowInsetsCompat.Type.systemBars())
     }
 
