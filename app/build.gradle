@@ -6,6 +6,7 @@ plugins {
     id 'androidx.navigation.safeargs.kotlin'
     id 'com.google.gms.google-services'
     id 'com.google.firebase.crashlytics'
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -19,6 +20,8 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
+        // TODO remove after finishing migration
+        javaCompileOptions.annotationProcessorOptions.arguments['dagger.hilt.disableModulesHaveInstallInCheck'] = 'true'
     }
     buildTypes {
         release {
@@ -61,6 +64,7 @@ dependencies {
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
     implementation "androidx.viewpager2:viewpager2:1.0.0"
     implementation "androidx.preference:preference-ktx:1.2.0"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1"
     implementation "androidx.core:core-ktx:1.8.0"
 
     implementation 'com.google.android.material:material:1.6.1'
@@ -99,6 +103,9 @@ dependencies {
     def dagger_version = "2.43.2"
     implementation "com.google.dagger:dagger:$dagger_version"
     kapt "com.google.dagger:dagger-compiler:$dagger_version"
+    // Hilt
+    implementation("com.google.dagger:hilt-android:2.44")
+    kapt("com.google.dagger:hilt-android-compiler:2.44")
 
     // PhotoView
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
@@ -128,4 +135,9 @@ dependencies {
 
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+}
+
+// Allow references to generated code - Used for Hilt
+kapt {
+    correctErrorTypes = true
 }
