@@ -1,6 +1,5 @@
 package com.guillermonegrete.gallery.common
 
-import android.content.Context
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.LayoutInflater
@@ -13,18 +12,19 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.setFragmentResult
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.databinding.ChoiceChipBinding
 import com.guillermonegrete.gallery.databinding.DialogFileOrderByBinding
 import com.guillermonegrete.gallery.files.SortField
 import com.guillermonegrete.gallery.tags.TagRepository
+import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.parcelize.Parcelize
 import timber.log.Timber
 import javax.inject.Inject
 
+@AndroidEntryPoint
 class SortingDialog: BottomSheetDialogFragment() {
 
     private val args: SortingDialogArgs by navArgs()
@@ -34,11 +34,6 @@ class SortingDialog: BottomSheetDialogFragment() {
 
     private var checkedOrder = Order.DEFAULT
     private var checkedTagId = NO_TAG_ID
-
-    override fun onAttach(context: Context) {
-        (context.applicationContext as MyApplication).appComponent.inject(this)
-        super.onAttach(context)
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val binding = DialogFileOrderByBinding.inflate(inflater, container, false)

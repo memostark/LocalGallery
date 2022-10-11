@@ -1,6 +1,5 @@
 package com.guillermonegrete.gallery.files.details
 
-import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -16,10 +15,10 @@ import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
-import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.databinding.FragmentAddTagBinding
+import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import timber.log.Timber
@@ -27,6 +26,7 @@ import java.util.*
 import javax.inject.Inject
 import kotlin.collections.ArrayList
 
+@AndroidEntryPoint
 class AddTagFragment: BottomSheetDialogFragment() {
 
     @Inject
@@ -41,11 +41,6 @@ class AddTagFragment: BottomSheetDialogFragment() {
     private val disposable = CompositeDisposable()
 
     private val args: AddTagFragmentArgs by navArgs()
-
-    override fun onAttach(context: Context) {
-        (context.applicationContext as MyApplication).appComponent.inject(this)
-        super.onAttach(context)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

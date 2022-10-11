@@ -17,7 +17,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.GridLayoutManager
-import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.common.Order
 import com.guillermonegrete.gallery.common.SortDialogChecked
@@ -29,6 +28,7 @@ import com.guillermonegrete.gallery.files.FilesListFragment
 import com.guillermonegrete.gallery.files.SortField
 import com.guillermonegrete.gallery.servers.ServersFragment
 import com.jakewharton.rxbinding4.appcompat.queryTextChanges
+import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -36,6 +36,7 @@ import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
+@AndroidEntryPoint
 class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
 
     private  var _binding: FragmentFoldersListBinding? = null
@@ -52,11 +53,6 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
     private var checkedOrder = Order.DEFAULT
 
     private val disposable = CompositeDisposable()
-
-    override fun onAttach(context: Context) {
-        (context.applicationContext as MyApplication).appComponent.inject(this)
-        super.onAttach(context)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
