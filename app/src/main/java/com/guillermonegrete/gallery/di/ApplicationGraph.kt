@@ -1,7 +1,5 @@
 package com.guillermonegrete.gallery.di
 
-import android.content.Context
-import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.folders.FoldersListFragment
 import com.guillermonegrete.gallery.folders.FoldersModule
 import com.guillermonegrete.gallery.ViewModelBuilder
@@ -11,23 +9,14 @@ import com.guillermonegrete.gallery.files.FilesModule
 import com.guillermonegrete.gallery.files.details.AddTagFragment
 import com.guillermonegrete.gallery.files.details.FileDetailsFragment
 import com.guillermonegrete.gallery.tags.TagsModule
-import dagger.BindsInstance
-import dagger.Component
+import dagger.Module
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 
-@Component(modules = [
-    FilesModule::class,
-    FoldersModule::class,
-    TagsModule::class,
-    RepositoryModule::class,
-    ViewModelBuilder::class
-])
+@InstallIn(SingletonComponent::class)
+@EntryPoint
 interface ApplicationGraph {
-
-    @Component.Factory
-    interface Factory {
-        // With @BindsInstance, the Context passed in will be available in the graph
-        fun create(@BindsInstance context: Context): ApplicationGraph
-    }
 
     fun inject(fragment: FoldersListFragment)
 
@@ -38,6 +27,14 @@ interface ApplicationGraph {
     fun inject(fragment: AddTagFragment)
 
     fun inject(fragment: SortingDialog)
-
-    fun inject(app: MyApplication)
 }
+
+@InstallIn(SingletonComponent::class)
+@Module(includes = [
+    FilesModule::class,
+    FoldersModule::class,
+    TagsModule::class,
+    RepositoryModule::class,
+    ViewModelBuilder::class
+])
+object AggregatorModule {}
