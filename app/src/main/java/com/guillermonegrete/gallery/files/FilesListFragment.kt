@@ -8,7 +8,6 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
@@ -25,7 +24,6 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import timber.log.Timber
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class FilesListFragment: Fragment(R.layout.fragment_files_list) {
@@ -33,8 +31,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
     private  var _binding: FragmentFilesListBinding? = null
     private val binding get() = _binding!!
 
-    @Inject lateinit var viewModelFactory: ViewModelProvider.Factory
-    private val viewModel by activityViewModels<FilesViewModel> { viewModelFactory }
+    private val viewModel: FilesViewModel by activityViewModels()
 
     private val disposable = CompositeDisposable()
 

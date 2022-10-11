@@ -12,7 +12,6 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
@@ -44,8 +43,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
 
     private lateinit var adapter: FolderAdapter
 
-    @Inject lateinit var viewModelFactory: ViewModelProvider.Factory
-    private val viewModel by viewModels<FoldersViewModel> { viewModelFactory }
+    private val viewModel: FoldersViewModel by viewModels()
 
     @Inject lateinit var preferences: SettingsRepository
 
