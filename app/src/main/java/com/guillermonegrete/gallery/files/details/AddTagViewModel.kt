@@ -3,10 +3,12 @@ package com.guillermonegrete.gallery.files.details
 import androidx.lifecycle.ViewModel
 import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.tags.TagRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
 import javax.inject.Inject
 
+@HiltViewModel
 class AddTagViewModel @Inject constructor (private val tagRepository: TagRepository): ViewModel() {
 
     val appliedTags = mutableSetOf<Tag>()

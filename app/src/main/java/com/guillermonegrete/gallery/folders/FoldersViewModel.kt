@@ -10,6 +10,7 @@ import com.guillermonegrete.gallery.data.source.FilesRepository
 import com.guillermonegrete.gallery.data.source.SettingsRepository
 import com.guillermonegrete.gallery.files.SortField
 import com.guillermonegrete.gallery.folders.models.FolderUI
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.subjects.BehaviorSubject
@@ -17,6 +18,7 @@ import io.reactivex.rxjava3.subjects.PublishSubject
 import io.reactivex.rxjava3.subjects.Subject
 import javax.inject.Inject
 
+@HiltViewModel
 class FoldersViewModel @Inject constructor(
     private val settings: SettingsRepository,
     private val filesRepository: FilesRepository

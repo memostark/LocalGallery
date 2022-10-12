@@ -11,12 +11,14 @@ import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.ImageFile
 import com.guillermonegrete.gallery.data.VideoFile
 import com.guillermonegrete.gallery.data.source.FilesRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
 import io.reactivex.rxjava3.subjects.Subject
 import javax.inject.Inject
 
+@HiltViewModel
 class FilesViewModel @Inject constructor(
     private val filesRepository: FilesRepository,
 ): ViewModel() {

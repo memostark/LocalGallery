@@ -8,12 +8,10 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.GridLayoutManager
-import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.common.Order
 import com.guillermonegrete.gallery.common.SortDialogChecked
@@ -21,19 +19,19 @@ import com.guillermonegrete.gallery.common.SortingDialog
 import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.databinding.FragmentFilesListBinding
 import com.guillermonegrete.gallery.files.details.FileDetailsFragment
+import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import timber.log.Timber
-import javax.inject.Inject
 
+@AndroidEntryPoint
 class FilesListFragment: Fragment(R.layout.fragment_files_list) {
 
     private  var _binding: FragmentFilesListBinding? = null
     private val binding get() = _binding!!
 
-    @Inject lateinit var viewModelFactory: ViewModelProvider.Factory
-    private val viewModel by activityViewModels<FilesViewModel> { viewModelFactory }
+    private val viewModel: FilesViewModel by activityViewModels()
 
     private val disposable = CompositeDisposable()
 
@@ -45,7 +43,6 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
     private var tagId = SortingDialog.NO_TAG_ID
 
     override fun onAttach(context: Context) {
-        (context.applicationContext as MyApplication).appComponent.inject(this)
         super.onAttach(context)
         adapter = FilesAdapter(viewModel)
 

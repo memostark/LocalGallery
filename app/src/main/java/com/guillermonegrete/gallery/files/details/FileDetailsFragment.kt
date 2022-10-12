@@ -1,7 +1,6 @@
 package com.guillermonegrete.gallery.files.details
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -12,30 +11,28 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
-import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.StyledPlayerView
-import com.guillermonegrete.gallery.MyApplication
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.databinding.FragmentFileDetailsBinding
 import com.guillermonegrete.gallery.files.FilesViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import timber.log.Timber
-import javax.inject.Inject
 
+@AndroidEntryPoint
 class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
     private  var _binding: FragmentFileDetailsBinding? = null
     private val binding get() = _binding!!
 
-    @Inject lateinit var viewModelFactory: ViewModelProvider.Factory
-    private val viewModel by activityViewModels<FilesViewModel> { viewModelFactory }
+    private val viewModel: FilesViewModel by activityViewModels()
     private var exoPlayer: ExoPlayer? = null
 
     private var currentPlayerView: StyledPlayerView? = null
@@ -45,11 +42,6 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
     private lateinit var adapter: FileDetailsAdapter
 
     private var index = 0
-
-    override fun onAttach(context: Context) {
-        (context.applicationContext as MyApplication).appComponent.inject(this)
-        super.onAttach(context)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

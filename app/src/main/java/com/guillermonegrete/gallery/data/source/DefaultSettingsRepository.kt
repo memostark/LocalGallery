@@ -4,10 +4,11 @@ import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
+import dagger.hilt.android.qualifiers.ApplicationContext
 import io.reactivex.rxjava3.core.Single
 import javax.inject.Inject
 
-class DefaultSettingsRepository @Inject constructor(context: Context): SettingsRepository {
+class DefaultSettingsRepository @Inject constructor(@ApplicationContext context: Context): SettingsRepository {
 
     private val preferences = PreferenceManager.getDefaultSharedPreferences(context)
 
