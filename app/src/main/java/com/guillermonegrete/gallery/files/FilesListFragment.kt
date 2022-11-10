@@ -3,7 +3,11 @@ package com.guillermonegrete.gallery.files
 import android.content.Context
 import android.os.Bundle
 import android.util.DisplayMetrics
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.view.ActionMode
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -129,7 +133,11 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                         layoutManager.scrollToPosition(it)
                     },
                     { error -> Timber.e(error) }
-                )
+                ),
+            adapter.onItemLongPress.subscribe(
+                { (requireActivity() as AppCompatActivity).startSupportActionMode(actionModeCallback) },
+                { Timber.e(it) }
+            )
         )
 
         viewModel.setFolderName(folder)
@@ -181,5 +189,30 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         val dm = DisplayMetrics()
         this.requireActivity().windowManager.defaultDisplay.getMetrics(dm)
         return dm.widthPixels
+    }
+
+    private val actionModeCallback = object: ActionMode.Callback {
+
+        override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+            adapter.setSelectionMode(true)
+            mode.menuInflater.inflate(R.menu.files_action_mode_menu, menu)
+            return true
+        }
+
+        override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?) = false
+
+        override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+            return when (item.itemId) {
+                R.id.add_tag -> {
+                    mode.finish() // Action picked, so close the CAB
+                    true
+                }
+                else -> false
+            }
+        }
+
+        override fun onDestroyActionMode(mode: ActionMode?) {
+            adapter.setSelectionMode(false)
+        }
     }
 }
