@@ -27,7 +27,8 @@ class FilesAdapter(
 
     private var multiSelect = false
 
-    var selectedItems = mutableSetOf<Int>()
+    private val selectedItems = mutableSetOf<Int>()
+    val selectedIds = mutableSetOf<Long>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -64,11 +65,12 @@ class FilesAdapter(
         fun bind(item: File){
             itemView.layoutParams = FrameLayout.LayoutParams(item.width, item.height)
             val realPos = absoluteAdapterPosition
-            image.setOnClickListener { itemClicked(realPos) }
+            image.setOnClickListener { itemClicked(realPos, item.id) }
 
             image.setOnLongClickListener {
                 onItemLongPress.onNext(realPos)
                 selectedItems.add(realPos)
+                selectedIds.add(item.id)
                 true
             }
 
@@ -86,12 +88,14 @@ class FilesAdapter(
                 .into(image)
         }
 
-        private fun itemClicked(position: Int) {
+        private fun itemClicked(position: Int, fileId: Long) {
             if(multiSelect){
                 if(position in selectedItems) {
                     selectedItems.remove(position)
+                    selectedIds.remove(fileId)
                 } else {
                     selectedItems.add(position)
+                    selectedIds.add(fileId)
                 }
                 notifyItemChanged(position)
             } else {
@@ -111,7 +115,10 @@ class FilesAdapter(
     fun setSelectionMode(isMultiSelection: Boolean) {
         if(isMultiSelection != multiSelect) {
             multiSelect = isMultiSelection
-            if(!multiSelect) selectedItems.clear()
+            if(!multiSelect) {
+                selectedItems.clear()
+                selectedIds.clear()
+            }
             notifyDataSetChanged()
         }
     }

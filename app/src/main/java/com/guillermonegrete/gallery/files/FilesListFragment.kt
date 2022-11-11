@@ -204,6 +204,8 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
             return when (item.itemId) {
                 R.id.add_tag -> {
+                    val action = FilesListFragmentDirections.actionFilesToAddTagFragment(adapter.selectedIds.toLongArray(), emptyArray())
+                    findNavController().navigate(action)
                     mode.finish() // Action picked, so close the CAB
                     true
                 }
