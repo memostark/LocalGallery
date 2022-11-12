@@ -23,4 +23,6 @@ class AddTagViewModel @Inject constructor (private val tagRepository: TagReposit
         tagRepository.deleteTagFromFile(fileId, tag.id)
             .doOnComplete { appliedTags.remove(tag) }
 
+    fun addTagToFiles(id: Long, fileIds: List<Long>) = tagRepository.addTagToFiles(id, fileIds)
+
 }

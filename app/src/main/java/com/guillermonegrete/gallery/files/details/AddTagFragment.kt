@@ -60,7 +60,7 @@ class AddTagFragment: BottomSheetDialogFragment() {
                     addChip(tag, fileIds.first())
                     if (newTagEdit.text.isNotEmpty()) newTagEdit.setText("")
                 } else {
-                    dismiss()
+                    addTagToFiles(tag.id, fileIds)
                 }
             }
 
@@ -80,6 +80,16 @@ class AddTagFragment: BottomSheetDialogFragment() {
         }
 
         return binding.root
+    }
+
+    private fun addTagToFiles(id: Long, fileIds: LongArray) {
+        disposable.add(viewModel.addTagToFiles(id, fileIds.toList())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { dismiss() },
+                { Timber.e(it, "Error adding tag to multiple files") }
+            )
+        )
     }
 
     private fun setEditKeyListener(tags: Set<Tag>, fileId: Long) {
