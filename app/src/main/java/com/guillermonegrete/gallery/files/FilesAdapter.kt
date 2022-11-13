@@ -27,7 +27,7 @@ class FilesAdapter(
 
     private var multiSelect = false
 
-    private val selectedItems = mutableSetOf<Int>()
+    val selectedItems = mutableSetOf<Int>()
     val selectedIds = mutableSetOf<Long>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

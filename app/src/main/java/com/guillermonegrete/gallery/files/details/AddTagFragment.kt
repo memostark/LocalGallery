@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import androidx.core.os.bundleOf
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
@@ -60,7 +61,7 @@ class AddTagFragment: BottomSheetDialogFragment() {
                     addChip(tag, fileIds.first())
                     if (newTagEdit.text.isNotEmpty()) newTagEdit.setText("")
                 } else {
-                    addTagToFiles(tag.id, fileIds)
+                    addTagToFiles(tag, fileIds)
                 }
             }
 
@@ -82,11 +83,16 @@ class AddTagFragment: BottomSheetDialogFragment() {
         return binding.root
     }
 
-    private fun addTagToFiles(id: Long, fileIds: LongArray) {
-        disposable.add(viewModel.addTagToFiles(id, fileIds.toList())
+    private fun addTagToFiles(tag: Tag, fileIds: LongArray) {
+        disposable.add(viewModel.addTagToFiles(tag.id, fileIds.toList())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
-                { dismiss() },
+                { files ->
+                    val ids = files.map { it.id }.toLongArray()
+                    val bundle = bundleOf(SELECTED_TAG_KEY to tag, UPDATED_FILES_IDS_KEY to ids)
+                    setFragmentResult(SELECT_TAG_REQUEST_KEY, bundle)
+                    dismiss()
+                },
                 { Timber.e(it, "Error adding tag to multiple files") }
             )
         )
@@ -197,8 +203,14 @@ class AddTagFragment: BottomSheetDialogFragment() {
     }
 
     companion object{
+        // Adding tags to a single file
         const val TAGS_KEY = "tags_key"
         const val REQUEST_KEY = "tag_frag_request"
+
+        // For adding a tag to multiple files
+        const val SELECT_TAG_REQUEST_KEY = "select_tag_request"
+        const val SELECTED_TAG_KEY = "selected_tag"
+        const val UPDATED_FILES_IDS_KEY = "updated_files_ids"
     }
 
 }

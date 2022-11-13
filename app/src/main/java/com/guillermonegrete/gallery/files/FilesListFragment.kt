@@ -21,7 +21,9 @@ import com.guillermonegrete.gallery.common.Order
 import com.guillermonegrete.gallery.common.SortDialogChecked
 import com.guillermonegrete.gallery.common.SortingDialog
 import com.guillermonegrete.gallery.data.Folder
+import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.databinding.FragmentFilesListBinding
+import com.guillermonegrete.gallery.files.details.AddTagFragment
 import com.guillermonegrete.gallery.files.details.FileDetailsFragment
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -40,6 +42,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
     private val disposable = CompositeDisposable()
 
     private lateinit var adapter: FilesAdapter
+    private var actionMode: ActionMode? = null
 
     // Default values for the checked items in the sorting dialog
     private var checkedField = SortField.DEFAULT
@@ -135,7 +138,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                     { error -> Timber.e(error) }
                 ),
             adapter.onItemLongPress.subscribe(
-                { (requireActivity() as AppCompatActivity).startSupportActionMode(actionModeCallback) },
+                { actionMode = (requireActivity() as AppCompatActivity).startSupportActionMode(actionModeCallback) },
                 { Timber.e(it) }
             )
         )
@@ -204,9 +207,9 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
             return when (item.itemId) {
                 R.id.add_tag -> {
+                    setTagsUpdateListener()
                     val action = FilesListFragmentDirections.actionFilesToAddTagFragment(adapter.selectedIds.toLongArray(), emptyArray())
                     findNavController().navigate(action)
-                    mode.finish() // Action picked, so close the CAB
                     true
                 }
                 else -> false
@@ -215,6 +218,26 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
 
         override fun onDestroyActionMode(mode: ActionMode?) {
             adapter.setSelectionMode(false)
+        }
+    }
+
+    private fun setTagsUpdateListener() {
+        setFragmentResultListener(AddTagFragment.SELECT_TAG_REQUEST_KEY) { _, bundle ->
+            val newTag = bundle.getParcelable<Tag>(AddTagFragment.SELECTED_TAG_KEY) ?: return@setFragmentResultListener
+            val ids = bundle.getLongArray(AddTagFragment.UPDATED_FILES_IDS_KEY) ?: return@setFragmentResultListener
+
+            for (pos in adapter.selectedItems) {
+                val file = adapter.snapshot().items[pos]
+
+                // Add if the file was a modified file and if it doesn't contain the tag.
+                if(file.id in ids && !file.tags.contains(newTag)){
+                    val newTags = file.tags.toMutableList()
+                    newTags.add(newTag)
+                    file.tags = newTags
+                    adapter.notifyItemChanged(pos)
+                }
+            }
+            actionMode?.finish()
         }
     }
 }
