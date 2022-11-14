@@ -11,6 +11,7 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.chip.Chip
@@ -38,6 +39,8 @@ class AddTagFragment: BottomSheetDialogFragment() {
 
     private val args: AddTagFragmentArgs by navArgs()
 
+    private var singleSelect = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // This style avoids content being displayed behind the keyboard
@@ -51,13 +54,16 @@ class AddTagFragment: BottomSheetDialogFragment() {
     ): View {
         _binding = FragmentAddTagBinding.inflate(inflater, container, false)
 
+        // if the origin destination is the files, it means this is a file multi selection
+        singleSelect = findNavController().previousBackStackEntry?.destination?.id == R.id.fileDetailsFragment
+
         setupViewModel()
 
         with(binding){
 
             val fileIds = args.fileIds
             adapter = TagSuggestionsAdapter { tag ->
-                if(fileIds.size == 1) {
+                if(singleSelect) {
                     addChip(tag, fileIds.first())
                     if (newTagEdit.text.isNotEmpty()) newTagEdit.setText("")
                 } else {
@@ -65,7 +71,7 @@ class AddTagFragment: BottomSheetDialogFragment() {
                 }
             }
 
-            if(fileIds.size == 1) {
+            if(singleSelect) {
                 val tags = viewModel.appliedTags
                 val fileId = fileIds.first()
                 addAppliedTags(tags, fileId)
@@ -139,13 +145,12 @@ class AddTagFragment: BottomSheetDialogFragment() {
     override fun onCancel(dialog: DialogInterface) {
         super.onCancel(dialog)
         // Don't set result listener when dealing with multiple ids
-        if (args.fileIds.size > 1) return
-        setFragmentResult(
-            REQUEST_KEY,
-            Bundle().apply {
-                putParcelableArrayList(TAGS_KEY, ArrayList(viewModel.appliedTags))
-            }
-        )
+        if (singleSelect) {
+            setFragmentResult(
+                REQUEST_KEY,
+                Bundle().apply { putParcelableArrayList(TAGS_KEY, ArrayList(viewModel.appliedTags)) }
+            )
+        }
     }
 
     private fun setupViewModel() {
