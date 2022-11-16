@@ -44,6 +44,10 @@
     <string name="files_toolbar_title">All files</string>
     <string name="file_selection_icon">selection icon</string>
     <string name="add_tag">Add tag</string>
+    <plurals name="files_updated_text">
+        <item quantity="one">Modified %d element</item>
+        <item quantity="other">Modified %d elements</item>
+    </plurals>
 
     <!-- File details-->
     <string name="created">Created:</string>

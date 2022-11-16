@@ -16,6 +16,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.GridLayoutManager
+import com.google.android.material.snackbar.Snackbar
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.common.Order
 import com.guillermonegrete.gallery.common.SortDialogChecked
@@ -238,6 +239,12 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                 }
             }
             actionMode?.finish()
+            val message = resources.getQuantityString(
+                R.plurals.files_updated_text,
+                ids.size,
+                ids.size
+            )
+            Snackbar.make(binding.filesFragmentRoot, message, Snackbar.LENGTH_SHORT).show()
         }
     }
 }
