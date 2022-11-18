@@ -24,6 +24,7 @@ class FilesAdapter(
 ): PagingDataAdapter<File, FilesAdapter.ViewHolder>(FileDiffCallback) {
 
     val onItemLongPress: PublishSubject<Int> = PublishSubject.create()
+    val onItemClick: PublishSubject<Int> = PublishSubject.create()
 
     private var multiSelect = false
 
@@ -98,6 +99,7 @@ class FilesAdapter(
                     selectedIds.add(fileId)
                 }
                 notifyItemChanged(position)
+                onItemClick.onNext(position)
             } else {
                 viewModel.openFilesDetails(position)
             }

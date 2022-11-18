@@ -139,7 +139,14 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                     { error -> Timber.e(error) }
                 ),
             adapter.onItemLongPress.subscribe(
-                { actionMode = (requireActivity() as AppCompatActivity).startSupportActionMode(actionModeCallback) },
+                {
+                    actionMode = (requireActivity() as AppCompatActivity).startSupportActionMode(actionModeCallback)
+                    actionMode?.title = "(1)"
+                },
+                { Timber.e(it) }
+            ),
+            adapter.onItemClick.subscribe(
+                { actionMode?.title = "(${adapter.selectedIds.size})" },
                 { Timber.e(it) }
             )
         )
