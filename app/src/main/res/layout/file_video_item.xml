@@ -33,4 +33,15 @@
         android:textColor="@android:color/white"
         android:padding="8dp"/>
 
+    <ImageView
+        android:id="@+id/selected_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|start"
+        android:layout_margin="8dp"
+        android:visibility="gone"
+        app:srcCompat="@drawable/ic_twotone_circle_24"
+        tools:visibility="visible"
+        android:contentDescription="selection icon" />
+
 </FrameLayout>

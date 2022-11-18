@@ -6,14 +6,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import androidx.core.os.bundleOf
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipGroup
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.databinding.FragmentAddTagBinding
@@ -38,6 +39,8 @@ class AddTagFragment: BottomSheetDialogFragment() {
 
     private val args: AddTagFragmentArgs by navArgs()
 
+    private var singleSelect = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // This style avoids content being displayed behind the keyboard
@@ -51,38 +54,28 @@ class AddTagFragment: BottomSheetDialogFragment() {
     ): View {
         _binding = FragmentAddTagBinding.inflate(inflater, container, false)
 
+        // if the origin destination is the files, it means this is a file multi selection
+        singleSelect = findNavController().previousBackStackEntry?.destination?.id == R.id.fileDetailsFragment
+
         setupViewModel()
 
         with(binding){
-            val tags = viewModel.appliedTags
-            tags.forEach { tag ->
-                val chip =  Chip(context)
-                chip.text = tag.name
-                chip.isCloseIconVisible = true
-                chip.setOnCloseIconClickListener {
-                    removeChip(it, tag)
-                }
-                tagsGroup.addView(chip, tagsGroup.childCount - 1)
-            }
 
+            val fileIds = args.fileIds
             adapter = TagSuggestionsAdapter { tag ->
-                addChip(tagsGroup, tag)
-                if (newTagEdit.text.isNotEmpty()) newTagEdit.setText("")
+                if(singleSelect) {
+                    addChip(tag, fileIds.first())
+                    if (newTagEdit.text.isNotEmpty()) newTagEdit.setText("")
+                } else {
+                    addTagToFiles(tag, fileIds)
+                }
             }
 
-            newTagEdit.setOnEditorActionListener { v, actionId, _ ->
-                if(actionId == EditorInfo.IME_ACTION_DONE){
-                    val text = v.text.toString()
-                    newTagEdit.setText("")
-
-                    // if tag is already applied, skip
-                    if(tags.any { it.name == text }) return@setOnEditorActionListener true
-
-                    addChip(tagsGroup, Tag(text, Date(), 0)) // Set id as 0 to indicate to the backend the tag is new
-
-                    return@setOnEditorActionListener true
-                }
-                false
+            if(singleSelect) {
+                val tags = viewModel.appliedTags
+                val fileId = fileIds.first()
+                addAppliedTags(tags, fileId)
+                setEditKeyListener(tags, fileId)
             }
 
             savedTagsList.adapter = adapter
@@ -96,6 +89,54 @@ class AddTagFragment: BottomSheetDialogFragment() {
         return binding.root
     }
 
+    private fun addTagToFiles(tag: Tag, fileIds: LongArray) {
+        disposable.add(viewModel.addTagToFiles(tag.id, fileIds.toList())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { files ->
+                    val ids = files.map { it.id }.toLongArray()
+                    val bundle = bundleOf(SELECTED_TAG_KEY to tag, UPDATED_FILES_IDS_KEY to ids)
+                    setFragmentResult(SELECT_TAG_REQUEST_KEY, bundle)
+                    dismiss()
+                },
+                { Timber.e(it, "Error adding tag to multiple files") }
+            )
+        )
+    }
+
+    private fun setEditKeyListener(tags: Set<Tag>, fileId: Long) {
+
+        val newTagEdit = binding.newTagEdit
+        newTagEdit.setOnEditorActionListener { v, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                val text = v.text.toString()
+                newTagEdit.setText("")
+
+                // if tag is already applied, skip
+                if (tags.any { it.name == text }) return@setOnEditorActionListener true
+
+                // Set id as 0 to indicate to the backend the tag is new
+                addChip(Tag(text, Date(), 0), fileId)
+
+                return@setOnEditorActionListener true
+            }
+            false
+        }
+    }
+
+    private fun addAppliedTags(tags: Set<Tag>, fileId: Long) {
+        val tagsGroup = binding.tagsGroup
+        tags.forEach { tag ->
+            val chip = Chip(context)
+            chip.text = tag.name
+            chip.isCloseIconVisible = true
+            chip.setOnCloseIconClickListener {
+                removeChip(it, tag, fileId)
+            }
+            tagsGroup.addView(chip, tagsGroup.childCount - 1)
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         _binding = null
@@ -103,12 +144,13 @@ class AddTagFragment: BottomSheetDialogFragment() {
 
     override fun onCancel(dialog: DialogInterface) {
         super.onCancel(dialog)
-        setFragmentResult(
-            REQUEST_KEY,
-            Bundle().apply {
-                putParcelableArrayList(TAGS_KEY, ArrayList(viewModel.appliedTags))
-            }
-        )
+        // Don't set result listener when dealing with multiple ids
+        if (singleSelect) {
+            setFragmentResult(
+                REQUEST_KEY,
+                Bundle().apply { putParcelableArrayList(TAGS_KEY, ArrayList(viewModel.appliedTags)) }
+            )
+        }
     }
 
     private fun setupViewModel() {
@@ -128,12 +170,13 @@ class AddTagFragment: BottomSheetDialogFragment() {
     }
 
     /**
-     * Call the backend to create/add a [tag] to the file. If successful add a new chip to the to [tagsGroup]
+     * Call the backend to create/add a [tag] to the [fileId]. If successful add a new chip to the to tags group.
      */
-    private fun addChip(tagsGroup: ChipGroup, tag: Tag) {
+    private fun addChip(tag: Tag, fileId: Long) {
+        val tagsGroup = binding.tagsGroup
 
         disposable.add(viewModel
-            .addTag(args.fileId, tag)
+            .addTag(fileId, tag)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({ newTag ->
                 // Creates and adds chip view
@@ -141,7 +184,7 @@ class AddTagFragment: BottomSheetDialogFragment() {
                 chip.text = newTag.name
                 chip.isCloseIconVisible = true
                 chip.setOnCloseIconClickListener { view ->
-                    removeChip(view, newTag)
+                    removeChip(view, newTag, fileId)
                 }
                 tagsGroup.addView(chip, tagsGroup.childCount - 1)
 
@@ -151,10 +194,10 @@ class AddTagFragment: BottomSheetDialogFragment() {
         )
     }
 
-    private fun removeChip(chipView: View, tag: Tag) {
+    private fun removeChip(chipView: View, tag: Tag, fileId: Long) {
 
         disposable.add(
-            viewModel.deleteTagFromFile(args.fileId, tag)
+            viewModel.deleteTagFromFile(fileId, tag)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
                     binding.tagsGroup.removeView(chipView)
@@ -165,8 +208,14 @@ class AddTagFragment: BottomSheetDialogFragment() {
     }
 
     companion object{
+        // Adding tags to a single file
         const val TAGS_KEY = "tags_key"
         const val REQUEST_KEY = "tag_frag_request"
+
+        // For adding a tag to multiple files
+        const val SELECT_TAG_REQUEST_KEY = "select_tag_request"
+        const val SELECTED_TAG_KEY = "selected_tag"
+        const val UPDATED_FILES_IDS_KEY = "updated_files_ids"
     }
 
 }
