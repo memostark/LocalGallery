@@ -26,6 +26,8 @@ class FoldersViewModel @Inject constructor(
 
     private val defaultFilter: String = "${DEFAULT_FIELD.field},${Order.DEFAULT.oder}"
 
+    private val forceUpdate: Subject<Boolean> = BehaviorSubject.createDefault(true)
+
     val urlAvailable: Subject<Boolean> = PublishSubject.create()
 
     private val urlFolder: Subject<String> = PublishSubject.create()
@@ -39,18 +41,24 @@ class FoldersViewModel @Inject constructor(
             searchQuery.distinctUntilChanged().switchMap { query ->
                 val finalQuery = query.ifEmpty { null }
                 val finalFilter = filter.ifEmpty { defaultFilter }
-                filesRepository.getPagedFolders(finalQuery, finalFilter)
-                    .map { pagingData ->
-                        pagingData.map { folder -> FolderUI.Model(folder) }
-                            .insertSeparators { before: FolderUI.Model?, after: FolderUI.Model? ->
-                                if (before == null && after != null)
-                                    return@insertSeparators FolderUI.HeaderModel(after.title ?: "")
-                                return@insertSeparators null
-                            }
-                    }.toObservable()
+                forceUpdate.switchMap {
+                    filesRepository.getPagedFolders(finalQuery, finalFilter)
+                        .map { pagingData ->
+                            pagingData.map { folder -> FolderUI.Model(folder) }
+                                .insertSeparators { before: FolderUI.Model?, after: FolderUI.Model? ->
+                                    if (before == null && after != null)
+                                        return@insertSeparators FolderUI.HeaderModel(after.title ?: "")
+                                    return@insertSeparators null
+                                }
+                        }.toObservable()
+                }
             }
         }
     }.toFlowable(BackpressureStrategy.LATEST).cachedIn(viewModelScope)
+
+    init {
+//        refresh()
+    }
 
     fun getDialogData(): Single<String> {
         return settings.getServerUrl()
@@ -76,6 +84,10 @@ class FoldersViewModel @Inject constructor(
 
     fun updateSort(query: CharSequence) {
         sort.onNext(query.toString())
+    }
+
+    fun refresh(){
+        forceUpdate.onNext(true)
     }
 
     companion object{
