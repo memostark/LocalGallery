@@ -56,10 +56,6 @@ class FoldersViewModel @Inject constructor(
         }
     }.toFlowable(BackpressureStrategy.LATEST).cachedIn(viewModelScope)
 
-    init {
-//        refresh()
-    }
-
     fun getDialogData(): Single<String> {
         return settings.getServerUrl()
     }

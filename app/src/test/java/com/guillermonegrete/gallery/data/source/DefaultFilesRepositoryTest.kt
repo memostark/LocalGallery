@@ -46,7 +46,10 @@ class DefaultFilesRepositoryTest {
         val files = repository.getFiles(folderName)
 
         val date = Date()
-        val expected = listOf(ImageFile("file1.jpg", creationDate = date, lastModified = date), ImageFile("file2.jpg", creationDate = date, lastModified = date))
+        val expected = listOf(
+            ImageFile("file1.jpg", creationDate = date, lastModified = date, id = 1),
+            ImageFile("file2.jpg", creationDate = date, lastModified = date, id = 2)
+        )
         files.test()
             .assertValue(expected)
     }

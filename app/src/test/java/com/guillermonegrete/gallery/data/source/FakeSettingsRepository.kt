@@ -17,4 +17,12 @@ class FakeSettingsRepository: SettingsRepository {
     override fun saveServerURL(url: String) {
         serverUrl = url
     }
+
+    override fun getNightMode(): Int {
+        TODO("Not yet implemented")
+    }
+
+    override fun setNightMode(mode: Int) {
+        TODO("Not yet implemented")
+    }
 }

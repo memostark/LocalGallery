@@ -35,13 +35,13 @@ class FoldersViewModelTest {
     var instantExecutorRule = InstantTaskExecutorRule()
 
     private val defaultFolders = listOf(
-        Folder("first", "", 0),
-        Folder("second", "", 0)
+        Folder("first", "", 0, 1),
+        Folder("second", "", 0, 2)
     )
     private val defaultUIFolders = listOf(
         FolderUI.HeaderModel(""),
-        FolderUI.Model("first", "", 0),
-        FolderUI.Model("second", "", 0)
+        FolderUI.Model("first", "", 0, 1),
+        FolderUI.Model("second", "", 0, 2)
     )
 
     @Before
@@ -70,19 +70,22 @@ class FoldersViewModelTest {
     fun `Given empty url, when loading folders, emit url available false`(){
         settingsRepository.serverUrl = ""
 
+        val urlObserver = viewModel.urlAvailable.test()
+
+        viewModel.getFolders()
         // When url is not set. flow shouldn't be emitting
         viewModel.pagedFolders.test()
             .assertEmpty()
 
         // Url not set
-        viewModel.urlAvailable.test()
-            .assertValues(false)
+        urlObserver.assertValues(false)
     }
 
     @Test
     fun `Given url set, when loading folders, emit url available and folders`() {
         // Has url set
         settingsRepository.serverUrl = "url"
+        val urlObserver = viewModel.urlAvailable.test()
 
         // Sets observer, otherwise flow won't emit
         viewModel.pagedFolders.test()
@@ -90,8 +93,7 @@ class FoldersViewModelTest {
         viewModel.getFolders()
 
         // Url is set
-        viewModel.urlAvailable.test()
-            .assertValues(true)
+        urlObserver.assertValues(true)
 
         // Assert default items emitted
         val resultPaging = viewModel.pagedFolders.blockingFirst()
@@ -119,7 +121,6 @@ class FoldersViewModelTest {
 
         // Assert new url set
         assertEquals(settingsRepository.serverUrl, newURL)
-        assertEquals(filesRepository.repoUrl, newURL)
 
         // Assert default items emitted
         val items = getItems(viewModel.pagedFolders.blockingFirst())
