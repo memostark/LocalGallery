@@ -22,8 +22,8 @@ import org.junit.Test
 class FoldersViewModelTest {
 
     // Necessary when using paging "cachedIn" in the view model.
-    private val dispatcher = TestCoroutineDispatcher()
-    private val testScope = TestCoroutineScope(dispatcher)
+    private val testScope = TestScope()
+    private val testDispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
 
 
     private lateinit var viewModel: FoldersViewModel
@@ -46,7 +46,7 @@ class FoldersViewModelTest {
 
     @Before
     fun setup() {
-        Dispatchers.setMain(dispatcher)
+        Dispatchers.setMain(testDispatcher)
     }
 
     @After
@@ -85,9 +85,9 @@ class FoldersViewModelTest {
     fun `Given url set, when loading folders, emit url available and folders`() {
         // Has url set
         settingsRepository.serverUrl = "url"
-        val urlObserver = viewModel.urlAvailable.test()
 
         // Sets observer, otherwise flow won't emit
+        val urlObserver = viewModel.urlAvailable.test()
         viewModel.pagedFolders.test()
 
         viewModel.getFolders()
@@ -155,7 +155,7 @@ class FoldersViewModelTest {
             updateCallback = NoopListCallback(),
             workerDispatcher = Dispatchers.Main
         )
-        testScope.runBlockingTest {
+        testScope.runTest {
             differ.submitData(folders)
             advanceUntilIdle()
         }
