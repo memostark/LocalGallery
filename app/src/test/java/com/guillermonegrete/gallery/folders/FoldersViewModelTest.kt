@@ -22,8 +22,8 @@ import org.junit.Test
 class FoldersViewModelTest {
 
     // Necessary when using paging "cachedIn" in the view model.
-    private val dispatcher = TestCoroutineDispatcher()
-    private val testScope = TestCoroutineScope(dispatcher)
+    private val testScope = TestScope()
+    private val testDispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
 
 
     private lateinit var viewModel: FoldersViewModel
@@ -35,18 +35,18 @@ class FoldersViewModelTest {
     var instantExecutorRule = InstantTaskExecutorRule()
 
     private val defaultFolders = listOf(
-        Folder("first", "", 0),
-        Folder("second", "", 0)
+        Folder("first", "", 0, 1),
+        Folder("second", "", 0, 2)
     )
     private val defaultUIFolders = listOf(
         FolderUI.HeaderModel(""),
-        FolderUI.Model("first", "", 0),
-        FolderUI.Model("second", "", 0)
+        FolderUI.Model("first", "", 0, 1),
+        FolderUI.Model("second", "", 0, 2)
     )
 
     @Before
     fun setup() {
-        Dispatchers.setMain(dispatcher)
+        Dispatchers.setMain(testDispatcher)
     }
 
     @After
@@ -70,13 +70,15 @@ class FoldersViewModelTest {
     fun `Given empty url, when loading folders, emit url available false`(){
         settingsRepository.serverUrl = ""
 
+        val urlObserver = viewModel.urlAvailable.test()
+
+        viewModel.getFolders()
         // When url is not set. flow shouldn't be emitting
         viewModel.pagedFolders.test()
             .assertEmpty()
 
         // Url not set
-        viewModel.urlAvailable.test()
-            .assertValues(false)
+        urlObserver.assertValues(false)
     }
 
     @Test
@@ -85,13 +87,13 @@ class FoldersViewModelTest {
         settingsRepository.serverUrl = "url"
 
         // Sets observer, otherwise flow won't emit
+        val urlObserver = viewModel.urlAvailable.test()
         viewModel.pagedFolders.test()
 
         viewModel.getFolders()
 
         // Url is set
-        viewModel.urlAvailable.test()
-            .assertValues(true)
+        urlObserver.assertValues(true)
 
         // Assert default items emitted
         val resultPaging = viewModel.pagedFolders.blockingFirst()
@@ -119,7 +121,6 @@ class FoldersViewModelTest {
 
         // Assert new url set
         assertEquals(settingsRepository.serverUrl, newURL)
-        assertEquals(filesRepository.repoUrl, newURL)
 
         // Assert default items emitted
         val items = getItems(viewModel.pagedFolders.blockingFirst())
@@ -154,7 +155,7 @@ class FoldersViewModelTest {
             updateCallback = NoopListCallback(),
             workerDispatcher = Dispatchers.Main
         )
-        testScope.runBlockingTest {
+        testScope.runTest {
             differ.submitData(folders)
             advanceUntilIdle()
         }

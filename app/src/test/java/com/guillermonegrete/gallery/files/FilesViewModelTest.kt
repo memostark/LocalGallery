@@ -10,21 +10,19 @@ class FilesViewModelTest {
 
     private lateinit var viewModel: FilesViewModel
 
-    private lateinit var settingsRepository: FakeSettingsRepository
     private lateinit var filesRepository: FakeFilesRepository
 
     private val defaultFolder = "folder-name"
     private val defaultFiles = listOf(
-        ImageFile("http://file1.jpg"),
-        ImageFile("http://file02.jpg"),
-        ImageFile("http://file_3.jpg")
+        ImageFile("http://file1.jpg", id = 1),
+        ImageFile("http://file02.jpg", id = 2),
+        ImageFile("http://file_3.jpg", id = 4)
     )
 
     @Before
     fun setUp(){
-        settingsRepository = FakeSettingsRepository()
         filesRepository = FakeFilesRepository()
-        viewModel = FilesViewModel(settingsRepository, filesRepository)
+        viewModel = FilesViewModel(filesRepository)
 
         filesRepository.addFiles(defaultFolder, *defaultFiles.toTypedArray())
     }

@@ -15,16 +15,10 @@ class FakeFilesRepository: FilesRepository {
 
     var filesServiceData: LinkedHashMap<String, MutableList<File>> = LinkedHashMap()
 
-    var repoUrl = ""
-
     private var shouldReturnError = false
 
     fun setReturnError(value: Boolean) {
         shouldReturnError = value
-    }
-
-    override fun updateRepoURL(newURL: String) {
-        repoUrl = newURL
     }
 
     override fun getFolders(): Single<GetFolderResponse> {
@@ -41,7 +35,11 @@ class FakeFilesRepository: FilesRepository {
         return Single.just(filesServiceData[folder])
     }
 
-    override fun getPagedFiles(folder: String, sort: String?): Flowable<PagingData<File>> {
+    override fun getPagedFiles(
+        folder: Folder,
+        tagId: Long,
+        sort: String?
+    ): Flowable<PagingData<File>> {
         TODO("Not yet implemented")
     }
 

@@ -114,7 +114,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             }
             foldersList.layoutManager = layoutManager
 
-            messageIcon.setOnClickListener { viewModel.getFolders() }
+            messageIcon.setOnClickListener { viewModel.refresh() }
         }
 
         setViewModel()
@@ -164,6 +164,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             )
         )
 
+//        viewModel.refresh()
         viewModel.getFolders()
     }
 
