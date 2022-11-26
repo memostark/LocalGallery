@@ -58,7 +58,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
         setFragmentResultListener(ServersFragment.REQUEST_KEY) { _, bundle ->
             val ip = bundle.getString(ServersFragment.IP_KEY) ?: return@setFragmentResultListener
             viewModel.updateServerUrl(ip)
-            loadFoldersData()
+            viewModel.getFolders()
         }
     }
 
@@ -99,7 +99,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                             checkedOrder = result.sort
 
                             viewModel.updateSort(checkedField.field, checkedOrder.oder)
-                            viewModel.getFolders(checkedField.field, checkedOrder.oder)
+                            viewModel.getFolders()
                         }
                         true
                     }
@@ -126,7 +126,6 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
 
         setViewModel()
         loadFoldersData()
-        viewModel.setSort(checkedField.field, checkedOrder.oder)
     }
 
     override fun onDestroyView() {
@@ -172,7 +171,8 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             )
         )
 
-        viewModel.getFolders(checkedField.field, checkedOrder.oder)
+        viewModel.setSort(checkedField.field, checkedOrder.oder)
+        viewModel.getFolders()
     }
 
     private fun loadDialogData(){
