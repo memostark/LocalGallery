@@ -128,8 +128,14 @@ enum class Order(val id: Int, val oder: String){
 
     companion object {
 
+        private val values: Array<Order> = Order.values()
+
         fun fromInteger(id: Int): Order {
-            return values().firstOrNull { it.id == id} ?: DEFAULT
+            return values.firstOrNull { it.id == id} ?: DEFAULT
+        }
+
+        fun fromOrder(order: String?): Order {
+            return values.firstOrNull { it.oder == order} ?: DEFAULT
         }
 
         val DEFAULT = ASC
