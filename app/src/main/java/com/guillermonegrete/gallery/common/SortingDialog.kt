@@ -128,7 +128,7 @@ enum class Order(val id: Int, val oder: String){
 
     companion object {
 
-        private val values: Array<Order> = Order.values()
+        private val values: Array<Order> = values()
 
         fun fromInteger(id: Int): Order {
             return values.firstOrNull { it.id == id} ?: DEFAULT
@@ -155,4 +155,10 @@ data class SortDialogChecked(
     val field: SortField,
     val sort: Order,
     val tagId: Long = 0L,
-): Parcelable
+): Parcelable {
+
+    companion object{
+        val DEFAULT_FILE = SortDialogChecked(SortField.DEFAULT, Order.DEFAULT)
+        val DEFAULT_FOLDER = SortDialogChecked(SortField.DEFAULT_FOLDER, Order.DEFAULT)
+    }
+}
