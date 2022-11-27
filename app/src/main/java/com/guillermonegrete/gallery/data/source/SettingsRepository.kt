@@ -21,7 +21,7 @@ interface SettingsRepository {
 
     fun setFolderSort(field: String, sort: String)
 
-    fun getFileSort(): String
+    fun getFileSort(): SortDialogChecked
 
-    fun setFileSort(string: String)
+    fun setFileSort(field: String, sort: String)
 }

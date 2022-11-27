@@ -55,12 +55,20 @@ class DefaultSettingsRepository @Inject constructor(@ApplicationContext context:
         }
     }
 
-    override fun getFileSort(): String {
-        TODO("Not yet implemented")
+    override fun getFileSort(): SortDialogChecked {
+        val fieldString = preferences.getString(FILE_FIELD_KEY, null)
+        val sortString = preferences.getString(FILE_ORDER_KEY, null)
+        val field = SortField.fromField(fieldString) ?: SortField.DEFAULT
+        val sort = Order.fromOrder(sortString)
+
+        return SortDialogChecked(field, sort)
     }
 
-    override fun setFileSort(string: String) {
-        TODO("Not yet implemented")
+    override fun setFileSort(field: String, sort: String) {
+        preferences.edit {
+            putString(FILE_FIELD_KEY, field)
+            putString(FILE_ORDER_KEY, sort)
+        }
     }
 
     companion object{
@@ -70,5 +78,7 @@ class DefaultSettingsRepository @Inject constructor(@ApplicationContext context:
         // Sorting keys
         const val FOLDER_FIELD_KEY = "folder_field"
         const val FOLDER_ORDER_KEY = "folder_order"
+        const val FILE_FIELD_KEY = "file_field"
+        const val FILE_ORDER_KEY = "file_order"
     }
 }

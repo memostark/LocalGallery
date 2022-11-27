@@ -23,6 +23,7 @@ import com.guillermonegrete.gallery.common.SortDialogChecked
 import com.guillermonegrete.gallery.common.SortingDialog
 import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.Tag
+import com.guillermonegrete.gallery.data.source.SettingsRepository
 import com.guillermonegrete.gallery.databinding.FragmentFilesListBinding
 import com.guillermonegrete.gallery.files.details.AddTagFragment
 import com.guillermonegrete.gallery.files.details.FileDetailsFragment
@@ -31,6 +32,7 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import timber.log.Timber
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class FilesListFragment: Fragment(R.layout.fragment_files_list) {
@@ -44,6 +46,8 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
 
     private lateinit var adapter: FilesAdapter
     private var actionMode: ActionMode? = null
+
+    @Inject lateinit var preferences: SettingsRepository
 
     // Default values for the checked items in the sorting dialog
     private var checkedField = SortField.DEFAULT
@@ -62,6 +66,10 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
             // Default sort for all files (most recent)
             checkedField = SortField.CREATED
             checkedOrder = Order.DESC
+        } else {
+            val sorting = preferences.getFileSort()
+            checkedField = sorting.field
+            checkedOrder = sorting.sort
         }
         viewModel.setFilter("${checkedField.field},${checkedOrder.oder}")
     }
@@ -180,6 +188,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
 
             viewModel.setTag(tagId)
             viewModel.setFilter("${checkedField.field},${checkedOrder.oder}")
+            preferences.setFileSort(checkedField.field, checkedOrder.oder)
             val folder: Folder = arguments?.getParcelable(FOLDER_KEY) ?: Folder.NULL_FOLDER
             viewModel.setFolderName(folder)
         }

@@ -58,7 +58,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
         setFragmentResultListener(ServersFragment.REQUEST_KEY) { _, bundle ->
             val ip = bundle.getString(ServersFragment.IP_KEY) ?: return@setFragmentResultListener
             viewModel.updateServerUrl(ip)
-            viewModel.getFolders()
+            viewModel.refresh()
         }
     }
 
@@ -99,7 +99,6 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                             checkedOrder = result.sort
 
                             viewModel.updateSort(checkedField.field, checkedOrder.oder)
-                            viewModel.getFolders()
                         }
                         true
                     }
@@ -171,7 +170,6 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             )
         )
 
-        viewModel.setSort(checkedField.field, checkedOrder.oder)
         viewModel.getFolders()
     }
 

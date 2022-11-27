@@ -65,7 +65,8 @@ class FoldersViewModel @Inject constructor(
             urlAvailable.onNext(false)
         } else {
             urlAvailable.onNext(true)
-            refresh()
+            val sorting = settings.getFolderSort()
+            sort.onNext("${sorting.field.field},${sorting.sort.oder}")
         }
     }
 
