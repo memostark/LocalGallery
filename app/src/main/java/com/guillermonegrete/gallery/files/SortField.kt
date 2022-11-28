@@ -17,6 +17,10 @@ enum class SortField(val field: String, val display: String) {
             return values[x]
         }
 
+        fun fromField(field: String?): SortField? {
+            return values.firstOrNull { it.field == field }
+        }
+
         fun toDisplayArray(list: List<SortField>) = list.map { Field(it.display, it.ordinal) }.toTypedArray()
 
         val DEFAULT = FILENAME

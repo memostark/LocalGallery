@@ -30,28 +30,23 @@ class FoldersViewModel @Inject constructor(
 
     val urlAvailable: Subject<Boolean> = PublishSubject.create()
 
-    private val urlFolder: Subject<String> = PublishSubject.create()
-
     private val searchQuery: Subject<String> = BehaviorSubject.createDefault(defaultFilter)
 
-    private val sort: Subject<String> = BehaviorSubject.createDefault("")
+    private val sort: Subject<String> = PublishSubject.create()
 
     val pagedFolders = sort.distinctUntilChanged().switchMap { filter ->
-        urlFolder.distinctUntilChanged().switchMap {
-            searchQuery.distinctUntilChanged().switchMap { query ->
-                val finalQuery = query.ifEmpty { null }
-                val finalFilter = filter.ifEmpty { defaultFilter }
-                forceUpdate.switchMap {
-                    filesRepository.getPagedFolders(finalQuery, finalFilter)
-                        .map { pagingData ->
-                            pagingData.map { folder -> FolderUI.Model(folder) }
-                                .insertSeparators { before: FolderUI.Model?, after: FolderUI.Model? ->
-                                    if (before == null && after != null)
-                                        return@insertSeparators FolderUI.HeaderModel(after.title ?: "")
-                                    return@insertSeparators null
-                                }
-                        }.toObservable()
-                }
+        searchQuery.distinctUntilChanged().switchMap { query ->
+            val finalQuery = query.ifEmpty { null }
+            forceUpdate.switchMap {
+                filesRepository.getPagedFolders(finalQuery, filter)
+                    .map { pagingData ->
+                        pagingData.map { folder -> FolderUI.Model(folder) }
+                            .insertSeparators { before: FolderUI.Model?, after: FolderUI.Model? ->
+                                if (before == null && after != null)
+                                    return@insertSeparators FolderUI.HeaderModel(after.title ?: "")
+                                return@insertSeparators null
+                            }
+                    }.toObservable()
             }
         }
     }.toFlowable(BackpressureStrategy.LATEST).cachedIn(viewModelScope)
@@ -64,13 +59,14 @@ class FoldersViewModel @Inject constructor(
         settings.saveServerURL(url)
     }
 
-    fun getFolders(){
+    fun getFolders() {
         val serverUrl = settings.getServerURL()
         if(serverUrl.isEmpty()) {
             urlAvailable.onNext(false)
         } else {
             urlAvailable.onNext(true)
-            urlFolder.onNext(serverUrl)
+            val sorting = settings.getFolderSort()
+            sort.onNext("${sorting.field.field},${sorting.sort.oder}")
         }
     }
 
@@ -78,8 +74,13 @@ class FoldersViewModel @Inject constructor(
         searchQuery.onNext(query.toString())
     }
 
-    fun updateSort(query: CharSequence) {
-        sort.onNext(query.toString())
+    fun setSort(field: String, order: String) {
+        sort.onNext("$field,$order")
+    }
+
+    fun updateSort(field: String, order: String) {
+        settings.setFolderSort(field, order)
+        sort.onNext("$field,$order")
     }
 
     fun refresh(){

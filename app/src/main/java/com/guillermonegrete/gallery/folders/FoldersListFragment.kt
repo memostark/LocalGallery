@@ -47,8 +47,8 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
 
     @Inject lateinit var preferences: SettingsRepository
 
-    private var checkedField = FoldersViewModel.DEFAULT_FIELD
-    private var checkedOrder = Order.DEFAULT
+    private lateinit var checkedField: SortField
+    private lateinit var checkedOrder: Order
 
     private val disposable = CompositeDisposable()
 
@@ -58,8 +58,15 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
         setFragmentResultListener(ServersFragment.REQUEST_KEY) { _, bundle ->
             val ip = bundle.getString(ServersFragment.IP_KEY) ?: return@setFragmentResultListener
             viewModel.updateServerUrl(ip)
-            loadFoldersData()
+            viewModel.refresh()
         }
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        val sorting = preferences.getFolderSort()
+        checkedField = sorting.field
+        checkedOrder = sorting.sort
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -91,8 +98,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                             checkedField = result.field
                             checkedOrder = result.sort
 
-                            viewModel.updateSort("${checkedField.field},${checkedOrder.oder}")
-                            viewModel.getFolders()
+                            viewModel.updateSort(checkedField.field, checkedOrder.oder)
                         }
                         true
                     }
@@ -164,7 +170,6 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             )
         )
 
-//        viewModel.refresh()
         viewModel.getFolders()
     }
 
