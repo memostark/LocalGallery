@@ -11,6 +11,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
+import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
@@ -63,6 +64,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
         _binding = FragmentFileDetailsBinding.bind(view)
 
         adapter = FileDetailsAdapter()
+        adapter.isAllFilesDest = findNavController().previousBackStackEntry?.destination?.id == R.id.all_files_dest
         setUpViewModel()
     }
 
