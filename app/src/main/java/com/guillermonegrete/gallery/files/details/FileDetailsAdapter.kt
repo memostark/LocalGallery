@@ -30,6 +30,8 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
 
     val panelTouchSubject: PublishSubject<Boolean> = PublishSubject.create()
 
+    val setCoverSubject: PublishSubject<Long> = PublishSubject.create()
+
     private val formatter = SimpleDateFormat("dd MMM yyyy HH:mm:ss", Locale.getDefault())
 
     private var isSheetVisible = false
@@ -116,6 +118,10 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
             editButton.setOnClickListener {
                 val action = FileDetailsFragmentDirections.fileDetailsToAddTagFragment(longArrayOf(file.id), file.tags.toTypedArray())
                 itemView.findNavController().navigate(action)
+            }
+
+            setCoverButton.setOnClickListener {
+                setCoverSubject.onNext(file.id)
             }
 
             setTags(file.tags)

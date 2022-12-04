@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -80,7 +81,8 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
         index = arguments?.getInt(FILE_INDEX_KEY) ?: 0
 
-        disposable.add(viewModel.cachedFileList
+        disposable.addAll(
+            viewModel.cachedFileList
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
@@ -89,12 +91,10 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                     viewpager.setCurrentItem(index, false)
                 },
                 { error -> Timber.e(error, "Error loading files") }
-            )
-        )
-
-        disposable.add(adapter.panelTouchSubject.distinctUntilChanged()
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({ panelTouched ->
+            ),
+            adapter.panelTouchSubject.distinctUntilChanged()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ panelTouched ->
                     // User finished touching, update adapter to update bottom sheet
                     if(!panelTouched) {
                         // Use post() to avoid: "IllegalStateException: Cannot call this method while RecyclerView is computing a layout or scrolling"
@@ -105,9 +105,26 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
                     // Prevents clunky sideways movement when dragging the bottom panel
                     viewpager.isUserInputEnabled = !panelTouched
-                },
-                { error -> Timber.e(error, "Error detecting panel touch") }
+                    }, { error -> Timber.e(error, "Error detecting panel touch") })
+            ,
+            adapter.setCoverSubject.subscribe(
+                { fileId -> updateFolderCover(fileId) },
+                { error -> Timber.e(error, "On set cover click error") }
             )
+        )
+    }
+
+    private fun updateFolderCover(fileId: Long) {
+        disposable.add(
+            viewModel.setCoverFile(fileId)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    { Toast.makeText(context, "Successfully updated folder cover", Toast.LENGTH_SHORT).show() },
+                    { error ->
+                        Toast.makeText(context, "Couldn't update folder cover", Toast.LENGTH_SHORT).show()
+                        Timber.e(error, "On set cover click error")
+                    }
+                )
         )
     }
 
