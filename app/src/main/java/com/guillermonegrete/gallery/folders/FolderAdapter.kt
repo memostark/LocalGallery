@@ -14,7 +14,7 @@ import io.reactivex.rxjava3.subjects.PublishSubject
 
 class FolderAdapter : PagingDataAdapter<FolderUI, RecyclerView.ViewHolder>(FolderDiffCallback) {
 
-    val clickSubject: PublishSubject<FolderUI.Model> = PublishSubject.create()
+    val clickSubject: PublishSubject<ClickInfo> = PublishSubject.create()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -57,8 +57,7 @@ class FolderAdapter : PagingDataAdapter<FolderUI, RecyclerView.ViewHolder>(Folde
                 )
 
                 itemView.setOnClickListener {
-                    val folder = getItem(absoluteAdapterPosition)
-                    if(folder is FolderUI.Model) clickSubject.onNext(folder)
+                    clickSubject.onNext(ClickInfo(absoluteAdapterPosition, item))
                 }
             }
         }
@@ -70,6 +69,8 @@ class FolderAdapter : PagingDataAdapter<FolderUI, RecyclerView.ViewHolder>(Folde
              binding.rootFolder.text = name
         }
     }
+
+    data class ClickInfo(val position: Int, val item: FolderUI.Model)
 }
 
 object FolderDiffCallback : DiffUtil.ItemCallback<FolderUI>() {

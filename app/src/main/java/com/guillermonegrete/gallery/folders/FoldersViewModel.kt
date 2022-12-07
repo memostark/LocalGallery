@@ -34,6 +34,8 @@ class FoldersViewModel @Inject constructor(
 
     private val sort: Subject<String> = PublishSubject.create()
 
+    var folderSelection = -1
+
     val pagedFolders = sort.distinctUntilChanged().switchMap { filter ->
         searchQuery.distinctUntilChanged().switchMap { query ->
             val finalQuery = query.ifEmpty { null }
