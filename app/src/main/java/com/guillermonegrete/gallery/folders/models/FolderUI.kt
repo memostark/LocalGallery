@@ -5,7 +5,7 @@ import com.guillermonegrete.gallery.data.Folder
 sealed class FolderUI {
     data class Model(
         val name: String,
-        val coverUrl: String,
+        var coverUrl: String,
         val count: Int,
         val id: Long,
     ) : FolderUI() {

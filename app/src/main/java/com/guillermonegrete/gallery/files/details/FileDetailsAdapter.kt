@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.view.isGone
 import androidx.navigation.findNavController
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -29,9 +30,13 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
 
     val panelTouchSubject: PublishSubject<Boolean> = PublishSubject.create()
 
+    val setCoverSubject: PublishSubject<Long> = PublishSubject.create()
+
     private val formatter = SimpleDateFormat("dd MMM yyyy HH:mm:ss", Locale.getDefault())
 
     private var isSheetVisible = false
+
+    var isAllFilesDest = false
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val layout = LayoutInflater.from(parent.context).inflate(viewType, parent, false)
@@ -65,12 +70,14 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
         private val bottomSheet: LinearLayout = itemView.findViewById(R.id.bottom_layout)
 
         private val editButton: ImageButton = itemView.findViewById(R.id.edit_btn)
+        private val setCoverButton: ImageButton = itemView.findViewById(R.id.set_cover_btn)
         private val tagGroups: ChipGroup = itemView.findViewById(R.id.tags_chip_group)
 
         private val behaviour = BottomSheetBehavior.from(bottomSheet)
 
         init {
             setSheets()
+            setCoverButton.isGone = isAllFilesDest
         }
 
         @SuppressLint("ClickableViewAccessibility")
@@ -111,6 +118,10 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
             editButton.setOnClickListener {
                 val action = FileDetailsFragmentDirections.fileDetailsToAddTagFragment(longArrayOf(file.id), file.tags.toTypedArray())
                 itemView.findNavController().navigate(action)
+            }
+
+            setCoverButton.setOnClickListener {
+                setCoverSubject.onNext(file.id)
             }
 
             setTags(file.tags)

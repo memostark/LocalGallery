@@ -167,6 +167,21 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@drawable/ic_baseline_edit_24" />
 
+        <ImageButton
+            android:id="@+id/set_cover_btn"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:padding="8dp"
+            android:background="?android:selectableItemBackground"
+            android:contentDescription="@string/cover_btn_description"
+            android:tint="?colorOnSurface"
+            app:layout_constraintBottom_toBottomOf="@+id/edit_btn"
+            app:layout_constraintEnd_toStartOf="@+id/edit_btn"
+            app:layout_constraintTop_toTopOf="@+id/edit_btn"
+            app:srcCompat="@drawable/ic_baseline_photo_album_24" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </LinearLayout>

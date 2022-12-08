@@ -37,6 +37,9 @@ class FilesViewModel @Inject constructor(
      */
     val newFilePos: Subject<Int> = PublishSubject.create()
 
+    var folderId = -1L
+        private set
+
     private var dataSize = 0
 
     private val arMin = 2.0f
@@ -122,6 +125,7 @@ class FilesViewModel @Inject constructor(
 
     fun setFolderName(folder: Folder){
         folderName.onNext(folder)
+        folderId = folder.id
     }
 
     fun setFilter(filterBy: String){
@@ -191,6 +195,8 @@ class FilesViewModel @Inject constructor(
         }
         updateRows.onNext(rows)
     }
+
+    fun setCoverFile(fileId: Long) = filesRepository.updateFolderCover(folderId, fileId)
 
     data class Size(var width: Int, var height: Int)
     data class UpdatedRow(val pos: Int, val size: Size)

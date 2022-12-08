@@ -5,12 +5,16 @@ import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.bundleOf
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
+import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
@@ -63,6 +67,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
         _binding = FragmentFileDetailsBinding.bind(view)
 
         adapter = FileDetailsAdapter()
+        adapter.isAllFilesDest = findNavController().previousBackStackEntry?.destination?.id == R.id.all_files_dest
         setUpViewModel()
     }
 
@@ -78,7 +83,8 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
         index = arguments?.getInt(FILE_INDEX_KEY) ?: 0
 
-        disposable.add(viewModel.cachedFileList
+        disposable.addAll(
+            viewModel.cachedFileList
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
@@ -87,12 +93,10 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                     viewpager.setCurrentItem(index, false)
                 },
                 { error -> Timber.e(error, "Error loading files") }
-            )
-        )
-
-        disposable.add(adapter.panelTouchSubject.distinctUntilChanged()
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({ panelTouched ->
+            ),
+            adapter.panelTouchSubject.distinctUntilChanged()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ panelTouched ->
                     // User finished touching, update adapter to update bottom sheet
                     if(!panelTouched) {
                         // Use post() to avoid: "IllegalStateException: Cannot call this method while RecyclerView is computing a layout or scrolling"
@@ -103,9 +107,31 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
                     // Prevents clunky sideways movement when dragging the bottom panel
                     viewpager.isUserInputEnabled = !panelTouched
-                },
-                { error -> Timber.e(error, "Error detecting panel touch") }
+                    }, { error -> Timber.e(error, "Error detecting panel touch") })
+            ,
+            adapter.setCoverSubject.subscribe(
+                { fileId -> updateFolderCover(fileId) },
+                { error -> Timber.e(error, "On set cover click error") }
             )
+        )
+    }
+
+    private fun updateFolderCover(fileId: Long) {
+        disposable.add(
+            viewModel.setCoverFile(fileId)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    {
+                        Toast.makeText(context, "Successfully updated folder cover", Toast.LENGTH_SHORT).show()
+                        val newUrl = it.coverUrl
+                        // notify the folder fragment that the cover was changed
+                        setFragmentResult(FOLDER_UPDATE_KEY, bundleOf(COVER_URL_KEY to newUrl))
+                    },
+                    { error ->
+                        Toast.makeText(context, "Couldn't update folder cover", Toast.LENGTH_SHORT).show()
+                        Timber.e(error, "On set cover click error")
+                    }
+                )
         )
     }
 
@@ -217,5 +243,8 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
     companion object{
         const val FILE_INDEX_KEY = "file_index"
+
+        const val FOLDER_UPDATE_KEY = "folder-updated"
+        const val COVER_URL_KEY = "cover-url"
     }
 }

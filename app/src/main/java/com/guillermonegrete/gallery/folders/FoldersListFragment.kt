@@ -25,6 +25,8 @@ import com.guillermonegrete.gallery.data.source.SettingsRepository
 import com.guillermonegrete.gallery.databinding.FragmentFoldersListBinding
 import com.guillermonegrete.gallery.files.FilesListFragment
 import com.guillermonegrete.gallery.files.SortField
+import com.guillermonegrete.gallery.files.details.FileDetailsFragment
+import com.guillermonegrete.gallery.folders.models.FolderUI
 import com.guillermonegrete.gallery.servers.ServersFragment
 import com.jakewharton.rxbinding4.appcompat.queryTextChanges
 import dagger.hilt.android.AndroidEntryPoint
@@ -60,10 +62,16 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             viewModel.updateServerUrl(ip)
             viewModel.refresh()
         }
+
+        setFragmentResultListener(FileDetailsFragment.FOLDER_UPDATE_KEY) { _, bundle ->
+            val newCoverUrl = bundle.getString(FileDetailsFragment.COVER_URL_KEY) ?: return@setFragmentResultListener
+            updateFolderItem(newCoverUrl)
+        }
     }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
+        adapter = FolderAdapter()
         val sorting = preferences.getFolderSort()
         checkedField = sorting.field
         checkedOrder = sorting.sort
@@ -148,7 +156,6 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
     }
 
     private fun loadFoldersData(){
-        adapter = FolderAdapter()
         adapter.addLoadStateListener(loadListener)
         binding.foldersList.adapter = adapter
         disposable.add(viewModel.pagedFolders
@@ -164,7 +171,8 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             .subscribe(
                 {
                     hideKeyboard()
-                    openFileFragment(Folder(it))
+                    viewModel.folderSelection = it.position
+                    openFileFragment(Folder(it.item))
                 },
                 { error -> Timber.e(error, "Error on clicking folder") }
             )
@@ -241,6 +249,12 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
         val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         val focusedView = context.currentFocus ?: return
         inputMethodManager.hideSoftInputFromWindow(focusedView.windowToken, 0)
+    }
+
+    private fun updateFolderItem(newCoverUrl: String){
+        val index = viewModel.folderSelection
+        val folderUi = adapter.snapshot().items[index]
+        if(folderUi is FolderUI.Model) folderUi.coverUrl = newCoverUrl
     }
 
     private val loadListener  = { loadStates: CombinedLoadStates ->

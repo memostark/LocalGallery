@@ -53,6 +53,7 @@
     <string name="created">Created:</string>
     <string name="modified">Modified:</string>
     <string name="edit_tags">edit tags</string>
+    <string name="cover_btn_description">set as cover</string>
 
     <!-- Server search-->
     <string name="server_address_hint">E.g. 172.16.254.1</string>
