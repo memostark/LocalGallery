@@ -9,6 +9,15 @@ sealed class File(
     val name: String, // actually an URL with name of the file
     var width: Int,
     var height: Int,
+    /**
+     * The width in pixels used to display the image in the gallery.
+     * This is calculated after the arrangement of the files is done.
+     */
+    var displayWidth: Int,
+    /**
+     * Same as [displayWidth].
+     */
+    var displayHeight: Int,
     val creationDate: Date,
     val lastModified: Date,
     var tags: List<Tag>,
@@ -22,11 +31,13 @@ class ImageFile(
     name: String,
     width: Int = 0,
     height: Int = 0,
+    displayWidth: Int = 0,
+    displayHeight: Int = 0,
     creationDate: Date = Date(),
     lastModified: Date = Date(),
     tags: List<Tag> = listOf(),
     id: Long,
-): File(name, width, height, creationDate, lastModified, tags, id){
+): File(name, width, height, displayWidth, displayHeight, creationDate, lastModified, tags, id){
     // To make testing easier when comparing and simulate a data class
     override fun equals(other: Any?) =
         if(other is ImageFile) name == other.name && width == other.width && height == other.height else false
@@ -37,9 +48,11 @@ class VideoFile(
     name: String,
     width: Int = 0,
     height: Int = 0,
+    displayWidth: Int = 0,
+    displayHeight: Int = 0,
     creationDate: Date,
     lastModified: Date,
     val duration: Int,
     tags: List<Tag> = listOf(),
     id: Long,
-): File(name, width, height, creationDate, lastModified, tags, id)
+): File(name, width, height, displayWidth, displayHeight, creationDate, lastModified, tags, id)

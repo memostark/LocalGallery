@@ -175,8 +175,8 @@ class FilesViewModel @Inject constructor(
         return sizes.mapIndexed { index, newSize ->
             when(val oldFile = files[index]){
                 // TODO remove this conversion, try to use a copy method or some way that automatically copies new fields added to the data class
-                is ImageFile -> ImageFile(oldFile.name, newSize.width, newSize.height, oldFile.creationDate, oldFile.lastModified, oldFile.tags, oldFile.id)
-                is VideoFile -> VideoFile(oldFile.name, newSize.width, newSize.height, oldFile.creationDate, oldFile.lastModified, oldFile.duration, oldFile.tags, oldFile.id)
+                is ImageFile -> ImageFile(oldFile.name, oldFile.width, oldFile.height, newSize.width, newSize.height, oldFile.creationDate, oldFile.lastModified, oldFile.tags, oldFile.id)
+                is VideoFile -> VideoFile(oldFile.name, oldFile.width, oldFile.height, newSize.width, newSize.height, oldFile.creationDate, oldFile.lastModified, oldFile.duration, oldFile.tags, oldFile.id)
             }
         }
     }
