@@ -43,6 +43,10 @@ class FakeFilesRepository: FilesRepository {
         TODO("Not yet implemented")
     }
 
+    override fun updateFolderCover(id: Long, fileId: Long): Single<Folder> {
+        TODO("Not yet implemented")
+    }
+
     @VisibleForTesting
     fun addFolders(vararg folders: Folder) {
         for (folder in folders) {

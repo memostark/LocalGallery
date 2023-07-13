@@ -64,7 +64,7 @@ class FilesAdapter(
         private val selectedIcon: ImageView = itemView.findViewById(R.id.selected_icon)
 
         fun bind(item: File){
-            itemView.layoutParams = FrameLayout.LayoutParams(item.width, item.height)
+            itemView.layoutParams = FrameLayout.LayoutParams(item.displayWidth, item.displayHeight)
             val realPos = absoluteAdapterPosition
             image.setOnClickListener { itemClicked(realPos, item.id) }
 
@@ -84,7 +84,7 @@ class FilesAdapter(
             Glide.with(itemView)
                 .load(item.name)
                 .placeholder(R.drawable.ic_image_24dp)
-                .override(item.width, item.height)
+                .override(item.displayWidth, item.displayHeight)
                 .centerCrop() // stretch the image to fit the view to avoid showing gaps
                 .into(image)
         }

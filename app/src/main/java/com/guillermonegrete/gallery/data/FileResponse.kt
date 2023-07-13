@@ -32,7 +32,7 @@ class ImageFileResponse(
 
     constructor(url: String, width: Int, height: Int): this(url, width, height, Date(), Date(), listOf(), 0)
 
-    override fun toFile() = ImageFile(url, width, height, creationDate, lastModified, tags, id)
+    override fun toFile() = ImageFile(url, width, height, 0, 0, creationDate, lastModified, tags, id)
 }
 
 class VideoFileResponse(
@@ -46,7 +46,7 @@ class VideoFileResponse(
     id: Long,
 ): FileResponse(url, width, height, creationDate, lastModified, tags, id, FileType.Video){
     constructor(url: String, width: Int, height: Int, duration: Int): this(url, width, height, Date(), Date(), listOf(), duration, 0)
-    override fun toFile() = VideoFile(url, width, height, creationDate, lastModified, duration, tags, id)
+    override fun toFile() = VideoFile(url, width, height, 0, 0, creationDate, lastModified, duration, tags, id)
 }
 
 enum class FileType{

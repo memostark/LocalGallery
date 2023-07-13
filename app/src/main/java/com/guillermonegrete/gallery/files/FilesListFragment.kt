@@ -115,7 +115,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         layoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
             override fun getSpanSize(position: Int): Int {
                 val file = adapter.snapshot()[position]
-                return file?.width ?: 1
+                return file?.displayWidth ?: 1
             }
         }
         list.adapter = adapter
@@ -131,8 +131,8 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
             viewModel.updateRows
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ it.forEach { row ->
-                    adapter.snapshot().items[row.pos].width = row.size.width
-                    adapter.snapshot().items[row.pos].height = row.size.height
+                    adapter.snapshot().items[row.pos].displayWidth = row.size.width
+                    adapter.snapshot().items[row.pos].displayHeight = row.size.height
                 }}, { error -> Timber.e(error,"Error updating rows") }
                 ),
             viewModel.newFilePos.
