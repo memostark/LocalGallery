@@ -7,8 +7,8 @@ import java.io.File as JavaFile
 
 sealed class File(
     val name: String, // actually an URL with name of the file
-    var width: Int,
-    var height: Int,
+    val width: Int,
+    val height: Int,
     /**
      * The width in pixels used to display the image in the gallery.
      * This is calculated after the arrangement of the files is done.
