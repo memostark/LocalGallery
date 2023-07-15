@@ -1,5 +1,8 @@
 package com.guillermonegrete.gallery.common
 
+import android.net.InetAddresses
+import android.os.Build
+import android.util.Patterns
 import com.guillermonegrete.gallery.data.source.SettingsRepository
 import okhttp3.Interceptor
 import okhttp3.Response
@@ -14,16 +17,25 @@ class HostSelectionInterceptor(private val settings: SettingsRepository): Interc
     override fun intercept(chain: Interceptor.Chain): Response {
         var request = chain.request()
 
-        val host: String = settings.getServerURL()
+        val url = settings.getServerURL()
+
+        val host = if (isIpValid(url)) url else "localhost"
 
         val newUrl = request.url.newBuilder()
             .host(host)
             .build()
-
         request = request.newBuilder()
             .url(newUrl)
             .build()
 
         return chain.proceed(request)
+    }
+
+    private fun isIpValid(ip: String): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            InetAddresses.isNumericAddress(ip)
+        } else {
+            Patterns.IP_ADDRESS.matcher(ip).matches()
+        }
     }
 }
