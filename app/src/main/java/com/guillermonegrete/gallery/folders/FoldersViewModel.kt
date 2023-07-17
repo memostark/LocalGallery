@@ -26,13 +26,13 @@ class FoldersViewModel @Inject constructor(
 
     private val defaultFilter: String = "${DEFAULT_FIELD.field},${Order.DEFAULT.oder}"
 
-    private val forceUpdate: Subject<Boolean> = BehaviorSubject.createDefault(true)
+    private val forceUpdate: Subject<Boolean> = PublishSubject.create()
 
     val urlAvailable: Subject<Boolean> = PublishSubject.create()
 
-    private val searchQuery: Subject<String> = BehaviorSubject.createDefault(defaultFilter)
+    private val searchQuery: Subject<String> = BehaviorSubject.createDefault("")
 
-    private val sort: Subject<String> = PublishSubject.create()
+    private val sort: Subject<String> = BehaviorSubject.createDefault(defaultFilter)
 
     var folderSelection = -1
 
@@ -63,26 +63,25 @@ class FoldersViewModel @Inject constructor(
 
     fun getFolders() {
         val serverUrl = settings.getServerURL()
+        val sorting = settings.getFolderSort()
+        sort.onNext("${sorting.field.field},${sorting.sort.oder}")
         if(serverUrl.isEmpty()) {
             urlAvailable.onNext(false)
         } else {
             urlAvailable.onNext(true)
-            val sorting = settings.getFolderSort()
-            sort.onNext("${sorting.field.field},${sorting.sort.oder}")
+            refresh()
         }
     }
 
     fun updateFilter(query: CharSequence) {
         searchQuery.onNext(query.toString())
-    }
-
-    fun setSort(field: String, order: String) {
-        sort.onNext("$field,$order")
+        refresh()
     }
 
     fun updateSort(field: String, order: String) {
         settings.setFolderSort(field, order)
         sort.onNext("$field,$order")
+        refresh()
     }
 
     fun refresh(){
