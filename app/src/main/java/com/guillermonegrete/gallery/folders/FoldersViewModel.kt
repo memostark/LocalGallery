@@ -59,6 +59,12 @@ class FoldersViewModel @Inject constructor(
 
     fun updateServerUrl(url: String) {
         settings.saveServerURL(url)
+        if(url.isEmpty()) {
+            urlAvailable.onNext(false)
+        } else {
+            urlAvailable.onNext(true)
+            refresh()
+        }
     }
 
     fun getFolders() {

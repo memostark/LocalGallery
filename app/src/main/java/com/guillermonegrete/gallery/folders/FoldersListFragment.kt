@@ -60,7 +60,6 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
         setFragmentResultListener(ServersFragment.REQUEST_KEY) { _, bundle ->
             val ip = bundle.getString(ServersFragment.IP_KEY) ?: return@setFragmentResultListener
             viewModel.updateServerUrl(ip)
-            viewModel.refresh()
         }
 
         setFragmentResultListener(FileDetailsFragment.FOLDER_UPDATE_KEY) { _, bundle ->
