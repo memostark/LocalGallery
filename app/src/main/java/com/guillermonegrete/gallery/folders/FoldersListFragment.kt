@@ -60,7 +60,6 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
         setFragmentResultListener(ServersFragment.REQUEST_KEY) { _, bundle ->
             val ip = bundle.getString(ServersFragment.IP_KEY) ?: return@setFragmentResultListener
             viewModel.updateServerUrl(ip)
-            viewModel.refresh()
         }
 
         setFragmentResultListener(FileDetailsFragment.FOLDER_UPDATE_KEY) { _, bundle ->
@@ -210,13 +209,16 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
         searchView.setSearchableInfo(searchManager.getSearchableInfo(activity?.componentName))
         searchView.maxWidth = Int.MAX_VALUE
 
-        searchView.queryTextChanges()
-            .debounce(300, TimeUnit.MILLISECONDS)
-            .distinctUntilChanged()
-            .subscribe(
-                { viewModel.updateFilter(it) },
-                { Timber.e(it, "Error when querying search view") }
-            )
+        disposable.add(
+            searchView.queryTextChanges()
+                .skip(1) // ignore the first event that happens automatically when subscribing it cause an undesired list refresh
+                .debounce(300, TimeUnit.MILLISECONDS)
+                .distinctUntilChanged()
+                .subscribe(
+                    { viewModel.updateFilter(it) },
+                    { Timber.e(it, "Error when querying search view") }
+                )
+        )
 
         searchView.setOnQueryTextFocusChangeListener { _, hasFocus ->
             // If keyboard is closed (hasFocus is false) and no text in search
