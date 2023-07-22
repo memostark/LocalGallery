@@ -32,7 +32,8 @@ class FakeFilesRepository: FilesRepository {
 
     override fun getFiles(folder: String): Single<List<File>> {
         if(shouldReturnError) return Single.error(RuntimeException())
-        return Single.just(filesServiceData[folder])
+        val files = filesServiceData[folder]
+        return if(files == null) Single.error(RuntimeException("Couldn't find entry for folder: $folder")) else Single.just(files)
     }
 
     override fun getPagedFiles(
