@@ -5,10 +5,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.insertSeparators
 import androidx.paging.map
 import androidx.paging.rxjava3.cachedIn
-import com.guillermonegrete.gallery.common.Order
 import com.guillermonegrete.gallery.data.source.FilesRepository
 import com.guillermonegrete.gallery.data.source.SettingsRepository
-import com.guillermonegrete.gallery.files.SortField
 import com.guillermonegrete.gallery.folders.models.FolderUI
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.BackpressureStrategy
@@ -24,15 +22,13 @@ class FoldersViewModel @Inject constructor(
     private val filesRepository: FilesRepository
 ): ViewModel() {
 
-    private val defaultFilter: String = "${DEFAULT_FIELD.field},${Order.DEFAULT.oder}"
-
-    private val forceUpdate: Subject<Boolean> = PublishSubject.create()
+    private val forceUpdate: Subject<Boolean> = BehaviorSubject.createDefault(true)
 
     val urlAvailable: Subject<Boolean> = PublishSubject.create()
 
-    private val searchQuery: Subject<String> = BehaviorSubject.createDefault("")
+    private var searchQuery: Subject<String> = BehaviorSubject.createDefault("")
 
-    private val sort: Subject<String> = BehaviorSubject.createDefault(defaultFilter)
+    private val sort: Subject<String> = PublishSubject.create()
 
     var folderSelection = -1
 
@@ -63,38 +59,33 @@ class FoldersViewModel @Inject constructor(
             urlAvailable.onNext(false)
         } else {
             urlAvailable.onNext(true)
-            refresh()
+            val sorting = settings.getFolderSort()
+            sort.onNext("${sorting.field.field},${sorting.sort.oder}")
         }
     }
 
     fun getFolders() {
         val serverUrl = settings.getServerURL()
-        val sorting = settings.getFolderSort()
-        sort.onNext("${sorting.field.field},${sorting.sort.oder}")
+
         if(serverUrl.isEmpty()) {
             urlAvailable.onNext(false)
         } else {
             urlAvailable.onNext(true)
-            refresh()
+            val sorting = settings.getFolderSort()
+            sort.onNext("${sorting.field.field},${sorting.sort.oder}")
         }
     }
 
     fun updateFilter(query: CharSequence) {
         searchQuery.onNext(query.toString())
-        refresh()
     }
 
     fun updateSort(field: String, order: String) {
         settings.setFolderSort(field, order)
         sort.onNext("$field,$order")
-        refresh()
     }
 
     fun refresh(){
         forceUpdate.onNext(true)
-    }
-
-    companion object{
-        val DEFAULT_FIELD = SortField.NAME
     }
 }
