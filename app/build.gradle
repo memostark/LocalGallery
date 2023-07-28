@@ -17,7 +17,7 @@ android {
         targetSdkVersion 33
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "com.guillermonegrete.gallery.CustomTestRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
     }
@@ -104,12 +104,15 @@ dependencies {
     kapt 'com.github.bumptech.glide:compiler:4.9.0'
 
     // Dagger 2
-    def dagger_version = "2.43.2"
+    def dagger_version = "2.44.2"
     implementation "com.google.dagger:dagger:$dagger_version"
     kapt "com.google.dagger:dagger-compiler:$dagger_version"
     // Hilt
-    implementation("com.google.dagger:hilt-android:2.44")
-    kapt("com.google.dagger:hilt-android-compiler:2.44")
+    implementation("com.google.dagger:hilt-android:$dagger_version")
+    kapt("com.google.dagger:hilt-android-compiler:$dagger_version")
+    // Hilt testing
+    androidTestImplementation "com.google.dagger:hilt-android-testing:$dagger_version"
+    kaptAndroidTest "com.google.dagger:hilt-compiler:$dagger_version"
 
     // PhotoView
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
