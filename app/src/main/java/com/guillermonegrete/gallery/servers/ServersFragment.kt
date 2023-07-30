@@ -93,7 +93,7 @@ class ServersFragment: DialogFragment(){
                         + source.subSequence(start, end)
                         ) + destTxt.substring(dend)
                 if (!resultingTxt.matches(
-                        Regex("^\\d{1,3}(\\.(\\d{1,3}(\\.(\\d{1,3}(\\.(\\d{1,3})?)?)?)?)?)?")
+                        Regex("^\\d{1,3}(\\.(\\d{1,3}(\\.(\\d{1,3}(\\.(\\d{1,3}(:(\\d{1,5})?)?)?)?)?)?)?)?")
                     )
                 )
                     return@InputFilter ""
