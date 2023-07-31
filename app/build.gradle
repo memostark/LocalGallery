@@ -83,7 +83,9 @@ dependencies {
     implementation "com.squareup.retrofit2:adapter-rxjava3:$retrofit_version"
 
     // Okhttp
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.9.3'
+    def okhttp_version = "4.10.0"
+    implementation "com.squareup.okhttp3:logging-interceptor:$okhttp_version"
+    androidTestImplementation "com.squareup.okhttp3:mockwebserver:$okhttp_version"
 
     // Moshi
     def moshi_version = "1.12.0"
