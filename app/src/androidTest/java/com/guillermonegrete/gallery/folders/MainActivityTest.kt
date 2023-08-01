@@ -1,13 +1,16 @@
 package com.guillermonegrete.gallery.folders
 
 import androidx.annotation.StringRes
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import androidx.test.core.app.ActivityScenario
+import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.replaceText
 import androidx.test.espresso.action.ViewActions.typeText
 import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.espresso.matcher.ViewMatchers.hasDescendant
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
@@ -61,7 +64,7 @@ class MainActivityTest {
     }
 
     @Test
-    fun when_no_url_given_new_url_then_list_loaded() {
+    fun given_no_url_when_new_url_then_list_loaded() {
         server.enqueue(MockResponse().setBody(FOLDER_RESPONSE))
 
         val activityScenario = ActivityScenario.launch(MainActivity::class.java)
@@ -91,6 +94,36 @@ class MainActivityTest {
         activityScenario.close()
     }
 
+    @Test
+    fun when_navigate_to_files_and_back_then_list_not_updated() {
+        setMockServerUrl()
+
+        server.enqueue(MockResponse().setBody(FOLDER_RESPONSE))
+        val activityScenario = ActivityScenario.launch(MainActivity::class.java)
+
+        // Navigate to files list of first folder
+        server.enqueue(MockResponse().setBody(FILES_RESPONSE))
+        onView(withId(R.id.folders_list))
+            .perform(
+                RecyclerViewActions.actionOnItemAtPosition<ViewHolder>(1, click()) // index 0 is header
+            )
+
+        onView(withId(R.id.files_list))
+            .check(matches(atPosition(0, isDisplayed())))
+
+        // Navigate back
+        server.enqueue(MockResponse().setBody(FOUR_FOLDER_RESPONSE))
+        Espresso.pressBack()
+
+        // Verify list didn't change
+        onView(withId(R.id.folders_list))
+            .check(matches(atPosition(0, withText("root_folder")))) // Header
+        onView(withId(R.id.folders_list))
+            .check(matches(atPosition(1, hasDescendant(withText("test item"))))) // First item
+
+        activityScenario.close()
+    }
+
     private fun clickHiddenMenuItem(@StringRes stringId: Int) {
         val context = getInstrumentation().targetContext
         openActionBarOverflowOrOptionsMenu(context)
@@ -104,6 +137,11 @@ class MainActivityTest {
             .inRoot(isDialog())
             .check(matches(isDisplayed()))
             .perform(click())
+    }
+
+    private fun setMockServerUrl(){
+        val fullUrl = server.url("/")
+        settingsRepository.saveServerURL(fullUrl.host + ":" + fullUrl.port)
     }
 
     companion object {
@@ -122,6 +160,44 @@ class MainActivityTest {
                 "totalPages": 1,
                 "totalItems": 1
               }
+            }
+        """.trimIndent()
+
+        val FOUR_FOLDER_RESPONSE = """
+            {
+              "name": "root_folder",
+              "page": {
+                "items": [
+                  ${(1..4).joinToString(",") {"""
+                    {
+                    "name": "folder $it",
+                    "coverUrl": "doesn't matter",
+                    "count": 10,
+                    "id": 0
+                    }"""}}
+                ],
+                "totalPages": 1,
+                "totalItems": 4
+              }
+            }
+        """.trimIndent()
+
+        val FILES_RESPONSE = """
+            {
+              "items": [
+                  {
+                    "url": "dummy-url",
+                    "width": 200,
+                    "height": 300,
+                    "creationDate": "2020-08-25T08:49:31Z",
+                    "lastModified": "2021-10-27T19:56:10Z",
+                    "tags": [],
+                    "id": 0,
+                    "file_type":"Image"
+                  }
+                ],
+                "totalPages": 1,
+                "totalItems": 1
             }
         """.trimIndent()
     }
