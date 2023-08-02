@@ -1,19 +1,15 @@
 package com.guillermonegrete.gallery.data.source
 
-import android.content.Context
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.edit
-import androidx.preference.PreferenceManager
 import com.guillermonegrete.gallery.common.Order
 import com.guillermonegrete.gallery.common.SortDialogChecked
 import com.guillermonegrete.gallery.files.SortField
-import dagger.hilt.android.qualifiers.ApplicationContext
 import io.reactivex.rxjava3.core.Single
 import javax.inject.Inject
 
-class DefaultSettingsRepository @Inject constructor(@ApplicationContext context: Context): SettingsRepository {
-
-    private val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+class DefaultSettingsRepository @Inject constructor(private val preferences: SharedPreferences): SettingsRepository {
 
     override fun getServerURL(): String{
         return preferences.getString(SERVER_URL_KEY, "") ?: ""

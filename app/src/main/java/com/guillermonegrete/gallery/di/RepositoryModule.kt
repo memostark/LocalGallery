@@ -1,5 +1,8 @@
 package com.guillermonegrete.gallery.di
 
+import android.content.Context
+import android.content.SharedPreferences
+import androidx.preference.PreferenceManager
 import com.guillermonegrete.gallery.BuildConfig
 import com.guillermonegrete.gallery.common.HostSelectionInterceptor
 import com.guillermonegrete.gallery.data.*
@@ -20,6 +23,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -27,6 +31,7 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.*
+import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
 @Module
@@ -71,6 +76,17 @@ object RepositoryModule {
     @Provides
     fun provideTagService(retrofit: Retrofit): TagService = retrofit.create(TagService::class.java)
 
+}
+
+@InstallIn(SingletonComponent::class)
+@Module
+object SettingsModule {
+
+    @Singleton
+    @Provides
+    fun provideSettings(@ApplicationContext context: Context): SharedPreferences{
+        return PreferenceManager.getDefaultSharedPreferences(context)
+    }
 }
 
 @InstallIn(SingletonComponent::class)
