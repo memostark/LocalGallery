@@ -18,6 +18,9 @@
         <action
             android:id="@+id/action_files_to_sorting_dialog"
             app:destination="@id/sorting_dialog" />
+        <action
+            android:id="@+id/action_files_to_addTagFragment"
+            app:destination="@id/addTagFragment" />
     </fragment>
 
     <fragment
