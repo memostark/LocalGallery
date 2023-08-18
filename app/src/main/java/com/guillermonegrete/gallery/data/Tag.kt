@@ -14,14 +14,3 @@ data class Tag(
      */
     val count: Long = 0,
 ): Parcelable
-
-
-data class TagCount(
-    val name: String,
-    val creationDate: Date,
-    /**
-     * The amount of files in the folder that have this tag applied.
-     */
-    val count: Long,
-    val id: Long,
-)
