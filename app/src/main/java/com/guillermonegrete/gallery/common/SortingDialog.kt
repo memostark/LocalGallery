@@ -81,7 +81,8 @@ class SortingDialog: BottomSheetDialogFragment() {
                             chipScroll.isVisible = true
                             tags.forEach { tag ->
                                 val chip =  ChoiceChipBinding.inflate(LayoutInflater.from(context)).root
-                                chip.text = tag.name
+                                val text = "${tag.name} (${tag.count})"
+                                chip.text = text
                                 if (tag.id == args.selections.tagId) {
                                     checkedTagId = tag.id
                                     chip.isChecked = true

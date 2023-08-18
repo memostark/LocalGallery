@@ -202,7 +202,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         val state = loadStates.refresh
         binding.loadingIcon.isVisible = state is LoadState.Loading
         binding.filesMessageContainer.isVisible = state is LoadState.Error
-        if(state is LoadState.Error) Timber.e(state.error, "Error when loading")
+        if(state is LoadState.Error) Timber.e(state.error, "Error when loading files")
     }
 
     private fun Fragment.getScreenWidth(): Int{
