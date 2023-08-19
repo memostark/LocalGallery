@@ -32,6 +32,8 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
 
     val setCoverSubject: PublishSubject<Long> = PublishSubject.create()
 
+    val onImageTapSubject: PublishSubject<Boolean> = PublishSubject.create()
+
     private val formatter = SimpleDateFormat("dd MMM yyyy HH:mm:ss", Locale.getDefault())
 
     private var isSheetVisible = false
@@ -105,6 +107,8 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
 
                 override fun onSlide(p0: View, p1: Float) {}
             })
+
+
         }
 
         open fun bind(file: File){
@@ -148,6 +152,12 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
     inner class ImageViewHolder(itemView: View): ViewHolder(itemView){
 
         private val fileImage: ImageView = itemView.findViewById(R.id.file_image)
+
+        init {
+            fileImage.setOnClickListener {
+                onImageTapSubject.onNext(true)
+            }
+        }
 
         override fun bind(file: File){
             super.bind(file)

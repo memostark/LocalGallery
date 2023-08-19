@@ -3,7 +3,6 @@ package com.guillermonegrete.gallery.files.details
 import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -11,6 +10,7 @@ import androidx.core.os.bundleOf
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
@@ -112,8 +112,24 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
             adapter.setCoverSubject.subscribe(
                 { fileId -> updateFolderCover(fileId) },
                 { error -> Timber.e(error, "On set cover click error") }
+            ),
+            adapter.onImageTapSubject.subscribe(
+                { _ -> toggleBars() },
+                { error -> Timber.e(error, "On image tap error") }
             )
         )
+    }
+
+    private fun toggleBars() {
+
+        val window = requireActivity().window
+        val insetController = WindowCompat.getInsetsController(window, window.decorView)
+        Toast.makeText(context, "Clicked ${insetController.systemBarsBehavior}", Toast.LENGTH_SHORT).show()
+        if (insetController.systemBarsBehavior == WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE) {
+            showStatusBar()
+        } else {
+            hideStatusBar()
+        }
     }
 
     private fun updateFolderCover(fileId: Long) {
