@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -47,6 +48,8 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
     private var index = 0
 
+    private var sysBarsVisible = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setFragmentResultListener(AddTagFragment.REQUEST_KEY) { _, result ->
@@ -68,6 +71,14 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
         adapter = FileDetailsAdapter()
         adapter.isAllFilesDest = findNavController().previousBackStackEntry?.destination?.id == R.id.all_files_dest
+
+        val decorView = requireActivity().window.decorView
+        ViewCompat.setOnApplyWindowInsetsListener(decorView) { v, insets ->
+            sysBarsVisible = insets.isVisible(WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.navigationBars())
+            // Return like this otherwise the insets show when they shouldn't
+            ViewCompat.onApplyWindowInsets(v, insets)
+        }
+
         setUpViewModel()
     }
 
@@ -121,14 +132,10 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
     }
 
     private fun toggleBars() {
-
-        val window = requireActivity().window
-        val insetController = WindowCompat.getInsetsController(window, window.decorView)
-        Toast.makeText(context, "Clicked ${insetController.systemBarsBehavior}", Toast.LENGTH_SHORT).show()
-        if (insetController.systemBarsBehavior == WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE) {
-            showStatusBar()
-        } else {
+        if (sysBarsVisible) {
             hideStatusBar()
+        } else {
+            showStatusBar()
         }
     }
 
@@ -217,7 +224,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
         (activity as AppCompatActivity?)?.supportActionBar?.show()
 
         val window = activity?.window ?: return
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowCompat.setDecorFitsSystemWindows(window, true)
         WindowInsetsControllerCompat(window, window.decorView).show(WindowInsetsCompat.Type.systemBars())
     }
 
