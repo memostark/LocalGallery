@@ -61,8 +61,6 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
             adapter.snapshot().items[pos].tags = newTags
             adapter.notifyItemChanged(pos)
         }
-
-        setUIChangesListeners()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -74,7 +72,9 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
         val decorView = requireActivity().window.decorView
         ViewCompat.setOnApplyWindowInsetsListener(decorView) { v, insets ->
-            sysBarsVisible = insets.isVisible(WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.navigationBars())
+            val status = insets.isVisible(WindowInsetsCompat.Type.statusBars())
+            val nav = insets.isVisible(WindowInsetsCompat.Type.navigationBars())
+            sysBarsVisible = status || nav
             // Return like this otherwise the insets show when they shouldn't
             ViewCompat.onApplyWindowInsets(v, insets)
         }
@@ -125,7 +125,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                 { error -> Timber.e(error, "On set cover click error") }
             ),
             adapter.onImageTapSubject.subscribe(
-                { _ -> toggleBars() },
+                { toggleBars() },
                 { error -> Timber.e(error, "On image tap error") }
             )
         )
@@ -188,22 +188,6 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
         } else {
             @Suppress("DEPRECATION")
             decorView.setOnSystemUiVisibilityChangeListener(null)
-        }
-    }
-
-    /**
-     * Used to detect when the status bar becomes visible (for example when the keyboard shows up).
-     * Hide again the bar if that's the case.
-     */
-    private fun setUIChangesListeners() {
-        // SDKs 30+ automatically hide the bar
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-            val decorView = activity?.window?.decorView ?: return
-            @Suppress("DEPRECATION")
-            decorView.setOnSystemUiVisibilityChangeListener { visibility ->
-                // System bars are visible
-                if (visibility and View.SYSTEM_UI_FLAG_FULLSCREEN == 0) hideStatusBar()
-            }
         }
     }
 
