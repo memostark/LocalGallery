@@ -3,17 +3,19 @@ package com.guillermonegrete.gallery.files.details
 import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
+import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.exoplayer2.ExoPlayer
@@ -47,6 +49,17 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
     private var index = 0
 
+    /**
+     * The actual visibility of the system bars.
+     */
+    private var sysBarsVisible = false
+
+    /**
+     *  The visibility the bars should have.
+     *  It may differ from the actual visibility for older devices because if the bars are modified (e.g. the keyboard shows them) they don't return to their previous state.
+     */
+    private var showBars = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setFragmentResultListener(AddTagFragment.REQUEST_KEY) { _, result ->
@@ -58,8 +71,6 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
             adapter.snapshot().items[pos].tags = newTags
             adapter.notifyItemChanged(pos)
         }
-
-        setUIChangesListeners()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -68,6 +79,16 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
         adapter = FileDetailsAdapter()
         adapter.isAllFilesDest = findNavController().previousBackStackEntry?.destination?.id == R.id.all_files_dest
+
+        val decorView = requireActivity().window.decorView
+        ViewCompat.setOnApplyWindowInsetsListener(decorView) { v, insets ->
+            val status = insets.isVisible(WindowInsetsCompat.Type.statusBars())
+            val nav = insets.isVisible(WindowInsetsCompat.Type.navigationBars())
+            sysBarsVisible = status || nav
+            // Return like this otherwise the insets show when they shouldn't
+            ViewCompat.onApplyWindowInsets(v, insets)
+        }
+
         setUpViewModel()
     }
 
@@ -112,8 +133,20 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
             adapter.setCoverSubject.subscribe(
                 { fileId -> updateFolderCover(fileId) },
                 { error -> Timber.e(error, "On set cover click error") }
+            ),
+            adapter.onImageTapSubject.subscribe(
+                { toggleBars() },
+                { error -> Timber.e(error, "On image tap error") }
             )
         )
+    }
+
+    private fun toggleBars() {
+        if (sysBarsVisible) {
+            hideStatusBar()
+        } else {
+            showStatusBar()
+        }
     }
 
     private fun updateFolderCover(fileId: Long) {
@@ -139,6 +172,8 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
         val pagerPos = binding.fileDetailsViewpager.currentItem
         viewModel.setNewPos(pagerPos)
 
+        val decorView = requireActivity().window.decorView
+        ViewCompat.setOnApplyWindowInsetsListener(decorView, null)
         binding.fileDetailsViewpager.adapter = null
         _binding = null
         disposable.clear()
@@ -148,6 +183,12 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
     override fun onResume() {
         super.onResume()
         hideStatusBar()
+        findNavController().addOnDestinationChangedListener(listener)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        findNavController().removeOnDestinationChangedListener(listener)
     }
 
     override fun onStop() {
@@ -168,22 +209,6 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
         }
     }
 
-    /**
-     * Used to detect when the status bar becomes visible (for example when the keyboard shows up).
-     * Hide again the bar if that's the case.
-     */
-    private fun setUIChangesListeners() {
-        // SDKs 30+ automatically hide the bar
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-            val decorView = activity?.window?.decorView ?: return
-            @Suppress("DEPRECATION")
-            decorView.setOnSystemUiVisibilityChangeListener { visibility ->
-                // System bars are visible
-                if (visibility and View.SYSTEM_UI_FLAG_FULLSCREEN == 0) hideStatusBar()
-            }
-        }
-    }
-
     private fun hideStatusBar(){
         (activity as AppCompatActivity?)?.supportActionBar?.hide()
 
@@ -195,14 +220,18 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
             controller.hide(WindowInsetsCompat.Type.systemBars())
             controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
+
+        showBars = false
     }
 
     private fun showStatusBar(){
         (activity as AppCompatActivity?)?.supportActionBar?.show()
 
         val window = activity?.window ?: return
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowCompat.setDecorFitsSystemWindows(window, true)
         WindowInsetsControllerCompat(window, window.decorView).show(WindowInsetsCompat.Type.systemBars())
+
+        showBars = true
     }
 
     private fun initializePlayer(){
@@ -237,6 +266,19 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                 player.prepare()
                 player.repeatMode = Player.REPEAT_MODE_ONE
                 player.playWhenReady = false
+            }
+        }
+    }
+
+    /**
+     * Hide the bar if it's visible when navigating back here (usually from a dialog that shows the keyboard)
+     */
+    private val listener = NavController.OnDestinationChangedListener { _, destination, _ ->
+        // SDKs 30+ automatically hide the bar
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            val toHere = destination.id == R.id.fileDetailsFragment
+            if(toHere && (sysBarsVisible != showBars )) {
+                if (!showBars) hideStatusBar()
             }
         }
     }
