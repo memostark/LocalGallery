@@ -20,4 +20,9 @@
         android:id="@+id/night_mode_menu_item"
         android:title="@string/night_mode"
         android:checkable="true" />
+
+    <item
+        android:id="@+id/autoplay_menu_item"
+        android:title="@string/autoplay"
+        android:checkable="true" />
 </menu>
