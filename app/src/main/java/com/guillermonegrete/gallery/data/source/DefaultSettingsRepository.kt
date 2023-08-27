@@ -35,6 +35,16 @@ class DefaultSettingsRepository @Inject constructor(private val preferences: Sha
         }
     }
 
+    override fun getAutoPlayMode(): Boolean {
+        return preferences.getBoolean(AUTOPLAY_VIDEO_KEY, true)
+    }
+
+    override fun setAutoPlayVideo(enabled: Boolean) {
+        preferences.edit {
+            putBoolean(AUTOPLAY_VIDEO_KEY, enabled)
+        }
+    }
+
     override fun getFolderSort(): SortDialogChecked {
         val fieldString = preferences.getString(FOLDER_FIELD_KEY, null)
         val sortString = preferences.getString(FOLDER_ORDER_KEY, null)
@@ -70,6 +80,7 @@ class DefaultSettingsRepository @Inject constructor(private val preferences: Sha
     companion object{
         const val SERVER_URL_KEY = "server_url"
         const val NIGHT_MODE_KEY = "night_mode"
+        const val AUTOPLAY_VIDEO_KEY = "autoplay_video"
 
         // Sorting keys
         const val FOLDER_FIELD_KEY = "folder_field"

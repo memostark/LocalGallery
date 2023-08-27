@@ -16,6 +16,10 @@ interface SettingsRepository {
 
     fun setNightMode(mode: Int)
 
+    fun getAutoPlayMode(): Boolean
+
+    fun setAutoPlayVideo(enabled: Boolean)
+
     // Sort preferences
     fun getFolderSort(): SortDialogChecked
 

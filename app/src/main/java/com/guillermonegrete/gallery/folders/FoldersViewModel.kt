@@ -88,4 +88,8 @@ class FoldersViewModel @Inject constructor(
     fun refresh(){
         forceUpdate.onNext(true)
     }
+
+    fun setAutoplayVideo(checked: Boolean) {
+        settings.setAutoPlayVideo(checked)
+    }
 }
