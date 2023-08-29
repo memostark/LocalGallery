@@ -27,6 +27,14 @@ class FakeSettingsRepository: SettingsRepository {
         TODO("Not yet implemented")
     }
 
+    override fun getAutoPlayMode(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun setAutoPlayVideo(enabled: Boolean) {
+        TODO("Not yet implemented")
+    }
+
     override fun getFolderSort(): SortDialogChecked = SortDialogChecked.DEFAULT_FOLDER
 
     override fun setFolderSort(field: String, sort: String) {
