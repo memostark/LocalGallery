@@ -9,6 +9,7 @@ import com.guillermonegrete.gallery.common.Order
 import com.guillermonegrete.gallery.data.File
 import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.source.FilesRepository
+import com.guillermonegrete.gallery.data.source.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.subjects.BehaviorSubject
@@ -19,6 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class FilesViewModel @Inject constructor(
     private val filesRepository: FilesRepository,
+    private val settings: SettingsRepository
 ): ViewModel() {
 
     private val defaultFilter: String = "${SortField.DEFAULT.field},${Order.DEFAULT.oder}"
@@ -137,6 +139,8 @@ class FilesViewModel @Inject constructor(
     fun setNewPos(pos: Int){
         newFilePos.onNext(pos)
     }
+
+    fun isAutoplayEnabled() = settings.getAutoPlayMode()
 
     @Synchronized
     private fun normalizeHeights(subList: List<Size>, height: Float) {

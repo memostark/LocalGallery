@@ -88,6 +88,9 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             val nightModeItem = toolbar.menu.findItem(R.id.night_mode_menu_item)
             nightModeItem.isChecked = AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES
 
+            val autoplayItem = toolbar.menu.findItem(R.id.autoplay_menu_item)
+            autoplayItem.isChecked = preferences.getAutoPlayMode()
+
             setSearchViewConfig(toolbar.menu)
             toolbar.setOnMenuItemClickListener { item ->
                 when(item.itemId){
@@ -114,6 +117,11 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                         val mode = if (nightModeItem.isChecked) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
                         preferences.setNightMode(mode)
                         AppCompatDelegate.setDefaultNightMode(mode)
+                        true
+                    }
+                    R.id.autoplay_menu_item -> {
+                        autoplayItem.isChecked = !autoplayItem.isChecked
+                        viewModel.setAutoplayVideo(autoplayItem.isChecked)
                         true
                     }
                     else -> false

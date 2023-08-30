@@ -60,6 +60,8 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
      */
     private var showBars = false
 
+    private var autoplayVideo = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setFragmentResultListener(AddTagFragment.REQUEST_KEY) { _, result ->
@@ -79,6 +81,8 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
         adapter = FileDetailsAdapter()
         adapter.isAllFilesDest = findNavController().previousBackStackEntry?.destination?.id == R.id.all_files_dest
+
+        autoplayVideo = viewModel.isAutoplayEnabled()
 
         val decorView = requireActivity().window.decorView
         ViewCompat.setOnApplyWindowInsetsListener(decorView) { v, insets ->
@@ -265,7 +269,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                 player.setMediaItem(MediaItem.fromUri(file.name))
                 player.prepare()
                 player.repeatMode = Player.REPEAT_MODE_ONE
-                player.playWhenReady = false
+                player.playWhenReady = autoplayVideo
             }
         }
     }
