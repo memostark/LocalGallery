@@ -241,7 +241,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
     private fun initializePlayer(){
         if (exoPlayer == null) exoPlayer = ExoPlayer.Builder(requireContext()).build()
 
-        val viewPager: ViewPager2 = binding.fileDetailsViewpager
+        val viewPager = binding.fileDetailsViewpager
         setPagerListener(viewPager)
     }
 
@@ -263,6 +263,9 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                 currentPlayerView?.player = null
                 currentPlayerView = playerView
                 playerView.player = player
+                // Controls hidden by default
+                playerView.controllerAutoShow = false
+                playerView.hideController()
 
                 val file = adapter.snapshot()[pageIndex] ?: return@setPageTransformer
 
