@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
@@ -267,6 +268,17 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                 playerView.controllerAutoShow = false
                 playerView.hideController()
 
+                playerView.setShowRewindButton(false)
+                playerView.setShowFastForwardButton(false)
+                playerView.setShowPreviousButton(false)
+                playerView.setShowNextButton(false)
+                val toggleBtn: ImageButton = playerView.findViewById(R.id.toggle_audio)
+                setAudio(player, toggleBtn)
+                toggleBtn.setOnClickListener {
+                    viewModel.audioOn = player.volume < 0.5f
+                    setAudio(player, toggleBtn)
+                }
+
                 val file = adapter.snapshot()[pageIndex] ?: return@setPageTransformer
 
                 player.setMediaItem(MediaItem.fromUri(file.name))
@@ -274,6 +286,16 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                 player.repeatMode = Player.REPEAT_MODE_ONE
                 player.playWhenReady = autoplayVideo
             }
+        }
+    }
+
+    private fun setAudio(player: Player, toggleBtn: ImageButton) {
+        if(viewModel.audioOn) {
+            player.volume = 1f
+            toggleBtn.setImageResource(R.drawable.baseline_volume_up_24)
+        } else {
+            player.volume = 0f
+            toggleBtn.setImageResource(R.drawable.baseline_volume_off_24)
         }
     }
 

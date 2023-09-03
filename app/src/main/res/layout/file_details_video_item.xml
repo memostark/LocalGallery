@@ -3,13 +3,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".files.details.FileDetailsFragment">
 
     <com.google.android.exoplayer2.ui.StyledPlayerView
         android:id="@+id/exo_player_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="top|center_horizontal"/>
+        android:layout_gravity="top|center_horizontal"
+        app:controller_layout_id="@layout/custom_exo_player_control_view"/>
 
     <include layout="@layout/file_details_bottom"/>
 

@@ -61,5 +61,6 @@
     <string name="servers_found">Servers found:</string>
     <string name="search_servers">Search servers</string>
     <string name="server_dialog_title">Set server address</string>
+    <string name="toggle_audio">toggle audio</string>
 
 </resources>
