@@ -120,9 +120,9 @@ dependencies {
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
 
     // Exo player
-    def exo_version = "2.18.1"
-    implementation "com.google.android.exoplayer:exoplayer-core:$exo_version"
-    implementation "com.google.android.exoplayer:exoplayer-ui:$exo_version"
+    def media3_version = "1.1.1"
+    implementation "androidx.media3:media3-exoplayer:$media3_version"
+    implementation "androidx.media3:media3-ui:$media3_version"
 
     def paging_version = "3.1.0-rc01"
     implementation "androidx.paging:paging-runtime-ktx:$paging_version"

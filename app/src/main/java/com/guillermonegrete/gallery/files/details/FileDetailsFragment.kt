@@ -19,10 +19,11 @@ import androidx.fragment.app.setFragmentResultListener
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.ui.StyledPlayerView
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.databinding.FragmentFileDetailsBinding
@@ -33,6 +34,8 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import timber.log.Timber
 
+// Used for media3, APIs are safe we just use this to remove the warnings, see more: https://developer.android.com/guide/topics/media/media3/getting-started/migration-guide#unstableapi
+@UnstableApi
 @AndroidEntryPoint
 class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
@@ -42,7 +45,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
     private val viewModel: FilesViewModel by activityViewModels()
     private var exoPlayer: ExoPlayer? = null
 
-    private var currentPlayerView: StyledPlayerView? = null
+    private var currentPlayerView: PlayerView? = null
 
     private val disposable = CompositeDisposable()
 
@@ -258,7 +261,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                 player.seekTo(0)
 
                 // If playerView exists it means is a video item, create Media Source and setup ExoPlayer
-                val playerView: StyledPlayerView = page.findViewById(R.id.exo_player_view) ?: return@setPageTransformer
+                val playerView: PlayerView = page.findViewById(R.id.exo_player_view) ?: return@setPageTransformer
 
                 // Detach player from previous view and update with current view
                 currentPlayerView?.player = null
