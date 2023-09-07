@@ -3,11 +3,14 @@ package com.guillermonegrete.gallery.files.details
 import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
+import android.view.GestureDetector
+import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
+import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -249,6 +252,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
         setPagerListener(viewPager)
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun setPagerListener(viewPager: ViewPager2){
 
         viewPager.setPageTransformer { page, position ->
@@ -282,6 +286,9 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                     setAudio(player, toggleBtn)
                 }
 
+                val detector = GestureDetectorCompat(requireContext(), MyGestureListener(playerView))
+                playerView.setOnTouchListener { _, event -> return@setOnTouchListener detector.onTouchEvent(event) }
+
                 val file = adapter.snapshot()[pageIndex] ?: return@setPageTransformer
 
                 player.setMediaItem(MediaItem.fromUri(file.name))
@@ -313,6 +320,28 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                 if (!showBars) hideStatusBar()
             }
         }
+    }
+
+    private inner class MyGestureListener(val playerView: PlayerView) : GestureDetector.SimpleOnGestureListener() {
+
+        val player = playerView.player
+
+        val screenWidth = resources.displayMetrics.widthPixels
+        val thirdWidth = screenWidth / 3
+
+        override fun onDoubleTap(e: MotionEvent): Boolean {
+            if (e.x < thirdWidth) {
+                player?.seekBack()
+                playerView.showController()
+            } else if(e.x > (screenWidth - thirdWidth)) {
+                player?.seekForward()
+                playerView.showController()
+            } else {
+                return false
+            }
+            return true
+        }
+
     }
 
     companion object{
