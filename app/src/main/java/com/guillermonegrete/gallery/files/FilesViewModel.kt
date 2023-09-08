@@ -37,6 +37,8 @@ class FilesViewModel @Inject constructor(
      */
     val newFilePos: Subject<Int> = PublishSubject.create()
 
+    var audioOn = true
+
     var folderId = -1L
         private set
 

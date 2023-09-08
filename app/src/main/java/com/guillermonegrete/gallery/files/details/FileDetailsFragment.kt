@@ -3,10 +3,14 @@ package com.guillermonegrete.gallery.files.details
 import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
+import android.view.GestureDetector
+import android.view.MotionEvent
 import android.view.View
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
+import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -18,10 +22,11 @@ import androidx.fragment.app.setFragmentResultListener
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.ui.StyledPlayerView
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.databinding.FragmentFileDetailsBinding
@@ -32,6 +37,8 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import timber.log.Timber
 
+// Used for media3, APIs are safe we just use this to remove the warnings, see more: https://developer.android.com/guide/topics/media/media3/getting-started/migration-guide#unstableapi
+@UnstableApi
 @AndroidEntryPoint
 class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
@@ -41,7 +48,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
     private val viewModel: FilesViewModel by activityViewModels()
     private var exoPlayer: ExoPlayer? = null
 
-    private var currentPlayerView: StyledPlayerView? = null
+    private var currentPlayerView: PlayerView? = null
 
     private val disposable = CompositeDisposable()
 
@@ -241,10 +248,11 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
     private fun initializePlayer(){
         if (exoPlayer == null) exoPlayer = ExoPlayer.Builder(requireContext()).build()
 
-        val viewPager: ViewPager2 = binding.fileDetailsViewpager
+        val viewPager = binding.fileDetailsViewpager
         setPagerListener(viewPager)
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun setPagerListener(viewPager: ViewPager2){
 
         viewPager.setPageTransformer { page, position ->
@@ -257,12 +265,29 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                 player.seekTo(0)
 
                 // If playerView exists it means is a video item, create Media Source and setup ExoPlayer
-                val playerView: StyledPlayerView = page.findViewById(R.id.exo_player_view) ?: return@setPageTransformer
+                val playerView: PlayerView = page.findViewById(R.id.exo_player_view) ?: return@setPageTransformer
 
                 // Detach player from previous view and update with current view
                 currentPlayerView?.player = null
                 currentPlayerView = playerView
                 playerView.player = player
+                // Controls hidden by default
+                playerView.controllerAutoShow = false
+                playerView.hideController()
+
+                playerView.setShowRewindButton(false)
+                playerView.setShowFastForwardButton(false)
+                playerView.setShowPreviousButton(false)
+                playerView.setShowNextButton(false)
+                val toggleBtn: ImageButton = playerView.findViewById(R.id.toggle_audio)
+                setAudio(player, toggleBtn)
+                toggleBtn.setOnClickListener {
+                    viewModel.audioOn = player.volume < 0.5f
+                    setAudio(player, toggleBtn)
+                }
+
+                val detector = GestureDetectorCompat(requireContext(), MyGestureListener(playerView))
+                playerView.setOnTouchListener { _, event -> return@setOnTouchListener detector.onTouchEvent(event) }
 
                 val file = adapter.snapshot()[pageIndex] ?: return@setPageTransformer
 
@@ -271,6 +296,16 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                 player.repeatMode = Player.REPEAT_MODE_ONE
                 player.playWhenReady = autoplayVideo
             }
+        }
+    }
+
+    private fun setAudio(player: Player, toggleBtn: ImageButton) {
+        if(viewModel.audioOn) {
+            player.volume = 1f
+            toggleBtn.setImageResource(R.drawable.baseline_volume_up_24)
+        } else {
+            player.volume = 0f
+            toggleBtn.setImageResource(R.drawable.baseline_volume_off_24)
         }
     }
 
@@ -285,6 +320,28 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                 if (!showBars) hideStatusBar()
             }
         }
+    }
+
+    private inner class MyGestureListener(val playerView: PlayerView) : GestureDetector.SimpleOnGestureListener() {
+
+        val player = playerView.player
+
+        val screenWidth = resources.displayMetrics.widthPixels
+        val thirdWidth = screenWidth / 3
+
+        override fun onDoubleTap(e: MotionEvent): Boolean {
+            if (e.x < thirdWidth) {
+                player?.seekBack()
+                playerView.showController()
+            } else if(e.x > (screenWidth - thirdWidth)) {
+                player?.seekForward()
+                playerView.showController()
+            } else {
+                return false
+            }
+            return true
+        }
+
     }
 
     companion object{
