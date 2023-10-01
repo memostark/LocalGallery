@@ -25,6 +25,9 @@ class MainActivity : AppCompatActivity(R.layout.activity_main){
                 R.id.fileDetailsFragment, R.id.addTagFragment -> true
                 else -> false
             }
+
+            if(destination.id == R.id.files_fragment_dest)
+                bottomNavigationView.menu.findItem(R.id.folders_fragment_dest).isChecked = true
         }
     }
 }
