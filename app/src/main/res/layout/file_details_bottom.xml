@@ -7,15 +7,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    app:behavior_peekHeight="30dp"
+    app:behavior_peekHeight="0dp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
-
-    <View
-        android:id="@+id/peek_space"
-        android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:background="@android:color/transparent"
-        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -57,13 +50,13 @@
             android:contentDescription="@string/open_in_browser"
             android:minWidth="48dp"
             android:minHeight="48dp"
-            android:tint="#2196F3"
             android:padding="4dp"
             android:scaleType="fitCenter"
             app:layout_constraintBottom_toBottomOf="@+id/file_name_text"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/file_name_text"
-            app:srcCompat="@drawable/ic_open_in_browser_black_24dp" />
+            app:srcCompat="@drawable/ic_open_in_browser_black_24dp"
+            app:tint="#2196F3" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline_top"
@@ -93,7 +86,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
-            android:layout_marginLeft="4dp"
             android:layout_marginTop="8dp"
             app:layout_constraintStart_toEndOf="@id/dates_barrier"
             app:layout_constraintTop_toBottomOf="@+id/file_size"
@@ -120,7 +112,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
-            android:layout_marginLeft="4dp"
             app:layout_constraintBottom_toBottomOf="@+id/textView4"
             app:layout_constraintStart_toEndOf="@id/dates_barrier"
             app:layout_constraintTop_toTopOf="@+id/textView4"
@@ -162,25 +153,24 @@
             android:scaleType="fitCenter"
             android:padding="8dp"
             android:contentDescription="@string/edit_tags"
-            android:tint="?colorOnSurface"
             app:layout_constraintBottom_toBottomOf="@+id/modified_date"
             app:layout_constraintEnd_toEndOf="parent"
-            app:srcCompat="@drawable/ic_baseline_edit_24" />
+            app:srcCompat="@drawable/ic_baseline_edit_24"
+            app:tint="?colorOnSurface" />
 
         <ImageButton
             android:id="@+id/set_cover_btn"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
             android:padding="8dp"
             android:background="?android:selectableItemBackground"
             android:contentDescription="@string/cover_btn_description"
-            android:tint="?colorOnSurface"
             app:layout_constraintBottom_toBottomOf="@+id/edit_btn"
             app:layout_constraintEnd_toStartOf="@+id/edit_btn"
             app:layout_constraintTop_toTopOf="@+id/edit_btn"
-            app:srcCompat="@drawable/ic_baseline_photo_album_24" />
+            app:srcCompat="@drawable/ic_baseline_photo_album_24"
+            app:tint="?colorOnSurface" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
