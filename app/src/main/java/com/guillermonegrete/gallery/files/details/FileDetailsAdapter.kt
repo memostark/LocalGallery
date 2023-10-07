@@ -64,6 +64,11 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
         holder.bind(file)
     }
 
+    fun showSheet(position: Int) {
+        isSheetVisible = true
+        notifyItemChanged(position)
+    }
+
     abstract inner class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
 
         private val nameText: TextView = itemView.findViewById(R.id.file_name_text)
