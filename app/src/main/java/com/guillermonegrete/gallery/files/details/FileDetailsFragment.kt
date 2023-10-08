@@ -354,7 +354,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
             // Detects horizontal swipes in any direction
             if (abs(diffY) > abs(diffX)) {
                 if (diffY < -SWIPE_THRESHOLD && velocityY < -SWIPE_VELOCITY_THRESHOLD) {
-                    adapter.showSheet(binding.fileDetailsViewpager.currentItem)
+                    adapter.showSheet()
                     return true
                 }
             }

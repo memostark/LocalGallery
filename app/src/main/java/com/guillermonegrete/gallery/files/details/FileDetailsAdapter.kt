@@ -64,9 +64,12 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
         holder.bind(file)
     }
 
-    fun showSheet(position: Int) {
-        isSheetVisible = true
-        notifyItemChanged(position)
+    @SuppressLint("NotifyDataSetChanged")
+    fun showSheet() {
+        if(!isSheetVisible) {
+            isSheetVisible = true
+            notifyDataSetChanged()
+        }
     }
 
     abstract inner class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
