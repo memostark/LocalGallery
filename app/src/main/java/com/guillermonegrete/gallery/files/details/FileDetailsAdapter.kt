@@ -12,6 +12,7 @@ import androidx.navigation.findNavController
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.github.chrisbanes.photoview.PhotoViewAttacher
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
@@ -24,6 +25,7 @@ import com.guillermonegrete.gallery.files.FileDiffCallback
 import io.reactivex.rxjava3.subjects.PublishSubject
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.abs
 
 
 class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>(FileDiffCallback){
@@ -62,6 +64,14 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
         holder.bind(file)
     }
 
+    @SuppressLint("NotifyDataSetChanged")
+    fun showSheet() {
+        if(!isSheetVisible) {
+            isSheetVisible = true
+            notifyDataSetChanged()
+        }
+    }
+
     abstract inner class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
 
         private val nameText: TextView = itemView.findViewById(R.id.file_name_text)
@@ -75,7 +85,7 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
         private val setCoverButton: ImageButton = itemView.findViewById(R.id.set_cover_btn)
         private val tagGroups: ChipGroup = itemView.findViewById(R.id.tags_chip_group)
 
-        private val behaviour = BottomSheetBehavior.from(bottomSheet)
+        protected val behaviour = BottomSheetBehavior.from(bottomSheet)
 
         init {
             setSheets()
@@ -154,7 +164,20 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
         private val fileImage: ImageView = itemView.findViewById(R.id.file_image)
 
         init {
-            fileImage.setOnClickListener {
+            val attacher = PhotoViewAttacher(fileImage)
+            attacher.setOnSingleFlingListener { e1, e2, _, velocityY ->
+                val diffY = e2.y - e1.y
+                val diffX = e2.x - e1.x
+                // Detects upwards vertical swipe (distance and speed are negative)
+                if (abs(diffY) > abs(diffX)) {
+                    if (diffY < -Companion.SWIPE_THRESHOLD && velocityY < -Companion.SWIPE_VELOCITY_THRESHOLD) {
+                        behaviour.state = BottomSheetBehavior.STATE_EXPANDED
+                        return@setOnSingleFlingListener true
+                    }
+                }
+                return@setOnSingleFlingListener false
+            }
+            attacher.setOnViewTapListener { view, x, y ->
                 onImageTapSubject.onNext(true)
             }
         }
@@ -180,5 +203,10 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
                 height = if(isSheetVisible) ViewGroup.LayoutParams.WRAP_CONTENT else ViewGroup.LayoutParams.MATCH_PARENT
             }
         }
+    }
+
+    companion object {
+        const val SWIPE_THRESHOLD = 0.8
+        const val SWIPE_VELOCITY_THRESHOLD = 0.8
     }
 }

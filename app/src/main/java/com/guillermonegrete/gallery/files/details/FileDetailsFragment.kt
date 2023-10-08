@@ -36,6 +36,7 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import timber.log.Timber
+import kotlin.math.abs
 
 // Used for media3, APIs are safe we just use this to remove the warnings, see more: https://developer.android.com/guide/topics/media/media3/getting-started/migration-guide#unstableapi
 @UnstableApi
@@ -342,6 +343,24 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
             return true
         }
 
+        override fun onFling(
+            e1: MotionEvent,
+            e2: MotionEvent,
+            velocityX: Float,
+            velocityY: Float
+        ): Boolean {
+            val diffY = e2.y - e1.y
+            val diffX = e2.x - e1.x
+            // Detects horizontal swipes in any direction
+            if (abs(diffY) > abs(diffX)) {
+                if (diffY < -SWIPE_THRESHOLD && velocityY < -SWIPE_VELOCITY_THRESHOLD) {
+                    adapter.showSheet()
+                    return true
+                }
+            }
+            return super.onFling(e1, e2, velocityX, velocityY)
+        }
+
     }
 
     companion object{
@@ -349,5 +368,8 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
         const val FOLDER_UPDATE_KEY = "folder-updated"
         const val COVER_URL_KEY = "cover-url"
+
+        const val SWIPE_THRESHOLD = FileDetailsAdapter.SWIPE_THRESHOLD
+        const val SWIPE_VELOCITY_THRESHOLD = FileDetailsAdapter.SWIPE_VELOCITY_THRESHOLD
     }
 }
