@@ -91,6 +91,8 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                 }
                 false
             }
+
+            filesMessageIcon.setOnClickListener { viewModel.refresh() }
         }
         bindViewModel(folder)
         setFileClickEvent()

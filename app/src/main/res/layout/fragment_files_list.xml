@@ -65,8 +65,9 @@
                 android:layout_width="96dp"
                 android:layout_height="96dp"
                 android:layout_gravity="center"
-                app:srcCompat="@drawable/ic_error_outline_black_24dp"
-                android:contentDescription="@string/no_address_icon_description"/>
+                android:contentDescription="@string/no_address_icon_description"
+                app:srcCompat="@drawable/ic_refresh_black_24dp"
+                app:tint="?colorControlNormal" />
 
             <TextView
                 android:id="@+id/files_message_main"
