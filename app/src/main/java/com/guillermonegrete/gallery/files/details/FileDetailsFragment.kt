@@ -38,8 +38,6 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 import timber.log.Timber
 import kotlin.math.abs
 
-// Used for media3, APIs are safe we just use this to remove the warnings, see more: https://developer.android.com/guide/topics/media/media3/getting-started/migration-guide#unstableapi
-@UnstableApi
 @AndroidEntryPoint
 class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
@@ -104,6 +102,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
         setUpViewModel()
     }
 
+    @UnstableApi
     override fun onStart() {
         super.onStart()
         initializePlayer()
@@ -246,6 +245,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
         showBars = true
     }
 
+    @UnstableApi
     private fun initializePlayer(){
         if (exoPlayer == null) exoPlayer = ExoPlayer.Builder(requireContext()).build()
 
@@ -253,6 +253,8 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
         setPagerListener(viewPager)
     }
 
+    // "Used for media3, APIs are safe we just use this to remove the warnings, see more: https://developer.android.com/guide/topics/media/media3/getting-started/migration-guide#unstableapi"
+    @UnstableApi
     @SuppressLint("ClickableViewAccessibility")
     private fun setPagerListener(viewPager: ViewPager2){
 
@@ -330,6 +332,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
         val screenWidth = resources.displayMetrics.widthPixels
         val thirdWidth = screenWidth / 3
 
+        @UnstableApi
         override fun onDoubleTap(e: MotionEvent): Boolean {
             if (e.x < thirdWidth) {
                 player?.seekBack()

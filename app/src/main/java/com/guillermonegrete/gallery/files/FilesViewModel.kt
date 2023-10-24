@@ -31,6 +31,7 @@ class FilesViewModel @Inject constructor(
     private val folderName: Subject<Folder> = PublishSubject.create()
     private val filter: Subject<String> = BehaviorSubject.createDefault(defaultFilter)
     private val tag: Subject<Long> = BehaviorSubject.createDefault(0L)
+    private val forceUpdate: Subject<Boolean> = BehaviorSubject.createDefault(true)
 
     /**
      * Used to notify if the position was changed by swiping in the details view.
@@ -52,9 +53,11 @@ class FilesViewModel @Inject constructor(
     var cachedFileList = tag.distinctUntilChanged().switchMap { tagId ->
         filter.distinctUntilChanged().switchMap { filter ->
             folderName.distinctUntilChanged().switchMap { folder ->
-                dataSize = 0
-                val finalFilter = filter.ifEmpty { defaultFilter }
-                filesRepository.getPagedFiles(folder, tagId, finalFilter).toObservable()
+                forceUpdate.switchMap {
+                    dataSize = 0
+                    val finalFilter = filter.ifEmpty { defaultFilter }
+                    filesRepository.getPagedFiles(folder, tagId, finalFilter).toObservable()
+                }
             }
         }
     }.map { pagingData ->
@@ -200,6 +203,10 @@ class FilesViewModel @Inject constructor(
     }
 
     fun setCoverFile(fileId: Long) = filesRepository.updateFolderCover(folderId, fileId)
+
+    fun refresh() {
+        forceUpdate.onNext(true)
+    }
 
     data class Size(var width: Int, var height: Int)
     data class UpdatedRow(val pos: Int, val size: Size)
