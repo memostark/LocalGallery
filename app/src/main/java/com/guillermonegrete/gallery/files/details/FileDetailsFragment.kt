@@ -291,6 +291,9 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
                 val detector = GestureDetectorCompat(requireContext(), MyGestureListener(playerView))
                 playerView.setOnTouchListener { _, event -> return@setOnTouchListener detector.onTouchEvent(event) }
+                playerView.setControllerVisibilityListener(PlayerView.ControllerVisibilityListener {
+                    if (it == View.VISIBLE) showStatusBar() else hideStatusBar()
+                })
 
                 val file = adapter.snapshot()[pageIndex] ?: return@setPageTransformer
 
