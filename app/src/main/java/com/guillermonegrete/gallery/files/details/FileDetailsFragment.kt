@@ -276,7 +276,11 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                 playerView.player = player
                 // Controls hidden by default
                 playerView.controllerAutoShow = false
-                playerView.hideController()
+                if(showBars) {
+                    playerView.showController()
+                } else {
+                    playerView.hideController()
+                }
 
                 playerView.setShowRewindButton(false)
                 playerView.setShowFastForwardButton(false)
