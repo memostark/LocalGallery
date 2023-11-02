@@ -135,6 +135,10 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                         viewpager.post {
                             adapter.notifyDataSetChanged()
                         }
+
+                        if(adapter.isSheetVisible) {
+                            showStatusBar()
+                        }
                     }
 
                     // Prevents clunky sideways movement when dragging the bottom panel

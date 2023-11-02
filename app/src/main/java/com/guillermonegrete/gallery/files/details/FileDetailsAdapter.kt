@@ -38,7 +38,7 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
 
     private val formatter = SimpleDateFormat("dd MMM yyyy HH:mm:ss", Locale.getDefault())
 
-    private var isSheetVisible = false
+    var isSheetVisible = false
 
     var isAllFilesDest = false
 
