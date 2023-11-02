@@ -171,6 +171,8 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
                 // Detects upwards vertical swipe (distance and speed are negative)
                 if (abs(diffY) > abs(diffX)) {
                     if (diffY < -Companion.SWIPE_THRESHOLD && velocityY < -Companion.SWIPE_VELOCITY_THRESHOLD) {
+                        // State is false, change to true so when it reaches the expanded state the new false state is processed
+                        panelTouchSubject.onNext(true)
                         behaviour.state = BottomSheetBehavior.STATE_EXPANDED
                         return@setOnSingleFlingListener true
                     }

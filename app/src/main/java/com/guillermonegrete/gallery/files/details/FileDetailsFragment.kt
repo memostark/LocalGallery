@@ -58,13 +58,13 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
     /**
      * The actual visibility of the system bars.
      */
-    private var sysBarsVisible = false
+    private var sysBarsVisible = true
 
     /**
      *  The visibility the bars should have.
      *  It may differ from the actual visibility for older devices because if the bars are modified (e.g. the keyboard shows them) they don't return to their previous state.
      */
-    private var showBars = false
+    private var showBars = true
 
     private var autoplayVideo = false
 
@@ -193,7 +193,6 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
     override fun onResume() {
         super.onResume()
-        hideStatusBar()
         findNavController().addOnDestinationChangedListener(listener)
     }
 
