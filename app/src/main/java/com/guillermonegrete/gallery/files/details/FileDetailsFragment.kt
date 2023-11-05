@@ -58,13 +58,13 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
     /**
      * The actual visibility of the system bars.
      */
-    private var sysBarsVisible = false
+    private var sysBarsVisible = true
 
     /**
      *  The visibility the bars should have.
      *  It may differ from the actual visibility for older devices because if the bars are modified (e.g. the keyboard shows them) they don't return to their previous state.
      */
-    private var showBars = false
+    private var showBars = true
 
     private var autoplayVideo = false
 
@@ -135,6 +135,10 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                         viewpager.post {
                             adapter.notifyDataSetChanged()
                         }
+
+                        if(adapter.isSheetVisible) {
+                            showStatusBar()
+                        }
                     }
 
                     // Prevents clunky sideways movement when dragging the bottom panel
@@ -193,7 +197,6 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
     override fun onResume() {
         super.onResume()
-        hideStatusBar()
         findNavController().addOnDestinationChangedListener(listener)
     }
 
@@ -276,7 +279,11 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                 playerView.player = player
                 // Controls hidden by default
                 playerView.controllerAutoShow = false
-                playerView.hideController()
+                if(showBars) {
+                    playerView.showController()
+                } else {
+                    playerView.hideController()
+                }
 
                 playerView.setShowRewindButton(false)
                 playerView.setShowFastForwardButton(false)
@@ -291,6 +298,9 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
                 val detector = GestureDetectorCompat(requireContext(), MyGestureListener(playerView))
                 playerView.setOnTouchListener { _, event -> return@setOnTouchListener detector.onTouchEvent(event) }
+                playerView.setControllerVisibilityListener(PlayerView.ControllerVisibilityListener {
+                    if (it == View.VISIBLE) showStatusBar() else hideStatusBar()
+                })
 
                 val file = adapter.snapshot()[pageIndex] ?: return@setPageTransformer
 
