@@ -49,6 +49,7 @@
         <item quantity="one">Modified %d element</item>
         <item quantity="other">Modified %d elements</item>
     </plurals>
+    <string name="open_folder">Open folder</string>
 
     <!-- File details-->
     <string name="created">Created:</string>

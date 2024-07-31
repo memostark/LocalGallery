@@ -31,32 +31,38 @@
             android:id="@+id/file_name_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
+            android:layout_margin="8dp"
             android:textAppearance="@style/TextAppearance.AppCompat.Body2"
             app:layout_constraintBottom_toBottomOf="@+id/imageView"
-            app:layout_constraintEnd_toStartOf="@+id/open_link_button"
+            app:layout_constraintEnd_toStartOf="@+id/open_folder_button"
             app:layout_constraintStart_toEndOf="@+id/imageView"
             app:layout_constraintTop_toTopOf="@+id/imageView"
             tools:text="dummy_file_name.jpg" />
 
-        <ImageButton
-            android:id="@+id/open_link_button"
-            android:layout_width="wrap_content"
+        <TextView
+            android:id="@+id/folder_text"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="@+id/file_name_text"
+            app:layout_constraintStart_toStartOf="@+id/file_name_text"
+            app:layout_constraintTop_toBottomOf="@+id/file_name_text"
+            tools:text="folder name"
+            tools:visibility="visible" />
+
+        <ImageButton
+            android:id="@+id/open_folder_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:background="?android:selectableItemBackground"
-            android:contentDescription="@string/open_in_browser"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
+            android:contentDescription="@string/open_folder"
             android:padding="4dp"
             android:scaleType="fitCenter"
-            app:layout_constraintBottom_toBottomOf="@+id/file_name_text"
+            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/file_name_text"
-            app:srcCompat="@drawable/ic_open_in_browser_black_24dp"
-            app:tint="#2196F3" />
+            app:layout_constraintTop_toTopOf="@+id/imageView"
+            app:srcCompat="@drawable/baseline_folder_24"
+            tools:visibility="visible"/>
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline_top"
@@ -70,7 +76,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:barrierDirection="bottom"
-            app:constraint_referenced_ids="file_name_text,imageView,open_link_button" />
+            app:constraint_referenced_ids="file_name_text,folder_text,imageView, open_folder_button" />
 
         <TextView
             android:id="@+id/file_size"
@@ -159,15 +165,31 @@
             app:tint="?colorOnSurface" />
 
         <ImageButton
+            android:id="@+id/open_link_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?android:selectableItemBackground"
+            android:contentDescription="@string/open_in_browser"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            android:padding="4dp"
+            android:scaleType="fitCenter"
+            app:layout_constraintBottom_toBottomOf="@+id/edit_btn"
+            app:layout_constraintEnd_toStartOf="@id/edit_btn"
+            app:layout_constraintTop_toTopOf="@+id/edit_btn"
+            app:srcCompat="@drawable/ic_open_in_browser_black_24dp"
+            app:tint="#2196F3" />
+
+        <ImageButton
             android:id="@+id/set_cover_btn"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_marginEnd="8dp"
             android:padding="8dp"
+            android:scaleType="fitCenter"
             android:background="?android:selectableItemBackground"
             android:contentDescription="@string/cover_btn_description"
             app:layout_constraintBottom_toBottomOf="@+id/edit_btn"
-            app:layout_constraintEnd_toStartOf="@+id/edit_btn"
+            app:layout_constraintEnd_toStartOf="@+id/open_link_button"
             app:layout_constraintTop_toTopOf="@+id/edit_btn"
             app:srcCompat="@drawable/ic_baseline_photo_album_24"
             app:tint="?colorOnSurface" />
