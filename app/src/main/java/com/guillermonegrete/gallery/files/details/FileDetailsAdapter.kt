@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.navigation.findNavController
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -75,6 +76,7 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
     abstract inner class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
 
         private val nameText: TextView = itemView.findViewById(R.id.file_name_text)
+        private val folderText: TextView = itemView.findViewById(R.id.folder_text)
         private val linkButton: ImageButton = itemView.findViewById(R.id.open_link_button)
         private val fileSizeText: TextView = itemView.findViewById(R.id.file_size)
         private val createdText: TextView = itemView.findViewById(R.id.creation_date)
@@ -136,6 +138,12 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
 
             setCoverButton.setOnClickListener {
                 setCoverSubject.onNext(file.id)
+            }
+
+            val folder = file.folder
+            folderText.isVisible = folder != null
+            if (folder != null) {
+                folderText.text = folder.name
             }
 
             setTags(file.tags)
