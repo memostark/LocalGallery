@@ -78,6 +78,7 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
         private val nameText: TextView = itemView.findViewById(R.id.file_name_text)
         private val folderText: TextView = itemView.findViewById(R.id.folder_text)
         private val linkButton: ImageButton = itemView.findViewById(R.id.open_link_button)
+        private val folderButton: ImageButton = itemView.findViewById(R.id.open_folder_button)
         private val fileSizeText: TextView = itemView.findViewById(R.id.file_size)
         private val createdText: TextView = itemView.findViewById(R.id.creation_date)
         private val modifiedText: TextView = itemView.findViewById(R.id.modified_date)
@@ -142,8 +143,13 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
 
             val folder = file.folder
             folderText.isVisible = folder != null
+            folderButton.isVisible = folder != null
             if (folder != null) {
                 folderText.text = folder.name
+                folderButton.setOnClickListener {
+                    val action = FileDetailsFragmentDirections.fileDetailsToFilesFragment(folder)
+                    itemView.findNavController().navigate(action)
+                }
             }
 
             setTags(file.tags)

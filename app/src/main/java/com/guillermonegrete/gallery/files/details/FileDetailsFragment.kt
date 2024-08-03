@@ -328,7 +328,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
     private val listener = NavController.OnDestinationChangedListener { _, destination, _ ->
         // SDKs 30+ automatically hide the bar
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-            val toHere = destination.id == R.id.fileDetailsFragment
+            val toHere = destination.id == R.id.file_details_dest
             if(toHere && (sysBarsVisible != showBars )) {
                 if (!showBars) hideStatusBar()
             }

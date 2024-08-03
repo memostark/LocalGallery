@@ -22,7 +22,9 @@ class MainActivity : AppCompatActivity(R.layout.activity_main){
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             bottomNavigationView.isGone = when (destination.id) {
-                R.id.fileDetailsFragment, R.id.addTagFragment -> true
+                R.id.file_details_dest, R.id.addTagFragment -> true
+                // Keep the bar hidden when navigating to the files list from details
+                R.id.files_fragment_dest -> navController.previousBackStackEntry?.destination?.id == R.id.file_details_dest
                 else -> false
             }
 
