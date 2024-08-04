@@ -79,7 +79,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentFilesListBinding.bind(view)
-        val folder: Folder = args.folder ?: Folder.NULL_FOLDER
+        val folder = args.folder ?: Folder.NULL_FOLDER
 
         val id = if(folder == Folder.NULL_FOLDER) SortingDialog.GET_ALL_TAGS else folder.id
 
@@ -175,9 +175,9 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
     }
 
     private fun openFileDetails(index: Int){
-        val bundle = Bundle()
-        bundle.putInt(FileDetailsFragment.FILE_INDEX_KEY, index)
-        findNavController().navigate(R.id.file_details_dest, bundle)
+        val folder = args.folder ?: Folder.NULL_FOLDER
+        val action = FilesListFragmentDirections.openFileDetails(index, folder)
+        findNavController().navigate(action)
     }
 
     private fun showSortDialog(id: Long) {

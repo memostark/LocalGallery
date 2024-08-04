@@ -74,6 +74,12 @@
         <action
             android:id="@+id/fileDetails_to_files_fragment"
             app:destination="@id/files_fragment_dest" />
+        <argument
+            android:name="file_index"
+            app:argType="integer"/>
+        <argument
+            android:name="folder"
+            app:argType="com.guillermonegrete.gallery.data.Folder" />
     </fragment>
     <dialog
         android:id="@+id/servers_fragment_dest"

@@ -19,14 +19,15 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
-import androidx.navigation.NavController
-import androidx.navigation.fragment.findNavController
-import androidx.viewpager2.widget.ViewPager2
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
+import androidx.navigation.NavController
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
+import androidx.viewpager2.widget.ViewPager2
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.databinding.FragmentFileDetailsBinding
@@ -38,6 +39,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 import timber.log.Timber
 import kotlin.math.abs
 
+
 @AndroidEntryPoint
 class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
@@ -45,6 +47,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
     private val binding get() = _binding!!
 
     private val viewModel: FilesViewModel by activityViewModels()
+    private val args: FileDetailsFragmentArgs by navArgs()
     private var exoPlayer: ExoPlayer? = null
 
     private var currentPlayerView: PlayerView? = null
@@ -79,6 +82,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
             adapter.snapshot().items[pos].tags = newTags
             adapter.notifyItemChanged(pos)
         }
+        index = args.fileIndex
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -113,8 +117,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
         val viewpager = binding.fileDetailsViewpager
         viewpager.adapter = adapter
 
-        index = arguments?.getInt(FILE_INDEX_KEY) ?: 0
-
+        viewModel.setFolderName(args.folder)
         disposable.addAll(
             viewModel.cachedFileList
             .subscribeOn(Schedulers.io())
@@ -154,6 +157,12 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                 { error -> Timber.e(error, "On image tap error") }
             )
         )
+        viewpager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                index = position
+            }
+        })
     }
 
     private fun toggleBars() {
@@ -377,7 +386,6 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
     }
 
     companion object{
-        const val FILE_INDEX_KEY = "file_index"
 
         const val FOLDER_UPDATE_KEY = "folder-updated"
         const val COVER_URL_KEY = "cover-url"
