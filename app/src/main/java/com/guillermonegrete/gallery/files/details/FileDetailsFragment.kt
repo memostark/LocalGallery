@@ -27,6 +27,7 @@ import androidx.media3.ui.PlayerView
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.paging.LoadState
 import androidx.viewpager2.widget.ViewPager2
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.Tag
@@ -123,10 +124,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
-                {
-                    adapter.submitData(lifecycle, it)
-                    viewpager.setCurrentItem(index, false)
-                },
+                { adapter.submitData(lifecycle, it) },
                 { error -> Timber.e(error, "Error loading files") }
             ),
             adapter.panelTouchSubject.distinctUntilChanged()
@@ -155,14 +153,19 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
             adapter.onImageTapSubject.subscribe(
                 { toggleBars() },
                 { error -> Timber.e(error, "On image tap error") }
-            )
+            ),
+            adapter.onFolderIconTap.subscribe {
+                index = viewpager.currentItem
+                val action = FileDetailsFragmentDirections.fileDetailsToFilesFragment(it)
+                findNavController().navigate(action)
+            },
         )
-        viewpager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                super.onPageSelected(position)
-                index = position
-            }
-        })
+
+        adapter.addLoadStateListener {
+            val state = it.source
+            if (state.refresh is LoadState.NotLoading &&
+                state.append is LoadState.NotLoading) viewpager.setCurrentItem(index, false)
+        }
     }
 
     private fun toggleBars() {

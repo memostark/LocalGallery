@@ -19,6 +19,7 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.File
+import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.ImageFile
 import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.data.VideoFile
@@ -36,6 +37,8 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
     val setCoverSubject: PublishSubject<Long> = PublishSubject.create()
 
     val onImageTapSubject: PublishSubject<Boolean> = PublishSubject.create()
+
+    val onFolderIconTap: PublishSubject<Folder> = PublishSubject.create()
 
     private val formatter = SimpleDateFormat("dd MMM yyyy HH:mm:ss", Locale.getDefault())
 
@@ -147,8 +150,7 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
             if (folder != null) {
                 folderText.text = folder.name
                 folderButton.setOnClickListener {
-                    val action = FileDetailsFragmentDirections.fileDetailsToFilesFragment(folder)
-                    itemView.findNavController().navigate(action)
+                    onFolderIconTap.onNext(folder)
                 }
             }
 
@@ -193,7 +195,7 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
                 }
                 return@setOnSingleFlingListener false
             }
-            attacher.setOnViewTapListener { view, x, y ->
+            attacher.setOnViewTapListener { _, _, _ ->
                 onImageTapSubject.onNext(true)
             }
         }
