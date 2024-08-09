@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.GridLayoutManager
@@ -41,6 +42,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
     private val binding get() = _binding!!
 
     private val viewModel: FilesViewModel by activityViewModels()
+    private val args: FilesListFragmentArgs by navArgs()
 
     private val disposable = CompositeDisposable()
 
@@ -61,7 +63,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         // Reset tags because the ViewModel is shared it may have a previous configuration
         // Reset in this method instead of onCreateView() to avoid resetting everytime the user navigates back to this fragment (e.g. from details frag)
         viewModel.setTag(SortingDialog.NO_TAG_ID)
-        val isAllFiles =  arguments?.getParcelable<Folder>(FOLDER_KEY) == null
+        val isAllFiles =  args.folder == null
         if(isAllFiles) {
             // Default sort for all files (most recent)
             checkedField = SortField.CREATED
@@ -77,7 +79,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentFilesListBinding.bind(view)
-        val folder: Folder = arguments?.getParcelable(FOLDER_KEY) ?: Folder.NULL_FOLDER
+        val folder = args.folder ?: Folder.NULL_FOLDER
 
         val id = if(folder == Folder.NULL_FOLDER) SortingDialog.GET_ALL_TAGS else folder.id
 
@@ -173,9 +175,9 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
     }
 
     private fun openFileDetails(index: Int){
-        val bundle = Bundle()
-        bundle.putInt(FileDetailsFragment.FILE_INDEX_KEY, index)
-        findNavController().navigate(R.id.fileDetailsFragment, bundle)
+        val folder = args.folder ?: Folder.NULL_FOLDER
+        val action = FilesListFragmentDirections.openFileDetails(index, folder)
+        findNavController().navigate(action)
     }
 
     private fun showSortDialog(id: Long) {

@@ -55,7 +55,7 @@ class AddTagFragment: BottomSheetDialogFragment() {
         _binding = FragmentAddTagBinding.inflate(inflater, container, false)
 
         // if the origin destination is the files, it means this is a file multi selection
-        singleSelect = findNavController().previousBackStackEntry?.destination?.id == R.id.fileDetailsFragment
+        singleSelect = findNavController().previousBackStackEntry?.destination?.id == R.id.file_details_dest
 
         setupViewModel()
 

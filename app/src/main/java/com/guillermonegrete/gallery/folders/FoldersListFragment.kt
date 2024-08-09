@@ -23,7 +23,6 @@ import com.guillermonegrete.gallery.common.SortingDialog
 import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.source.SettingsRepository
 import com.guillermonegrete.gallery.databinding.FragmentFoldersListBinding
-import com.guillermonegrete.gallery.files.FilesListFragment
 import com.guillermonegrete.gallery.files.SortField
 import com.guillermonegrete.gallery.files.details.FileDetailsFragment
 import com.guillermonegrete.gallery.folders.models.FolderUI
@@ -200,9 +199,8 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
     }
 
     private fun openFileFragment(folder: Folder){
-        val bundle = Bundle()
-        bundle.putParcelable(FilesListFragment.FOLDER_KEY, folder)
-        findNavController().navigate(R.id.files_fragment_dest, bundle)
+        val action = FoldersListFragmentDirections.openFolder(folder)
+        findNavController().navigate(action)
     }
 
     private fun openServerFragment(presetIp: String){

@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.navigation.findNavController
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -18,6 +19,7 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.File
+import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.ImageFile
 import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.data.VideoFile
@@ -35,6 +37,8 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
     val setCoverSubject: PublishSubject<Long> = PublishSubject.create()
 
     val onImageTapSubject: PublishSubject<Boolean> = PublishSubject.create()
+
+    val onFolderIconTap: PublishSubject<Folder> = PublishSubject.create()
 
     private val formatter = SimpleDateFormat("dd MMM yyyy HH:mm:ss", Locale.getDefault())
 
@@ -75,7 +79,9 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
     abstract inner class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
 
         private val nameText: TextView = itemView.findViewById(R.id.file_name_text)
+        private val folderText: TextView = itemView.findViewById(R.id.folder_text)
         private val linkButton: ImageButton = itemView.findViewById(R.id.open_link_button)
+        private val folderButton: ImageButton = itemView.findViewById(R.id.open_folder_button)
         private val fileSizeText: TextView = itemView.findViewById(R.id.file_size)
         private val createdText: TextView = itemView.findViewById(R.id.creation_date)
         private val modifiedText: TextView = itemView.findViewById(R.id.modified_date)
@@ -138,6 +144,16 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
                 setCoverSubject.onNext(file.id)
             }
 
+            val folder = file.folder
+            folderText.isVisible = folder != null
+            folderButton.isVisible = folder != null
+            if (folder != null) {
+                folderText.text = folder.name
+                folderButton.setOnClickListener {
+                    onFolderIconTap.onNext(folder)
+                }
+            }
+
             setTags(file.tags)
         }
 
@@ -179,7 +195,7 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
                 }
                 return@setOnSingleFlingListener false
             }
-            attacher.setOnViewTapListener { view, x, y ->
+            attacher.setOnViewTapListener { _, _, _ ->
                 onImageTapSubject.onNext(true)
             }
         }

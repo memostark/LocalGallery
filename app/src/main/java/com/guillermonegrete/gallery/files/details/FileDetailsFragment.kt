@@ -19,14 +19,16 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
-import androidx.navigation.NavController
-import androidx.navigation.fragment.findNavController
-import androidx.viewpager2.widget.ViewPager2
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
+import androidx.navigation.NavController
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
+import androidx.paging.LoadState
+import androidx.viewpager2.widget.ViewPager2
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.databinding.FragmentFileDetailsBinding
@@ -38,6 +40,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 import timber.log.Timber
 import kotlin.math.abs
 
+
 @AndroidEntryPoint
 class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
@@ -45,6 +48,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
     private val binding get() = _binding!!
 
     private val viewModel: FilesViewModel by activityViewModels()
+    private val args: FileDetailsFragmentArgs by navArgs()
     private var exoPlayer: ExoPlayer? = null
 
     private var currentPlayerView: PlayerView? = null
@@ -79,6 +83,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
             adapter.snapshot().items[pos].tags = newTags
             adapter.notifyItemChanged(pos)
         }
+        index = args.fileIndex
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -113,17 +118,13 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
         val viewpager = binding.fileDetailsViewpager
         viewpager.adapter = adapter
 
-        index = arguments?.getInt(FILE_INDEX_KEY) ?: 0
-
+        viewModel.setFolderName(args.folder)
         disposable.addAll(
             viewModel.cachedFileList
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
-                {
-                    adapter.submitData(lifecycle, it)
-                    viewpager.setCurrentItem(index, false)
-                },
+                { adapter.submitData(lifecycle, it) },
                 { error -> Timber.e(error, "Error loading files") }
             ),
             adapter.panelTouchSubject.distinctUntilChanged()
@@ -152,8 +153,19 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
             adapter.onImageTapSubject.subscribe(
                 { toggleBars() },
                 { error -> Timber.e(error, "On image tap error") }
-            )
+            ),
+            adapter.onFolderIconTap.subscribe {
+                index = viewpager.currentItem
+                val action = FileDetailsFragmentDirections.fileDetailsToFilesFragment(it)
+                findNavController().navigate(action)
+            },
         )
+
+        adapter.addLoadStateListener {
+            val state = it.source
+            if (state.refresh is LoadState.NotLoading &&
+                state.append is LoadState.NotLoading) viewpager.setCurrentItem(index, false)
+        }
     }
 
     private fun toggleBars() {
@@ -328,7 +340,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
     private val listener = NavController.OnDestinationChangedListener { _, destination, _ ->
         // SDKs 30+ automatically hide the bar
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-            val toHere = destination.id == R.id.fileDetailsFragment
+            val toHere = destination.id == R.id.file_details_dest
             if(toHere && (sysBarsVisible != showBars )) {
                 if (!showBars) hideStatusBar()
             }
@@ -377,7 +389,6 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
     }
 
     companion object{
-        const val FILE_INDEX_KEY = "file_index"
 
         const val FOLDER_UPDATE_KEY = "folder-updated"
         const val COVER_URL_KEY = "cover-url"

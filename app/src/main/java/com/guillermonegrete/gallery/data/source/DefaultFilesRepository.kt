@@ -43,8 +43,4 @@ class DefaultFilesRepository @Inject constructor(
 
     override fun updateFolderCover(id: Long, fileId: Long) = foldersAPI.updateFolderCover(id, fileId)
 
-    companion object{
-        var BASE_URL = "http://localhost/"
-    }
-
 }

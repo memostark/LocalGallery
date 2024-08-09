@@ -11,7 +11,7 @@ enum class SortField(val field: String, val display: String) {
     COUNT("count", "Count");
 
     companion object {
-        private val values: Array<SortField> = values()
+        private val values: Array<SortField> = entries.toTypedArray()
 
         fun fromInteger(x: Int): SortField {
             return values[x]
