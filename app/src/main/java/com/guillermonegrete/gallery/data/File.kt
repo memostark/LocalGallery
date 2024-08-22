@@ -37,7 +37,7 @@ class ImageFile(
     creationDate: Date = Date(),
     lastModified: Date = Date(),
     tags: List<Tag> = listOf(),
-    folder: Folder?,
+    folder: Folder? = null,
     id: Long,
 ): File(name, width, height, displayWidth, displayHeight, creationDate, lastModified, tags, folder, id){
     // To make testing easier when comparing and simulate a data class
@@ -56,6 +56,6 @@ class VideoFile(
     lastModified: Date,
     val duration: Int,
     tags: List<Tag> = listOf(),
-    folder: Folder?,
+    folder: Folder? = null,
     id: Long,
 ): File(name, width, height, displayWidth, displayHeight, creationDate, lastModified, tags, folder, id)
