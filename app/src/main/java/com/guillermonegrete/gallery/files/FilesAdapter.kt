@@ -18,6 +18,7 @@ import com.guillermonegrete.gallery.data.ImageFile
 import com.guillermonegrete.gallery.data.VideoFile
 import com.guillermonegrete.gallery.databinding.FileVideoItemBinding
 import io.reactivex.rxjava3.subjects.PublishSubject
+import kotlin.math.abs
 
 class FilesAdapter(
     private val viewModel: FilesViewModel
@@ -29,7 +30,10 @@ class FilesAdapter(
     private var multiSelect = false
 
     val selectedItems = mutableSetOf<Int>()
-    val selectedIds = mutableSetOf<Long>()
+    val selectedIds: MutableSet<Long>
+        get() {
+            return selectedItems.mapNotNull { peek(it)?.id }.toMutableSet()
+        }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -55,6 +59,23 @@ class FilesAdapter(
         }
     }
 
+    fun setSelected(position: Int) {
+        selectedItems.add(position)
+        notifyItemChanged(position)
+    }
+
+    fun setSelected(start: Int, end: Int) {
+        selectedItems.addAll(start..end)
+        val count = abs(end - start) + 1 // add one because the end index is inclusive
+        notifyItemRangeChanged(start, count)
+    }
+
+    fun setUnselected(start: Int, end: Int) {
+        selectedItems.removeAll(start..end)
+        val count = abs(end - start) + 1
+        notifyItemRangeChanged(start, count)
+    }
+
     open inner class ViewHolder(
         private val viewModel: FilesViewModel,
         item: View
@@ -66,12 +87,10 @@ class FilesAdapter(
         fun bind(item: File){
             itemView.layoutParams = FrameLayout.LayoutParams(item.displayWidth, item.displayHeight)
             val realPos = absoluteAdapterPosition
-            image.setOnClickListener { itemClicked(realPos, item.id) }
+            image.setOnClickListener { itemClicked(realPos) }
 
             image.setOnLongClickListener {
                 onItemLongPress.onNext(realPos)
-                selectedItems.add(realPos)
-                selectedIds.add(item.id)
                 true
             }
 
@@ -89,14 +108,12 @@ class FilesAdapter(
                 .into(image)
         }
 
-        private fun itemClicked(position: Int, fileId: Long) {
+        private fun itemClicked(position: Int) {
             if(multiSelect){
                 if(position in selectedItems) {
                     selectedItems.remove(position)
-                    selectedIds.remove(fileId)
                 } else {
                     selectedItems.add(position)
-                    selectedIds.add(fileId)
                 }
                 notifyItemChanged(position)
                 onItemClick.onNext(position)
@@ -119,7 +136,6 @@ class FilesAdapter(
             multiSelect = isMultiSelection
             if(!multiSelect) {
                 selectedItems.clear()
-                selectedIds.clear()
             }
             notifyDataSetChanged()
         }

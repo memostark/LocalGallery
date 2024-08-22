@@ -27,7 +27,6 @@ import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.data.source.SettingsRepository
 import com.guillermonegrete.gallery.databinding.FragmentFilesListBinding
 import com.guillermonegrete.gallery.files.details.AddTagFragment
-import com.guillermonegrete.gallery.files.details.FileDetailsFragment
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -48,6 +47,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
 
     private lateinit var adapter: FilesAdapter
     private var actionMode: ActionMode? = null
+    private var dragSelectTouchListener: DragSelectTouchListener? = null
 
     @Inject lateinit var preferences: SettingsRepository
 
@@ -95,6 +95,24 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
             }
 
             filesMessageIcon.setOnClickListener { viewModel.refresh() }
+            val selectListener = object: DragSelectTouchListener.OnAdvancedDragSelectListener {
+                override fun onSelectionStarted(start: Int) {
+                    actionMode = (requireActivity() as AppCompatActivity).startSupportActionMode(actionModeCallback)
+                    actionMode?.title = "(1)"
+                    adapter.setSelected(start)
+                }
+
+                override fun onSelectionFinished(end: Int) {}
+
+                override fun onSelectChange(start: Int, end: Int, isSelected: Boolean) {
+                    if (isSelected) adapter.setSelected(start, end) else adapter.setUnselected(start, end)
+                    actionMode?.title = "(${adapter.selectedItems.size})"
+                }
+
+            }
+            val listener = DragSelectTouchListener().withSelectListener(selectListener)
+            filesList.addOnItemTouchListener(listener)
+            dragSelectTouchListener = listener
         }
         bindViewModel(folder)
         setFileClickEvent()
@@ -152,13 +170,12 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                 ),
             adapter.onItemLongPress.subscribe(
                 {
-                    actionMode = (requireActivity() as AppCompatActivity).startSupportActionMode(actionModeCallback)
-                    actionMode?.title = "(1)"
+                    dragSelectTouchListener?.startDragSelection(it)
                 },
                 { Timber.e(it) }
             ),
             adapter.onItemClick.subscribe(
-                { actionMode?.title = "(${adapter.selectedIds.size})" },
+                { actionMode?.title = "(${adapter.selectedItems.size})" },
                 { Timber.e(it) }
             )
         )
