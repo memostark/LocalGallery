@@ -78,7 +78,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
             // Instead of using the snapshot list, the recommended approach to update an item is updating a cache source
             // and reloading from there (like a database) as explained here: https://stackoverflow.com/a/63139535/10244759
             // However this reload may force to reload the images which may be more wasteful
-            val newTags = result.getParcelableArrayList<Tag>(AddTagFragment.TAGS_KEY) ?: return@setFragmentResultListener
+            val newTags = result.getParcelableArrayList<Tag>(AddTagFragment.TAGS_KEY, Tag::class.java) ?: return@setFragmentResultListener
             val pos = binding.fileDetailsViewpager.currentItem
             adapter.snapshot().items[pos].tags = newTags
             adapter.notifyItemChanged(pos)
@@ -369,11 +369,12 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
         }
 
         override fun onFling(
-            e1: MotionEvent,
+            e1: MotionEvent?,
             e2: MotionEvent,
             velocityX: Float,
             velocityY: Float
         ): Boolean {
+            e1 ?: return false
             val diffY = e2.y - e1.y
             val diffX = e2.x - e1.x
             // Detects horizontal swipes in any direction
