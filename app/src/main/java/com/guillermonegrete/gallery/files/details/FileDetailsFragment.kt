@@ -278,6 +278,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
             if (position == 0.0f){ // New page
                 val pageIndex = viewPager.currentItem
 
+                currentPlayerView?.setControllerVisibilityListener(null as PlayerView.ControllerVisibilityListener?)
                 val player = exoPlayer ?: return@setPageTransformer
                 player.stop()
                 player.seekTo(0)
@@ -289,8 +290,9 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                 currentPlayerView?.player = null
                 currentPlayerView = playerView
                 playerView.player = player
-                // Controls hidden by default
+                // Disable automatically changing the controls visibility.
                 playerView.controllerAutoShow = false
+                playerView.controllerShowTimeoutMs = 0
                 if(showBars) {
                     playerView.showController()
                 } else {
