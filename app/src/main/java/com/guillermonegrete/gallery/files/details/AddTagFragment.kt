@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.core.os.bundleOf
 import androidx.core.widget.doAfterTextChanged
-import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -23,7 +22,6 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import timber.log.Timber
 import java.util.*
-import kotlin.collections.ArrayList
 
 @AndroidEntryPoint
 class AddTagFragment: BottomSheetDialogFragment() {
@@ -44,7 +42,7 @@ class AddTagFragment: BottomSheetDialogFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // This style avoids content being displayed behind the keyboard
-        setStyle(DialogFragment.STYLE_NORMAL, R.style.AdjustResizeDialogStyle)
+        setStyle(STYLE_NORMAL, R.style.AdjustResizeDialogStyle)
     }
 
     override fun onCreateView(

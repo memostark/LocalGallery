@@ -129,7 +129,7 @@ enum class Order(val id: Int, val oder: String){
 
     companion object {
 
-        private val values: Array<Order> = values()
+        private val values = Order.entries
 
         fun fromInteger(id: Int): Order {
             return values.firstOrNull { it.id == id} ?: DEFAULT

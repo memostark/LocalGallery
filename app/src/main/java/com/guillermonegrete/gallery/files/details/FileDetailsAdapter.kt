@@ -85,7 +85,7 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
         private val fileSizeText: TextView = itemView.findViewById(R.id.file_size)
         private val createdText: TextView = itemView.findViewById(R.id.creation_date)
         private val modifiedText: TextView = itemView.findViewById(R.id.modified_date)
-        private val bottomSheet: LinearLayout = itemView.findViewById(R.id.bottom_layout)
+        private val bottomSheet: ViewGroup = itemView.findViewById(R.id.bottom_layout)
 
         private val editButton: ImageButton = itemView.findViewById(R.id.edit_btn)
         private val setCoverButton: ImageButton = itemView.findViewById(R.id.set_cover_btn)

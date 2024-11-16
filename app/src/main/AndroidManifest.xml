@@ -14,8 +14,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".folders.MainActivity"
-            android:theme="@style/AppTheme.NoActionBar"
+        <activity
+            android:name=".folders.MainActivity"
             android:windowSoftInputMode="adjustPan"
             android:exported="true">
 
