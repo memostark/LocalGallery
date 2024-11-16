@@ -24,7 +24,9 @@
                 android:layout_height="wrap_content"
                 android:importantForAutofill="no"
                 android:inputType="text"
-                android:minWidth="32dp"
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                android:contentDescription="@string/add_tag_label"
                 android:imeOptions="actionDone"
                 tools:ignore="LabelFor" />
 

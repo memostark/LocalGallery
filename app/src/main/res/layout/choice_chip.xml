@@ -4,4 +4,4 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     tools:text="Placeholder"
-    style="@style/Widget.Gallery.Chip.Choice" />
+    style="@style/Widget.Material3.Chip.Suggestion" />

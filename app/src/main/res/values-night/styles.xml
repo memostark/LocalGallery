@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <style name="AppTheme" parent="BaseTheme">
-        <!--  The default bottom sheet theme is light, this one is the dark theme-->
-        <item name="bottomSheetDialogTheme">@style/Theme.MaterialComponents.BottomSheetDialog</item>
-    </style>
-
-    <style name="AdjustResizeDialogStyle" parent="Theme.Design.BottomSheetDialog">
+    <style name="AdjustResizeDialogStyle" parent="Theme.Material3.Dark.BottomSheetDialog">
         <item name="android:windowIsFloating">false</item>
         <item name="android:windowSoftInputMode">adjustResize|stateHidden</item>
     </style>

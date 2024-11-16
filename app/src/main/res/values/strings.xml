@@ -63,5 +63,6 @@
     <string name="search_servers">Search servers</string>
     <string name="server_dialog_title">Set server address</string>
     <string name="toggle_audio">toggle audio</string>
+    <string name="add_tag_label">Add tag input</string>
 
 </resources>
