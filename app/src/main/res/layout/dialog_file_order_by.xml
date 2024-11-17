@@ -21,7 +21,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/sort_by"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
         android:layout_marginBottom="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/done_button" />
@@ -35,21 +35,21 @@
 
         <RadioButton
             android:id="@+id/by_name"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:text="@string/name"
             style="@style/SortDialogRadioButton"/>
 
         <RadioButton
             android:id="@+id/by_creation"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:text="@string/creation_date"
             style="@style/SortDialogRadioButton" />
 
         <RadioButton
             android:id="@+id/by_last_modified"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:text="@string/last_modified"
             style="@style/SortDialogRadioButton" />
@@ -69,6 +69,7 @@
         android:layout_height="wrap_content"
         android:text="@string/order"
         android:layout_marginBottom="8dp"
+        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/field_sort" />
 
@@ -81,14 +82,14 @@
 
         <RadioButton
             android:id="@+id/descending_order"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:text="@string/descending"
             style="@style/SortDialogRadioButton" />
 
         <RadioButton
             android:id="@+id/ascending_order"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:text="@string/ascending"
             style="@style/SortDialogRadioButton" />
