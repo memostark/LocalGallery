@@ -7,8 +7,13 @@ import android.view.*
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
+import androidx.core.os.BundleCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
@@ -103,7 +108,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                         findNavController().navigate(action)
                         setFragmentResultListener(SortingDialog.RESULT_KEY) { _, bundle ->
                             // We use a String here, but any type that can be put in a Bundle is supported
-                            val result: SortDialogChecked = bundle.getParcelable(SortingDialog.SORT_KEY) ?: return@setFragmentResultListener
+                            val result = BundleCompat.getParcelable(bundle, SortingDialog.SORT_KEY, SortDialogChecked::class.java) ?: return@setFragmentResultListener
                             checkedField = result.field
                             checkedOrder = result.sort
 
@@ -133,6 +138,13 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                 override fun getSpanSize(position: Int) = if(position == 0) 2 else 1
             }
             foldersList.layoutManager = layoutManager
+
+            ViewCompat.setOnApplyWindowInsetsListener(toolbar) { v, viewInsets ->
+                val insets = viewInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+                toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin = insets.top }
+                foldersList.updatePadding(left = insets.left, right = insets.right, bottom = insets.bottom)
+                WindowInsetsCompat.CONSUMED
+            }
 
             messageIcon.setOnClickListener { viewModel.refresh() }
         }
