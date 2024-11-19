@@ -6,9 +6,14 @@ import android.util.DisplayMetrics
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
@@ -110,6 +115,13 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                 }
 
             }
+            ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { v, viewInsets ->
+                val insets = viewInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+                binding.toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin = insets.top }
+                filesList.updatePadding(left = insets.left, right = insets.right, bottom = insets.bottom)
+                WindowInsetsCompat.CONSUMED
+            }
+
             val listener = DragSelectTouchListener().withSelectListener(selectListener)
             filesList.addOnItemTouchListener(listener)
             dragSelectTouchListener = listener
@@ -202,7 +214,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         val action = FilesListFragmentDirections.actionFilesToSortingDialog(options, SortDialogChecked(checkedField, checkedOrder, tagId), id)
         findNavController().navigate(action)
         setFragmentResultListener(SortingDialog.RESULT_KEY) { _, bundle ->
-            val result: SortDialogChecked = bundle.getParcelable(SortingDialog.SORT_KEY) ?: return@setFragmentResultListener
+            val result: SortDialogChecked = bundle.getParcelable(SortingDialog.SORT_KEY, SortDialogChecked::class.java) ?: return@setFragmentResultListener
             checkedField = result.field
             checkedOrder = result.sort
             tagId = result.tagId
@@ -210,7 +222,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
             viewModel.setTag(tagId)
             viewModel.setFilter("${checkedField.field},${checkedOrder.oder}")
             preferences.setFileSort(checkedField.field, checkedOrder.oder)
-            val folder: Folder = arguments?.getParcelable(FOLDER_KEY) ?: Folder.NULL_FOLDER
+            val folder: Folder = arguments?.getParcelable(FOLDER_KEY, Folder::class.java) ?: Folder.NULL_FOLDER
             viewModel.setFolderName(folder)
         }
     }
@@ -261,7 +273,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
 
     private fun setTagsUpdateListener() {
         setFragmentResultListener(AddTagFragment.SELECT_TAG_REQUEST_KEY) { _, bundle ->
-            val newTag = bundle.getParcelable<Tag>(AddTagFragment.SELECTED_TAG_KEY) ?: return@setFragmentResultListener
+            val newTag = bundle.getParcelable(AddTagFragment.SELECTED_TAG_KEY, Tag::class.java) ?: return@setFragmentResultListener
             val ids = bundle.getLongArray(AddTagFragment.UPDATED_FILES_IDS_KEY) ?: return@setFragmentResultListener
 
             for (pos in adapter.selectedItems) {
