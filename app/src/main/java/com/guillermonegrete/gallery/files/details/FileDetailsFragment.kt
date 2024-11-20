@@ -8,13 +8,11 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageButton
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
-import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
@@ -72,6 +70,8 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
     private var autoplayVideo = false
 
+    private var bottomInset = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setFragmentResultListener(AddTagFragment.REQUEST_KEY) { _, result ->
@@ -100,6 +100,8 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
             val status = insets.isVisible(WindowInsetsCompat.Type.statusBars())
             val nav = insets.isVisible(WindowInsetsCompat.Type.navigationBars())
             sysBarsVisible = status || nav
+            val systemInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            bottomInset = systemInsets.bottom
             // Return like this otherwise the insets show when they shouldn't
             ViewCompat.onApplyWindowInsets(v, insets)
         }
@@ -236,12 +238,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
     }
 
     private fun hideStatusBar(){
-        (activity as AppCompatActivity?)?.supportActionBar?.hide()
-
         val window = activity?.window ?: return
-        // Must be true, otherwise empty space will be left where the bottom navigation bar was located.
-        // This affected mainly phones without physical navigation bar buttons
-        WindowCompat.setDecorFitsSystemWindows(window, true)
         WindowInsetsControllerCompat(window, window.decorView).let { controller ->
             controller.hide(WindowInsetsCompat.Type.systemBars())
             controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
@@ -251,12 +248,8 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
     }
 
     private fun showStatusBar(){
-        (activity as AppCompatActivity?)?.supportActionBar?.show()
-
         val window = activity?.window ?: return
-        WindowCompat.setDecorFitsSystemWindows(window, true)
         WindowInsetsControllerCompat(window, window.decorView).show(WindowInsetsCompat.Type.systemBars())
-
         showBars = true
     }
 
@@ -310,10 +303,12 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                     setAudio(player, toggleBtn)
                 }
 
-                val detector = GestureDetectorCompat(requireContext(), MyGestureListener(playerView))
+                val detector = GestureDetector(requireContext(), MyGestureListener(playerView))
                 playerView.setOnTouchListener { _, event -> return@setOnTouchListener detector.onTouchEvent(event) }
                 playerView.setControllerVisibilityListener(PlayerView.ControllerVisibilityListener {
-                    if (it == View.VISIBLE) showStatusBar() else hideStatusBar()
+                    val isVisible = it == View.VISIBLE
+                    if (isVisible) showStatusBar() else hideStatusBar()
+                    playerView.updatePadding(bottom = if (isVisible) bottomInset else 0)
                 })
 
                 val file = adapter.snapshot()[pageIndex] ?: return@setPageTransformer
