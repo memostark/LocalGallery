@@ -26,9 +26,8 @@
                 android:inputType="text"
                 android:minWidth="48dp"
                 android:minHeight="48dp"
-                android:contentDescription="@string/add_tag_label"
-                android:imeOptions="actionDone"
-                tools:ignore="LabelFor" />
+                android:hint="@string/add_tag_label"
+                android:imeOptions="actionDone"/>
 
         </com.google.android.material.chip.ChipGroup>
 
