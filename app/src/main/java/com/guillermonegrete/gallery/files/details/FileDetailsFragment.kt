@@ -8,6 +8,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageButton
 import android.widget.Toast
+import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -78,7 +79,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
             // Instead of using the snapshot list, the recommended approach to update an item is updating a cache source
             // and reloading from there (like a database) as explained here: https://stackoverflow.com/a/63139535/10244759
             // However this reload may force to reload the images which may be more wasteful
-            val newTags = result.getParcelableArrayList<Tag>(AddTagFragment.TAGS_KEY, Tag::class.java) ?: return@setFragmentResultListener
+            val newTags = BundleCompat.getParcelableArrayList(result, AddTagFragment.TAGS_KEY, Tag::class.java) ?: return@setFragmentResultListener
             val pos = binding.fileDetailsViewpager.currentItem
             adapter.snapshot().items[pos].tags = newTags
             adapter.notifyItemChanged(pos)
@@ -97,13 +98,22 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
         val decorView = requireActivity().window.decorView
         ViewCompat.setOnApplyWindowInsetsListener(decorView) { v, insets ->
-            val status = insets.isVisible(WindowInsetsCompat.Type.statusBars())
-            val nav = insets.isVisible(WindowInsetsCompat.Type.navigationBars())
-            sysBarsVisible = status || nav
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                // The isVisible() method only works for API 30+, for older API use the deprecated visibility listener.
+                val status = insets.isVisible(WindowInsetsCompat.Type.statusBars())
+                val nav = insets.isVisible(WindowInsetsCompat.Type.navigationBars())
+                sysBarsVisible = status || nav
+            }
             val systemInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             bottomInset = systemInsets.bottom
             // Return like this otherwise the insets show when they shouldn't
             ViewCompat.onApplyWindowInsets(v, insets)
+        }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            @Suppress("DEPRECATION")
+            decorView.setOnSystemUiVisibilityChangeListener { visibility ->
+                sysBarsVisible = visibility and View.SYSTEM_UI_FLAG_FULLSCREEN == 0
+            }
         }
 
         setUpViewModel()
@@ -137,10 +147,6 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                         // Use post() to avoid: "IllegalStateException: Cannot call this method while RecyclerView is computing a layout or scrolling"
                         viewpager.post {
                             adapter.notifyDataSetChanged()
-                        }
-
-                        if(adapter.isSheetVisible) {
-                            showStatusBar()
                         }
                     }
 
