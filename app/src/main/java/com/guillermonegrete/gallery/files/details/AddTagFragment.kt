@@ -1,6 +1,5 @@
 package com.guillermonegrete.gallery.files.details
 
-import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -13,8 +12,6 @@ import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.chip.Chip
 import com.guillermonegrete.gallery.R
@@ -44,21 +41,7 @@ class AddTagFragment: BottomSheetDialogFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // This style avoids content being displayed behind the keyboard
-        setStyle(STYLE_NORMAL, R.style.AdjustResizeDialogStyle)
-    }
-
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val dialog = super.onCreateDialog(savedInstanceState)
-        // For devices with very small screens, this moves the dialog up when the keyboard is shown to avoid overlap with the content.
-        dialog.setOnShowListener {
-            view?.post {
-                val bottomSheet = (dialog as? BottomSheetDialog)?.findViewById<View>(R.id.design_bottom_sheet) ?: return@post
-                BottomSheetBehavior.from(bottomSheet).state = BottomSheetBehavior.STATE_EXPANDED
-            }
-        }
-
-        return dialog
+        setStyle(STYLE_NORMAL, R.style.DialogHiddenKeyboardStyle)
     }
 
     override fun onCreateView(

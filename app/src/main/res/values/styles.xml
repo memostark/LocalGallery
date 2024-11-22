@@ -5,6 +5,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryVariant">@color/colorPrimaryDark</item>
         <item name="colorSecondary">@color/colorAccent</item>
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.App.BottomSheetDialog</item>
         <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="o_mr1">always</item>
     </style>
 
@@ -21,10 +22,13 @@
     </style>
 
 
-    <!-- Apply to dialog when the layout needs to readjust to avoid the keyboard from blocking it-->
-    <style name="AdjustResizeDialogStyle" parent="Theme.Material3.Light.BottomSheetDialog">
-        <item name="android:windowIsFloating">false</item>
-        <item name="android:windowSoftInputMode">adjustResize|stateHidden</item>
+    <style name="DialogHiddenKeyboardStyle" parent="ThemeOverlay.App.BottomSheetDialog">
+        <item name="android:windowSoftInputMode">stateHidden</item>
+    </style>
+
+    <style name="ThemeOverlay.App.BottomSheetDialog" parent="ThemeOverlay.Material3.BottomSheetDialog">
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:enforceNavigationBarContrast" tools:targetApi="q">false</item>
     </style>
 
 </resources>
