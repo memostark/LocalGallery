@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <style name="AdjustResizeDialogStyle" parent="Theme.Material3.Dark.BottomSheetDialog">
-        <item name="android:windowIsFloating">false</item>
-        <item name="android:windowSoftInputMode">adjustResize|stateHidden</item>
-    </style>
-</resources>
