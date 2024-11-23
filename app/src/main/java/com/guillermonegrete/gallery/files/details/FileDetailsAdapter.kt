@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
 import androidx.navigation.findNavController
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -46,6 +47,17 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
 
     var isAllFilesDest = false
 
+    var bottomInset = 0
+    var chipPadding = 0f
+    var addTagText = ""
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+        val context = recyclerView.context
+        chipPadding = context.resources.getDimension(R.dimen.chip_text_padding)
+        addTagText = context.resources.getString(R.string.add_tag)
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val layout = LayoutInflater.from(parent.context).inflate(viewType, parent, false)
         return when(viewType){
@@ -68,12 +80,29 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
         holder.bind(file)
     }
 
+    override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: List<Any?>) {
+        if (payloads.isEmpty()) {
+            super.onBindViewHolder(holder, position, payloads)
+        } else {
+            for (payload in payloads) {
+                when (payload) {
+                    PAYLOAD_BOTTOM_INSET -> holder.handleInsets()
+                }
+            }
+        }
+    }
+
     @SuppressLint("NotifyDataSetChanged")
     fun showSheet() {
         if(!isSheetVisible) {
             isSheetVisible = true
             notifyDataSetChanged()
         }
+    }
+
+    fun updateInsets(inset: Int) {
+        bottomInset = inset
+        notifyItemRangeChanged(0, itemCount - 1, PAYLOAD_BOTTOM_INSET)
     }
 
     abstract inner class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
@@ -87,9 +116,9 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
         private val modifiedText: TextView = itemView.findViewById(R.id.modified_date)
         private val bottomSheet: ViewGroup = itemView.findViewById(R.id.bottom_layout)
 
-        private val editButton: ImageButton = itemView.findViewById(R.id.edit_btn)
         private val setCoverButton: ImageButton = itemView.findViewById(R.id.set_cover_btn)
-        private val tagGroups: ChipGroup = itemView.findViewById(R.id.tags_chip_group)
+        private val tagGroup: ChipGroup = itemView.findViewById(R.id.tags_chip_group)
+        private val addTag: Chip = itemView.findViewById(R.id.add_tag_btn)
 
         protected val behaviour = BottomSheetBehavior.from(bottomSheet)
 
@@ -132,10 +161,11 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
             fileSizeText.text = file.sizeText
             createdText.text = formatter.format(file.creationDate)
             modifiedText.text = formatter.format(file.lastModified)
-            behaviour.state = if(isSheetVisible) BottomSheetBehavior.STATE_EXPANDED else BottomSheetBehavior.STATE_COLLAPSED
+            bottomSheet.updatePadding(bottom = if (isSheetVisible) bottomInset else 0)
+            bottomSheet.post { behaviour.state = if(isSheetVisible) BottomSheetBehavior.STATE_EXPANDED else BottomSheetBehavior.STATE_COLLAPSED }
             linkButton.setOnClickListener { openLink(file.name) }
 
-            editButton.setOnClickListener {
+            addTag.setOnClickListener {
                 val action = FileDetailsFragmentDirections.fileDetailsToAddTagFragment(longArrayOf(file.id), file.tags.toTypedArray())
                 itemView.findNavController().navigate(action)
             }
@@ -158,11 +188,25 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
         }
 
         private fun setTags(tags: List<Tag>) {
-            tagGroups.removeAllViews()
+            setAddTagButton(tags.isEmpty())
+            tagGroup.removeViews(1, tagGroup.childCount - 1)
             tags.forEach {
                 val chip =  Chip(itemView.context)
                 chip.text = it.name
-                tagGroups.addView(chip)
+                tagGroup.addView(chip)
+            }
+        }
+
+        private fun setAddTagButton(isIcon: Boolean) {
+            if (isIcon) {
+                addTag.text = addTagText
+                addTag.textEndPadding = chipPadding
+                addTag.textStartPadding = chipPadding
+            } else {
+                addTag.text = null
+                addTag.textEndPadding = 0f
+                addTag.textStartPadding = 0f
+                addTag.updatePadding(left = 0, right = 0)
             }
         }
 
@@ -172,6 +216,10 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
                 data = Uri.parse(item)
             }
             itemView.context.startActivity(intent)
+        }
+
+        fun handleInsets() {
+            bottomSheet.updatePadding(bottom = if (isSheetVisible) bottomInset else 0)
         }
     }
 
@@ -186,7 +234,7 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
                 val diffX = e2.x - e1.x
                 // Detects upwards vertical swipe (distance and speed are negative)
                 if (abs(diffY) > abs(diffX)) {
-                    if (diffY < -Companion.SWIPE_THRESHOLD && velocityY < -Companion.SWIPE_VELOCITY_THRESHOLD) {
+                    if (diffY < -SWIPE_THRESHOLD && velocityY < -SWIPE_VELOCITY_THRESHOLD) {
                         // State is false, change to true so when it reaches the expanded state the new false state is processed
                         panelTouchSubject.onNext(true)
                         behaviour.state = BottomSheetBehavior.STATE_EXPANDED
@@ -226,5 +274,7 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
     companion object {
         const val SWIPE_THRESHOLD = 0.8
         const val SWIPE_VELOCITY_THRESHOLD = 0.8
+
+        const val PAYLOAD_BOTTOM_INSET = "bottom_inset"
     }
 }
