@@ -87,6 +87,7 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
             for (payload in payloads) {
                 when (payload) {
                     PAYLOAD_BOTTOM_INSET -> holder.handleInsets()
+                    PAYLOAD_SHEET_STATE -> holder.updateBottomSheet()
                 }
             }
         }
@@ -103,6 +104,10 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
     fun updateInsets(inset: Int) {
         bottomInset = inset
         notifyItemRangeChanged(0, itemCount - 1, PAYLOAD_BOTTOM_INSET)
+    }
+
+    fun notifySheetChange() {
+        notifyItemRangeChanged(0, itemCount - 1, PAYLOAD_SHEET_STATE)
     }
 
     abstract inner class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
@@ -185,7 +190,10 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
             }
 
             setTags(file.tags)
+            updateLayout()
         }
+
+        abstract fun updateLayout()
 
         private fun setTags(tags: List<Tag>) {
             setAddTagButton(tags.isEmpty())
@@ -202,10 +210,14 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
                 addTag.text = addTagText
                 addTag.textEndPadding = chipPadding
                 addTag.textStartPadding = chipPadding
+                addTag.iconEndPadding = 0f
+                addTag.iconStartPadding = 0f
             } else {
                 addTag.text = null
                 addTag.textEndPadding = 0f
                 addTag.textStartPadding = 0f
+                addTag.iconEndPadding = chipPadding
+                addTag.iconStartPadding = chipPadding
                 addTag.updatePadding(left = 0, right = 0)
             }
         }
@@ -220,6 +232,12 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
 
         fun handleInsets() {
             bottomSheet.updatePadding(bottom = if (isSheetVisible) bottomInset else 0)
+        }
+
+        fun updateBottomSheet() {
+            bottomSheet.updatePadding(bottom = if (isSheetVisible) bottomInset else 0)
+            bottomSheet.post { behaviour.state = if(isSheetVisible) BottomSheetBehavior.STATE_EXPANDED else BottomSheetBehavior.STATE_COLLAPSED }
+            updateLayout()
         }
     }
 
@@ -253,6 +271,9 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
             Glide.with(itemView.context)
                 .load(file.name)
                 .into(fileImage)
+        }
+
+        override fun updateLayout() {
             fileImage.layoutParams = fileImage.layoutParams.apply {
                 height = if(isSheetVisible) ViewGroup.LayoutParams.WRAP_CONTENT else ViewGroup.LayoutParams.MATCH_PARENT
             }
@@ -263,8 +284,7 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
 
         private val player: View = itemView.findViewById(R.id.exo_player_view)
 
-        override fun bind(file: File) {
-            super.bind(file)
+        override fun updateLayout() {
             player.layoutParams = player.layoutParams.apply {
                 height = if(isSheetVisible) ViewGroup.LayoutParams.WRAP_CONTENT else ViewGroup.LayoutParams.MATCH_PARENT
             }
@@ -276,5 +296,6 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
         const val SWIPE_VELOCITY_THRESHOLD = 0.8
 
         const val PAYLOAD_BOTTOM_INSET = "bottom_inset"
+        const val PAYLOAD_SHEET_STATE = "sheet_visibility"
     }
 }
