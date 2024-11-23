@@ -158,7 +158,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                     if(!panelTouched) {
                         // Use post() to avoid: "IllegalStateException: Cannot call this method while RecyclerView is computing a layout or scrolling"
                         viewpager.post {
-                            adapter.notifyDataSetChanged()
+                            adapter.notifySheetChange()
                         }
                     }
 
