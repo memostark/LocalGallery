@@ -11,13 +11,14 @@
     app:gestureInsetBottomIgnored="true"
     app:paddingBottomSystemWindowInsets="false"
     app:behavior_peekHeight="0dp"
-    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+    tools:layout_gravity="bottom">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp">
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
 
         <ImageView
             android:id="@+id/imageView"
@@ -137,10 +138,10 @@
 
         <androidx.core.widget.NestedScrollView
             android:layout_width="0dp"
-            android:layout_height="150dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:paddingBottom="32dp"
             android:clipToPadding="false"
+            app:layout_constraintHeight_max="150dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/modified_date">
@@ -150,22 +151,25 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/add_tag_btn"
+                    style="@style/Widget.Material3.Chip.Assist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/add_tag"
+                    app:textStartPadding="@dimen/chip_text_padding"
+                    app:textEndPadding="@dimen/chip_text_padding"
+                    app:chipIcon="@drawable/ic_baseline_add_24"
+                    app:chipIconTint="?colorOnSurface"
+                    app:ensureMinTouchTargetSize="true"/>
+
+                <include layout="@layout/choice_chip"
+                    android:visibility="gone"
+                    tools:visibility="visible"/>
+
             </com.google.android.material.chip.ChipGroup>
 
         </androidx.core.widget.NestedScrollView>
-
-        <ImageButton
-            android:id="@+id/edit_btn"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?android:selectableItemBackground"
-            android:scaleType="fitCenter"
-            android:padding="8dp"
-            android:contentDescription="@string/edit_tags"
-            app:layout_constraintBottom_toBottomOf="@+id/modified_date"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:srcCompat="@drawable/ic_baseline_edit_24"
-            app:tint="?colorOnSurface" />
 
         <ImageButton
             android:id="@+id/open_link_button"
@@ -177,9 +181,8 @@
             android:minHeight="48dp"
             android:padding="4dp"
             android:scaleType="fitCenter"
-            app:layout_constraintBottom_toBottomOf="@+id/edit_btn"
-            app:layout_constraintEnd_toStartOf="@id/edit_btn"
-            app:layout_constraintTop_toTopOf="@+id/edit_btn"
+            app:layout_constraintTop_toTopOf="@+id/creation_date"
+            app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@drawable/ic_open_in_browser_black_24dp"
             app:tint="#2196F3" />
 
@@ -191,9 +194,8 @@
             android:scaleType="fitCenter"
             android:background="?android:selectableItemBackground"
             android:contentDescription="@string/cover_btn_description"
-            app:layout_constraintBottom_toBottomOf="@+id/edit_btn"
             app:layout_constraintEnd_toStartOf="@+id/open_link_button"
-            app:layout_constraintTop_toTopOf="@+id/edit_btn"
+            app:layout_constraintTop_toTopOf="@+id/open_link_button"
             app:srcCompat="@drawable/ic_baseline_photo_album_24"
             app:tint="?colorOnSurface" />
 

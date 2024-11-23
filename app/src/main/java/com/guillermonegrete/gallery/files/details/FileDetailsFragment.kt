@@ -98,21 +98,33 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
         val decorView = requireActivity().window.decorView
         ViewCompat.setOnApplyWindowInsetsListener(decorView) { v, insets ->
+            val systemInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            bottomInset = systemInsets.bottom
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 // The isVisible() method only works for API 30+, for older API use the deprecated visibility listener.
                 val status = insets.isVisible(WindowInsetsCompat.Type.statusBars())
                 val nav = insets.isVisible(WindowInsetsCompat.Type.navigationBars())
                 sysBarsVisible = status || nav
+                if (systemInsets.bottom != adapter.bottomInset) {
+                    adapter.updateInsets(bottomInset)
+                }
+            } else {
+                adapter.bottomInset = systemInsets.bottom
+                // For older APIs, it's only necessary to listen once because the values never change (possibly a library bug)
+                ViewCompat.setOnApplyWindowInsetsListener(decorView, null)
             }
-            val systemInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            bottomInset = systemInsets.bottom
-            // Return like this otherwise the insets show when they shouldn't
+
             ViewCompat.onApplyWindowInsets(v, insets)
         }
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             @Suppress("DEPRECATION")
             decorView.setOnSystemUiVisibilityChangeListener { visibility ->
-                sysBarsVisible = visibility and View.SYSTEM_UI_FLAG_FULLSCREEN == 0
+                val newVisibility = visibility and View.SYSTEM_UI_FLAG_FULLSCREEN == 0
+                if (sysBarsVisible != newVisibility) {
+                    sysBarsVisible = newVisibility
+                    val insets = if (newVisibility) bottomInset else 0
+                    adapter.updateInsets(insets)
+                }
             }
         }
 
