@@ -62,6 +62,10 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
      * The actual visibility of the system bars.
      */
     private var sysBarsVisible = true
+        set(value) {
+            adapter.showControls = value // Controls should be hidden when system bars are hidden
+            field = value
+        }
 
     /**
      *  The visibility the bars should have.
@@ -290,6 +294,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                 val pageIndex = viewPager.currentItem
 
                 currentPlayerView?.setControllerVisibilityListener(null as PlayerView.ControllerVisibilityListener?)
+                currentPlayerView?.player = null
                 val player = exoPlayer ?: return@setPageTransformer
                 player.stop()
                 player.seekTo(0)
@@ -298,11 +303,10 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                 val playerView: PlayerView = page.findViewById(R.id.exo_player_view) ?: return@setPageTransformer
 
                 // Detach player from previous view and update with current view
-                currentPlayerView?.player = null
                 currentPlayerView = playerView
                 playerView.player = player
                 // Disable automatically changing the controls visibility.
-                playerView.controllerAutoShow = false
+                playerView.controllerAutoShow = sysBarsVisible
                 playerView.controllerShowTimeoutMs = 0
                 if(showBars) {
                     playerView.showController()
