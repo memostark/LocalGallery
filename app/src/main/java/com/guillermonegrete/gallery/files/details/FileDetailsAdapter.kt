@@ -7,9 +7,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.annotation.OptIn
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.ui.PlayerView
 import androidx.navigation.findNavController
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -44,6 +47,7 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
     private val formatter = SimpleDateFormat("dd MMM yyyy HH:mm:ss", Locale.getDefault())
 
     var isSheetVisible = false
+    var showControls = true
 
     var isAllFilesDest = false
 
@@ -282,7 +286,13 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
 
     inner class VideoViewHolder(itemView: View): ViewHolder(itemView){
 
-        private val player: View = itemView.findViewById(R.id.exo_player_view)
+        private val player: PlayerView = itemView.findViewById(R.id.exo_player_view)
+
+        @OptIn(UnstableApi::class)
+        override fun bind(file: File) {
+            super.bind(file)
+            player.controllerAutoShow = showControls
+        }
 
         override fun updateLayout() {
             player.layoutParams = player.layoutParams.apply {
