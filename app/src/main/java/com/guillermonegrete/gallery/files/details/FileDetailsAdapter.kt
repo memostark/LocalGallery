@@ -292,6 +292,7 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
         override fun bind(file: File) {
             super.bind(file)
             player.controllerAutoShow = showControls
+            player.updatePadding(bottom = if (showControls) bottomInset else 0)
         }
 
         override fun updateLayout() {

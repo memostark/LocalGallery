@@ -294,17 +294,35 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                 val pageIndex = viewPager.currentItem
 
                 currentPlayerView?.setControllerVisibilityListener(null as PlayerView.ControllerVisibilityListener?)
-                currentPlayerView?.player = null
                 val player = exoPlayer ?: return@setPageTransformer
-                player.stop()
-                player.seekTo(0)
+                player.pause()
 
                 // If playerView exists it means is a video item, create Media Source and setup ExoPlayer
                 val playerView: PlayerView = page.findViewById(R.id.exo_player_view) ?: return@setPageTransformer
+                val file = adapter.snapshot()[pageIndex] ?: return@setPageTransformer
 
+                val controllerListener = PlayerView.ControllerVisibilityListener {
+                    val isVisible = it == View.VISIBLE
+                    if (isVisible) showStatusBar() else hideStatusBar()
+                    playerView.updatePadding(bottom = if (isVisible) bottomInset else 0)
+                }
+                val oldId = player.currentMediaItem?.mediaId
                 // Detach player from previous view and update with current view
-                currentPlayerView = playerView
+                if (currentPlayerView != playerView) currentPlayerView?.player = null
                 playerView.player = player
+                currentPlayerView = playerView
+
+                if (oldId == file.name) {
+                    if (autoplayVideo) player.play()
+                    if(showBars) {
+                        playerView.showController()
+                    } else {
+                        playerView.hideController()
+                    }
+                    playerView.setControllerVisibilityListener(controllerListener)
+
+                    return@setPageTransformer
+                }
                 // Disable automatically changing the controls visibility.
                 playerView.controllerAutoShow = sysBarsVisible
                 playerView.controllerShowTimeoutMs = 0
@@ -327,15 +345,10 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
                 val detector = GestureDetector(requireContext(), MyGestureListener(playerView))
                 playerView.setOnTouchListener { _, event -> return@setOnTouchListener detector.onTouchEvent(event) }
-                playerView.setControllerVisibilityListener(PlayerView.ControllerVisibilityListener {
-                    val isVisible = it == View.VISIBLE
-                    if (isVisible) showStatusBar() else hideStatusBar()
-                    playerView.updatePadding(bottom = if (isVisible) bottomInset else 0)
-                })
+                playerView.setControllerVisibilityListener(controllerListener)
 
-                val file = adapter.snapshot()[pageIndex] ?: return@setPageTransformer
-
-                player.setMediaItem(MediaItem.fromUri(file.name))
+                val newItem = MediaItem.Builder().setMediaId(file.name).setUri(file.name).build()
+                player.setMediaItem(newItem)
                 player.prepare()
                 player.repeatMode = Player.REPEAT_MODE_ONE
                 player.playWhenReady = autoplayVideo
