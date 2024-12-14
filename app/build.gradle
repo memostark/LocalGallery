@@ -1,13 +1,13 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
-    id 'kotlin-kapt'
     id 'kotlin-parcelize'
     id 'androidx.navigation.safeargs.kotlin'
     id 'com.google.gms.google-services'
     id 'com.google.firebase.crashlytics'
     id("com.google.dagger.hilt.android")
     id("org.jetbrains.kotlin.plugin.compose") version "$kotlin_version"
+    id 'com.google.devtools.ksp'
 }
 
 android {
@@ -103,19 +103,19 @@ dependencies {
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
 
     // Glide
-    implementation 'com.github.bumptech.glide:glide:4.9.0'
-    kapt 'com.github.bumptech.glide:compiler:4.9.0'
+    implementation 'com.github.bumptech.glide:glide:4.16.0'
+    ksp 'com.github.bumptech.glide:ksp:4.16.0'
 
     // Dagger 2
     def dagger_version = "2.50"
     implementation "com.google.dagger:dagger:$dagger_version"
-    kapt "com.google.dagger:dagger-compiler:$dagger_version"
+    ksp "com.google.dagger:dagger-compiler:$dagger_version"
     // Hilt
     implementation("com.google.dagger:hilt-android:$dagger_version")
-    kapt("com.google.dagger:hilt-android-compiler:$dagger_version")
+    ksp("com.google.dagger:hilt-android-compiler:$dagger_version")
     // Hilt testing
     androidTestImplementation "com.google.dagger:hilt-android-testing:$dagger_version"
-    kaptAndroidTest "com.google.dagger:hilt-compiler:$dagger_version"
+    kspAndroidTest "com.google.dagger:hilt-compiler:$dagger_version"
 
     // PhotoView
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
@@ -163,9 +163,4 @@ dependencies {
     def espresso_version = "3.5.1"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_version"
     androidTestImplementation "androidx.test.espresso:espresso-contrib:$espresso_version"
-}
-
-// Allow references to generated code - Used for Hilt
-kapt {
-    correctErrorTypes = true
 }
