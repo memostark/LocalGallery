@@ -14,6 +14,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.chip.Chip
+import com.google.android.material.snackbar.Snackbar
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.databinding.FragmentAddTagBinding
@@ -107,6 +108,12 @@ class AddTagFragment: BottomSheetDialogFragment() {
         newTagEdit.setOnEditorActionListener { v, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 val text = v.text.toString()
+
+                if (text.isBlank()) {
+                    Snackbar.make(binding.root, "New tag can't be empty", Snackbar.LENGTH_SHORT).show()
+                    return@setOnEditorActionListener true
+                }
+
                 newTagEdit.setText("")
 
                 // if tag is already applied, skip
@@ -187,7 +194,10 @@ class AddTagFragment: BottomSheetDialogFragment() {
 
                 // No longer show the tag in the suggestions list
                 adapter.remove(newTag)
-            }, { Timber.e(it) })
+            }, {
+                Snackbar.make(binding.root, "Error: Couldn't add tag", Snackbar.LENGTH_SHORT).show()
+                Timber.e(it, "Couldn't add tag: $tag")
+            })
         )
     }
 
