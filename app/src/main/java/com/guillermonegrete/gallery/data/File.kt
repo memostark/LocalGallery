@@ -42,7 +42,7 @@ class ImageFile(
 ): File(name, width, height, displayWidth, displayHeight, creationDate, lastModified, tags, folder, id){
     // To make testing easier when comparing and simulate a data class
     override fun equals(other: Any?) =
-        if(other is ImageFile) name == other.name && width == other.width && height == other.height else false
+        if(other is ImageFile) name == other.name && displayWidth == other.displayWidth && displayHeight == other.displayHeight else false
 
     override fun hashCode() = javaClass.hashCode()
 }

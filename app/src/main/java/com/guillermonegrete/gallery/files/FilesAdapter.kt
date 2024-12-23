@@ -85,6 +85,7 @@ class FilesAdapter(
         private val selectedIcon: ImageView = itemView.findViewById(R.id.selected_icon)
 
         fun bind(item: File){
+            println("Binding item $absoluteAdapterPosition: $item")
             itemView.layoutParams = FrameLayout.LayoutParams(item.displayWidth, item.displayHeight)
             val realPos = absoluteAdapterPosition
             image.setOnClickListener { itemClicked(realPos) }
@@ -145,7 +146,7 @@ class FilesAdapter(
 object FileDiffCallback : DiffUtil.ItemCallback<File>() {
 
     override fun areItemsTheSame(oldItem: File, newItem: File): Boolean {
-        return oldItem.name == newItem.name
+        return oldItem.id == newItem.id
     }
 
     override fun areContentsTheSame(oldItem: File, newItem: File): Boolean {
