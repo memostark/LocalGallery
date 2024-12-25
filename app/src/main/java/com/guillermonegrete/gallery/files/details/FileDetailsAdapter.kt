@@ -107,11 +107,11 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
 
     fun updateInsets(inset: Int) {
         bottomInset = inset
-        notifyItemRangeChanged(0, itemCount - 1, PAYLOAD_BOTTOM_INSET)
+        notifyItemRangeChanged(0, itemCount, PAYLOAD_BOTTOM_INSET)
     }
 
     fun notifySheetChange() {
-        notifyItemRangeChanged(0, itemCount - 1, PAYLOAD_SHEET_STATE)
+        notifyItemRangeChanged(0, itemCount, PAYLOAD_SHEET_STATE)
     }
 
     abstract inner class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
