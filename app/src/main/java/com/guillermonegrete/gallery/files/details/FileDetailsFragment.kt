@@ -141,7 +141,6 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
         initializePlayer()
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private fun setUpViewModel() {
         val viewpager = binding.fileDetailsViewpager
         viewpager.adapter = adapter
