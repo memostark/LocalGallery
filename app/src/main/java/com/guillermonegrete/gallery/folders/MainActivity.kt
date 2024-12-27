@@ -2,6 +2,7 @@ package com.guillermonegrete.gallery.folders
 
 import android.graphics.Color
 import android.os.Bundle
+import android.view.View
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -9,6 +10,7 @@ import androidx.core.view.isGone
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.snackbar.Snackbar
 import com.guillermonegrete.gallery.R
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -35,5 +37,12 @@ class MainActivity : AppCompatActivity(R.layout.activity_main){
             if(destination.id == R.id.files_fragment_dest)
                 bottomNavigationView.menu.findItem(R.id.folders_fragment_dest).isChecked = true
         }
+    }
+
+    fun showSnackBar(message: String) {
+        val navBar = findViewById<View>(R.id.main_bottom_nav)
+        val snackBar = Snackbar.make(navBar, message, Snackbar.LENGTH_SHORT)
+        snackBar.setAnchorView(navBar)
+        snackBar.show()
     }
 }
