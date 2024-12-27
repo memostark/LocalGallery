@@ -32,6 +32,7 @@ import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.data.source.SettingsRepository
 import com.guillermonegrete.gallery.databinding.FragmentFilesListBinding
 import com.guillermonegrete.gallery.files.details.AddTagFragment
+import com.guillermonegrete.gallery.folders.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -293,7 +294,9 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                 ids.size,
                 ids.size
             )
-            Snackbar.make(binding.filesFragmentRoot, message, Snackbar.LENGTH_SHORT).show()
+            val act = activity
+            if (act is MainActivity) act.showSnackBar(message)
+            else Snackbar.make(binding.filesFragmentRoot, message, Snackbar.LENGTH_SHORT).show()
         }
     }
 }
