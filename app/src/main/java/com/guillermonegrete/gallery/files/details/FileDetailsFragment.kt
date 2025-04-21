@@ -57,6 +57,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
     private lateinit var adapter: FileDetailsAdapter
 
     private var index = 0
+    private var shouldSetIndex = false
 
     /**
      * The actual visibility of the system bars.
@@ -94,6 +95,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentFileDetailsBinding.bind(view)
+        shouldSetIndex = true
 
         adapter = FileDetailsAdapter()
         adapter.isAllFilesDest = findNavController().previousBackStackEntry?.destination?.id == R.id.all_files_dest
@@ -186,8 +188,12 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
         adapter.addLoadStateListener {
             val state = it.source
-            if (state.refresh is LoadState.NotLoading &&
-                state.append is LoadState.NotLoading) viewpager.setCurrentItem(index, false)
+            if (shouldSetIndex &&
+                state.refresh is LoadState.NotLoading &&
+                state.append is LoadState.NotLoading) {
+                viewpager.setCurrentItem(index, false)
+                shouldSetIndex = false
+            }
         }
     }
 
