@@ -29,9 +29,13 @@ import androidx.navigation.fragment.navArgs
 import androidx.paging.LoadState
 import androidx.viewpager2.widget.ViewPager2
 import com.guillermonegrete.gallery.R
+import com.guillermonegrete.gallery.common.Order
+import com.guillermonegrete.gallery.common.SortingDialog
+import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.databinding.FragmentFileDetailsBinding
 import com.guillermonegrete.gallery.files.FilesViewModel
+import com.guillermonegrete.gallery.files.SortField
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -95,6 +99,13 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentFileDetailsBinding.bind(view)
+        // Set the order because it might have changed (e.g. when navigating back from a folder with a different sort)
+        viewModel.setTag(SortingDialog.NO_TAG_ID)
+        val isAllFiles =  args.folder == Folder.NULL_FOLDER
+        if (isAllFiles) {
+            viewModel.setFilter("${SortField.CREATED.field},${Order.DESC.oder}")
+        }
+
         shouldSetIndex = true
 
         adapter = FileDetailsAdapter()
