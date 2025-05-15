@@ -202,8 +202,10 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
             if (shouldSetIndex &&
                 state.refresh is LoadState.NotLoading &&
                 state.append is LoadState.NotLoading) {
+                // Try to set the item, if the index is bigger than the item count, the adapter will load more items and the listener will trigger again.
                 viewpager.setCurrentItem(index, false)
-                shouldSetIndex = false
+                // Once the count reaches the index, the item is set. Shouldn't set anymore.
+                if (adapter.itemCount > index) shouldSetIndex = false
             }
         }
     }
