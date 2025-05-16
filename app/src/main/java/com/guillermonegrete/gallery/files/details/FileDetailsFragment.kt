@@ -1,6 +1,7 @@
 package com.guillermonegrete.gallery.files.details
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.view.GestureDetector
@@ -82,6 +83,20 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
     private var bottomInset = 0
 
+    private var checkedField = SortField.DEFAULT.field
+    private var checkedOrder = Order.DEFAULT.oder
+    private var tagId = SortingDialog.NO_TAG_ID
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        viewModel.getFilter()?.let { filter ->
+            checkedField = filter.sortType
+            checkedOrder = filter.order
+        }
+        viewModel.getTag()?.let { tagId = it }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setFragmentResultListener(AddTagFragment.REQUEST_KEY) { _, result ->
@@ -103,7 +118,8 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
         viewModel.setTag(SortingDialog.NO_TAG_ID)
         val isAllFiles =  args.folder == Folder.NULL_FOLDER
         if (isAllFiles) {
-            viewModel.setFilter("${SortField.CREATED.field},${Order.DESC.oder}")
+            viewModel.setTag(tagId)
+            viewModel.setFilter(FilesViewModel.ListFilter(checkedField, checkedOrder))
         }
 
         shouldSetIndex = true

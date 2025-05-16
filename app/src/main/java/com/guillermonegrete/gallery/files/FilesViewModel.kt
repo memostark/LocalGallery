@@ -23,14 +23,12 @@ class FilesViewModel @Inject constructor(
     private val settings: SettingsRepository
 ): ViewModel() {
 
-    private val defaultFilter: String = "${SortField.DEFAULT.field},${Order.DEFAULT.oder}"
-
     val openDetails: Subject<Int> = PublishSubject.create()
     val updateRows: Subject<List<UpdatedRow>> = PublishSubject.create()
 
     private val folderName: Subject<Folder> = PublishSubject.create()
-    private val filter: Subject<String> = BehaviorSubject.createDefault(defaultFilter)
-    private val tag: Subject<Long> = BehaviorSubject.createDefault(0L)
+    private val filter: BehaviorSubject<ListFilter> = BehaviorSubject.createDefault(ListFilter())
+    private val tag: BehaviorSubject<Long> = BehaviorSubject.createDefault(0L)
     private val forceUpdate: Subject<Boolean> = BehaviorSubject.createDefault(true)
 
     /**
@@ -55,7 +53,7 @@ class FilesViewModel @Inject constructor(
             folderName.distinctUntilChanged().switchMap { folder ->
                 forceUpdate.switchMap {
                     dataSize = 0
-                    val finalFilter = filter.ifEmpty { defaultFilter }
+                    val finalFilter = "${filter.sortType},${filter.order}"
                     filesRepository.getPagedFiles(folder, tagId, finalFilter).toObservable()
                 }
             }
@@ -133,12 +131,20 @@ class FilesViewModel @Inject constructor(
         folderId = folder.id
     }
 
-    fun setFilter(filterBy: String){
+    fun setFilter(filterBy: ListFilter){
         filter.onNext(filterBy)
+    }
+
+    fun getFilter(): ListFilter? {
+        return filter.value
     }
 
     fun setTag(tagId: Long){
         tag.onNext(tagId)
+    }
+
+    fun getTag(): Long? {
+        return tag.value
     }
 
     fun setNewPos(pos: Int){
@@ -210,4 +216,9 @@ class FilesViewModel @Inject constructor(
 
     data class Size(var width: Int, var height: Int)
     data class UpdatedRow(val pos: Int, val size: Size)
+
+    data class ListFilter(
+        val sortType: String = SortField.DEFAULT.field,
+        val order: String = Order.DEFAULT.oder,
+    )
 }

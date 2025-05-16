@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
+import androidx.core.os.BundleCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
@@ -62,6 +63,9 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
     private var checkedOrder = Order.DEFAULT
     private var tagId = SortingDialog.NO_TAG_ID
 
+    private val isAllFiles: Boolean
+        get() = args.folder == null
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
         adapter = FilesAdapter(viewModel)
@@ -69,7 +73,6 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         // Reset tags because the ViewModel is shared it may have a previous configuration
         // Reset in this method instead of onCreateView() to avoid resetting everytime the user navigates back to this fragment (e.g. from details frag)
         viewModel.setTag(SortingDialog.NO_TAG_ID)
-        val isAllFiles =  args.folder == null
         if(isAllFiles) {
             // Default sort for all files (most recent)
             checkedField = SortField.CREATED
@@ -79,7 +82,8 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
             checkedField = sorting.field
             checkedOrder = sorting.sort
         }
-        viewModel.setFilter("${checkedField.field},${checkedOrder.oder}")
+        val newFilter = FilesViewModel.ListFilter(checkedField.field, checkedOrder.oder)
+        viewModel.setFilter(newFilter)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -215,15 +219,17 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         val action = FilesListFragmentDirections.actionFilesToSortingDialog(options, SortDialogChecked(checkedField, checkedOrder, tagId), id)
         findNavController().navigate(action)
         setFragmentResultListener(SortingDialog.RESULT_KEY) { _, bundle ->
-            val result: SortDialogChecked = bundle.getParcelable(SortingDialog.SORT_KEY, SortDialogChecked::class.java) ?: return@setFragmentResultListener
+            val result: SortDialogChecked = BundleCompat.getParcelable(bundle, SortingDialog.SORT_KEY, SortDialogChecked::class.java) ?: return@setFragmentResultListener
             checkedField = result.field
             checkedOrder = result.sort
             tagId = result.tagId
 
             viewModel.setTag(tagId)
-            viewModel.setFilter("${checkedField.field},${checkedOrder.oder}")
-            preferences.setFileSort(checkedField.field, checkedOrder.oder)
-            val folder: Folder = arguments?.getParcelable(FOLDER_KEY, Folder::class.java) ?: Folder.NULL_FOLDER
+            val newFilter = FilesViewModel.ListFilter(checkedField.field, checkedOrder.oder)
+            viewModel.setFilter(newFilter)
+            // The sort for All Files is independent from the preference sort
+            if (!isAllFiles) preferences.setFileSort(checkedField.field, checkedOrder.oder)
+            val folder = BundleCompat.getParcelable(requireArguments(), FOLDER_KEY, Folder::class.java) ?: Folder.NULL_FOLDER
             viewModel.setFolderName(folder)
         }
     }
@@ -274,7 +280,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
 
     private fun setTagsUpdateListener() {
         setFragmentResultListener(AddTagFragment.SELECT_TAG_REQUEST_KEY) { _, bundle ->
-            val newTag = bundle.getParcelable(AddTagFragment.SELECTED_TAG_KEY, Tag::class.java) ?: return@setFragmentResultListener
+            val newTag = BundleCompat.getParcelable(bundle, AddTagFragment.SELECTED_TAG_KEY, Tag::class.java) ?: return@setFragmentResultListener
             val ids = bundle.getLongArray(AddTagFragment.UPDATED_FILES_IDS_KEY) ?: return@setFragmentResultListener
 
             for (pos in adapter.selectedItems) {
