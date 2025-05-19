@@ -93,8 +93,8 @@ class FilesViewModel @Inject constructor(
                 }
                 arSum > arMax -> {
                     // Ratio too big, remove last and add the rest as a row
-                    val pop = tempSizes.removeLast()
-                    val popFile = tempList.removeLast()
+                    val pop = tempSizes.removeAt(tempSizes.lastIndex)
+                    val popFile = tempList.removeAt(tempList.lastIndex)
                     val popRatio = getAspectRatio(pop)
                     arSum -= popRatio
                     normalizeHeights(tempSizes, width / arSum)
