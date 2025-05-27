@@ -17,6 +17,7 @@
             android:id="@+id/main_nav_view"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:fitsSystemWindows="false"
             app:menu="@menu/main_nav_menu"/>
 
         <androidx.fragment.app.FragmentContainerView

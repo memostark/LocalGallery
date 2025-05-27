@@ -2,10 +2,14 @@ package com.guillermonegrete.gallery.folders
 
 import android.graphics.Color
 import android.os.Bundle
+import android.view.ViewGroup
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isGone
+import androidx.core.view.updateLayoutParams
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.setupWithNavController
@@ -50,6 +54,19 @@ class MainActivity : AppCompatActivity() {
                     is NavigationView -> navigationView.menu.findItem(R.id.folders_fragment_dest).isChecked = true
                 }
             }
+        }
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
+            var nv = binding.landscapeLayout
+            if (nv != null) {
+                navigationView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    leftMargin = insets.left
+                    topMargin = insets.top
+                }
+            }
+
+            windowInsets
         }
     }
 

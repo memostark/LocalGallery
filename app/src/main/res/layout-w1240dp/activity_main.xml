@@ -13,6 +13,13 @@
         android:orientation="horizontal"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
+        <com.google.android.material.navigation.NavigationView
+            android:id="@+id/main_nav_view"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:fitsSystemWindows="false"
+            app:menu="@menu/main_nav_menu"/>
+
         <androidx.fragment.app.FragmentContainerView
             android:name="androidx.navigation.fragment.NavHostFragment"
             android:id="@+id/nav_host_fragment"
@@ -21,12 +28,6 @@
             app:defaultNavHost="true"
             app:navGraph="@navigation/nav_graph"/>
 
-        <com.google.android.material.navigation.NavigationView
-            android:id="@+id/main_nav_view"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:fitsSystemWindows="false"
-            app:menu="@menu/main_nav_menu"/>
     </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
