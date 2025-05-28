@@ -2,7 +2,6 @@ package com.guillermonegrete.gallery.files
 
 import android.content.Context
 import android.os.Bundle
-import android.util.DisplayMetrics
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -131,7 +130,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
             filesList.addOnItemTouchListener(listener)
             dragSelectTouchListener = listener
         }
-        bindViewModel(folder)
+        binding.filesList.post { bindViewModel(folder) }
         setFileClickEvent()
     }
 
@@ -147,7 +146,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         adapter.addLoadStateListener(loadListener)
         val list = binding.filesList
 
-        val width = getScreenWidth()
+        val width = getListWidth()
 
         val layoutManager = GridLayoutManager(context, width)
         list.layoutManager = layoutManager
@@ -161,12 +160,13 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
 
         viewModel.width = width
 
-        disposable.addAll(viewModel.cachedFileList
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-                { adapter.submitData(lifecycle, it) },
-                { error -> Timber.e(error,"Error loading files") }
-            ),
+        disposable.addAll(
+            viewModel.cachedFileList
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    { adapter.submitData(lifecycle, it) },
+                    { error -> Timber.e(error,"Error loading files") }
+                ),
             viewModel.updateRows
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ it.forEach { row ->
@@ -186,9 +186,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                     { error -> Timber.e(error) }
                 ),
             adapter.onItemLongPress.subscribe(
-                {
-                    dragSelectTouchListener?.startDragSelection(it)
-                },
+                { dragSelectTouchListener?.startDragSelection(it) },
                 { Timber.e(it) }
             ),
             adapter.onItemClick.subscribe(
@@ -245,11 +243,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         if(state is LoadState.Error) Timber.e(state.error, "Error when loading files")
     }
 
-    private fun Fragment.getScreenWidth(): Int{
-        val dm = DisplayMetrics()
-        this.requireActivity().windowManager.defaultDisplay.getMetrics(dm)
-        return dm.widthPixels
-    }
+    private fun Fragment.getListWidth() = binding.filesList.width
 
     private val actionModeCallback = object: ActionMode.Callback {
 
