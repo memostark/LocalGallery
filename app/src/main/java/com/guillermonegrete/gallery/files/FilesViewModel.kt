@@ -1,5 +1,6 @@
 package com.guillermonegrete.gallery.files
 
+import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.flatMap
@@ -12,6 +13,7 @@ import com.guillermonegrete.gallery.data.source.FilesRepository
 import com.guillermonegrete.gallery.data.source.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.BackpressureStrategy
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
 import io.reactivex.rxjava3.subjects.Subject
@@ -32,6 +34,11 @@ class FilesViewModel @Inject constructor(
     private val forceUpdate: Subject<Boolean> = BehaviorSubject.createDefault(true)
 
     /**
+     * Used to notify when the list width change (usually due to configuration changes).
+     */
+    private val widthSubject: Subject<Int> = PublishSubject.create()
+
+    /**
      * Used to notify if the position was changed by swiping in the details view.
      */
     val newFilePos: Subject<Int> = PublishSubject.create()
@@ -48,7 +55,7 @@ class FilesViewModel @Inject constructor(
 
     var width = 0
 
-    var cachedFileList = tag.distinctUntilChanged().switchMap { tagId ->
+    private val filesFlow = tag.distinctUntilChanged().switchMap { tagId ->
         filter.distinctUntilChanged().switchMap { filter ->
             folderName.distinctUntilChanged().switchMap { folder ->
                 forceUpdate.switchMap {
@@ -58,9 +65,14 @@ class FilesViewModel @Inject constructor(
                 }
             }
         }
-    }.map { pagingData ->
-        pagingData.map { dataSize++; it }
-    }.map { pagingData ->
+    }.cachedIn(viewModelScope)
+
+    // The order in combineLatest() is important here, widthSubject must be first so every time it changes all the emissions of files get reprocessed with the new width
+    var cachedFileList = Observable.combineLatest(widthSubject, filesFlow) { width, pagingData ->
+
+        @SuppressLint("CheckResult")
+        pagingData.map { dataSize++; Unit }
+
         var arSum = 0f
         val tempList = mutableListOf<File>()
         val tempSizes = mutableListOf<Size>()
@@ -149,6 +161,10 @@ class FilesViewModel @Inject constructor(
 
     fun setNewPos(pos: Int){
         newFilePos.onNext(pos)
+    }
+
+    fun setListWidth(width: Int){
+        widthSubject.onNext(width)
     }
 
     fun isAutoplayEnabled() = settings.getAutoPlayMode()

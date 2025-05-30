@@ -2,7 +2,6 @@ package com.guillermonegrete.gallery.files
 
 import android.content.Context
 import android.os.Bundle
-import android.os.Parcelable
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -143,26 +142,6 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         super.onDestroyView()
     }
 
-    private var restoredState: Parcelable? = null
-    private var restoredPos = 0
-
-    override fun onViewStateRestored(savedInstanceState: Bundle?) {
-        super.onViewStateRestored(savedInstanceState)
-        if (savedInstanceState != null) {
-            restoredState = BundleCompat.getParcelable(savedInstanceState, "list_state", Parcelable::class.java)
-            restoredPos = savedInstanceState.getInt("list_pos")
-        }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        val layoutManager = binding.filesList.layoutManager as? GridLayoutManager
-        outState.putParcelable("list_state", layoutManager?.onSaveInstanceState())
-        outState.putInt("list_pos", layoutManager?.findFirstVisibleItemPosition() ?: 0)
-    }
-
-    var restorePosition = false
-
     private fun bindViewModel(folder: Folder){
         adapter.addLoadStateListener(loadListener)
         val list = binding.filesList
@@ -179,11 +158,6 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         }
         list.adapter = adapter
 
-        restorePosition = false
-        if (viewModel.width != width) {
-            restorePosition = true
-            viewModel.refresh()
-        }
         viewModel.width = width
 
         disposable.addAll(
@@ -221,6 +195,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
             )
         )
 
+        viewModel.setListWidth(width)
         viewModel.setFolderName(folder)
     }
 
@@ -267,14 +242,6 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         binding.loadingIcon.isVisible = state is LoadState.Loading
         binding.filesMessageContainer.isVisible = state is LoadState.Error
         if(state is LoadState.Error) Timber.e(state.error, "Error when loading files")
-        if (restorePosition &&
-            loadStates.source.refresh is LoadState.NotLoading &&
-            loadStates.source.append is LoadState.NotLoading) {
-            binding.filesList.layoutManager?.onRestoreInstanceState(restoredState)
-            if (adapter.itemCount > restoredPos) {
-                restorePosition = false
-            }
-        }
     }
 
     private fun Fragment.getListWidth() = binding.filesList.width
