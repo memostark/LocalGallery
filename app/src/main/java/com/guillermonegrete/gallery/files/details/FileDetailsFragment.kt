@@ -115,7 +115,6 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentFileDetailsBinding.bind(view)
         // Set the order because it might have changed (e.g. when navigating back from a folder with a different sort)
-        viewModel.setTag(SortingDialog.NO_TAG_ID)
         val isAllFiles =  args.folder == Folder.NULL_FOLDER
         if (isAllFiles) {
             viewModel.setTag(tagId)

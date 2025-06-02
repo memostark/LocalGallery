@@ -69,10 +69,11 @@ class FilesViewModel @Inject constructor(
 
     // The order in combineLatest() is important here, widthSubject must be first so every time it changes all the emissions of files get reprocessed with the new width
     var cachedFileList = Observable.combineLatest(widthSubject, filesFlow) { width, pagingData ->
-
-        @SuppressLint("CheckResult")
-        pagingData.map { dataSize++; Unit }
-
+        this.width = width
+        pagingData
+    }.map { pagingData ->
+        pagingData.map { dataSize++; it }
+    }.map { pagingData ->
         var arSum = 0f
         val tempList = mutableListOf<File>()
         val tempSizes = mutableListOf<Size>()

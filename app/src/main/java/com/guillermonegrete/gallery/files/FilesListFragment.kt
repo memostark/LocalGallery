@@ -158,8 +158,6 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         }
         list.adapter = adapter
 
-        viewModel.width = width
-
         disposable.addAll(
             viewModel.cachedFileList
                 .observeOn(AndroidSchedulers.mainThread())
@@ -195,7 +193,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
             )
         )
 
-        viewModel.setListWidth(width)
+        if (viewModel.width != width) viewModel.setListWidth(width)
         viewModel.setFolderName(folder)
     }
 
