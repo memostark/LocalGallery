@@ -1,6 +1,5 @@
 package com.guillermonegrete.gallery.files
 
-import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.flatMap

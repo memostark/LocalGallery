@@ -15,8 +15,8 @@ import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
+import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.paging.CombinedLoadStates
@@ -46,7 +46,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
     private  var _binding: FragmentFilesListBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: FilesViewModel by activityViewModels()
+    private val viewModel: FilesViewModel by hiltNavGraphViewModels(R.id.all_files_dest)
     private val args: FilesListFragmentArgs by navArgs()
 
     private val disposable = CompositeDisposable()
@@ -71,7 +71,6 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
 
         // Reset tags because the ViewModel is shared it may have a previous configuration
         // Reset in this method instead of onCreateView() to avoid resetting everytime the user navigates back to this fragment (e.g. from details frag)
-        viewModel.setTag(SortingDialog.NO_TAG_ID)
         if(isAllFiles) {
             // Default sort for all files (most recent)
             checkedField = SortField.CREATED
