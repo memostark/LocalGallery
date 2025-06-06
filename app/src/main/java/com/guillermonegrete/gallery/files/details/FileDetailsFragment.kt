@@ -1,7 +1,6 @@
 package com.guillermonegrete.gallery.files.details
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.view.GestureDetector
@@ -16,9 +15,9 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
+import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -51,7 +50,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
     private  var _binding: FragmentFileDetailsBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: FilesViewModel by activityViewModels()
+    private val viewModel: FilesViewModel by hiltNavGraphViewModels(R.id.all_files_dest)
     private val args: FileDetailsFragmentArgs by navArgs()
     private var exoPlayer: ExoPlayer? = null
 
@@ -87,18 +86,13 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
     private var checkedOrder = Order.DEFAULT.oder
     private var tagId = SortingDialog.NO_TAG_ID
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         viewModel.getFilter()?.let { filter ->
             checkedField = filter.sortType
             checkedOrder = filter.order
         }
         viewModel.getTag()?.let { tagId = it }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
         setFragmentResultListener(AddTagFragment.REQUEST_KEY) { _, result ->
             // Instead of using the snapshot list, the recommended approach to update an item is updating a cache source
             // and reloading from there (like a database) as explained here: https://stackoverflow.com/a/63139535/10244759
