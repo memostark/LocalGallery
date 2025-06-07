@@ -1,6 +1,7 @@
 package com.guillermonegrete.gallery.files.details
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.view.GestureDetector
@@ -86,13 +87,17 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
     private var checkedOrder = Order.DEFAULT.oder
     private var tagId = SortingDialog.NO_TAG_ID
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
         viewModel.getFilter()?.let { filter ->
             checkedField = filter.sortType
             checkedOrder = filter.order
         }
         viewModel.getTag()?.let { tagId = it }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         setFragmentResultListener(AddTagFragment.REQUEST_KEY) { _, result ->
             // Instead of using the snapshot list, the recommended approach to update an item is updating a cache source
             // and reloading from there (like a database) as explained here: https://stackoverflow.com/a/63139535/10244759
@@ -102,7 +107,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
             adapter.snapshot().items[pos].tags = newTags
             adapter.notifyItemChanged(pos)
         }
-        index = args.fileIndex
+        if (savedInstanceState == null) index = args.fileIndex
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
