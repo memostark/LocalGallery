@@ -14,15 +14,12 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
-import androidx.navigation.ui.setupWithNavController
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationBarView
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
-import timber.log.Timber
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -43,8 +40,6 @@ class MainActivity : AppCompatActivity() {
             is NavigationBarView -> {
                 navigationView.setOnItemSelectedListener {
                     val currentDest = navController.currentDestination?.id
-                    Timber.d("Current: $currentDest, target: ${it.itemId}")
-                    Timber.d("All files: ${R.id.all_files_dest}, files frag: ${R.id.files_fragment_dest}")
 
                     if (currentDest == R.id.files_fragment_dest &&
                         it.itemId == R.id.all_files_dest) {
