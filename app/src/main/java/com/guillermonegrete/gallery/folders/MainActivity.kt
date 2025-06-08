@@ -10,7 +10,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isGone
 import androidx.core.view.updateLayoutParams
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
@@ -45,7 +44,16 @@ class MainActivity : AppCompatActivity() {
                         it.itemId == R.id.all_files_dest) {
                         val builder = NavOptions.Builder().setRestoreState(true)
                         builder.setPopUpTo(
-                            navController.graph.findStartDestination().id,
+                            R.id.folders_fragment_dest,
+                            inclusive = true,
+                            saveState = true
+                        )
+                        navController.navigate(it.itemId, null, builder.build())
+                    } else if (currentDest == R.id.files_fragment_dest &&
+                        it.itemId == R.id.folders_fragment_dest) {
+                        val builder = NavOptions.Builder().setRestoreState(true)
+                        builder.setPopUpTo(
+                            R.id.all_files_dest,
                             inclusive = true,
                             saveState = true
                         )
@@ -55,6 +63,7 @@ class MainActivity : AppCompatActivity() {
                     }
                     return@setOnItemSelectedListener true
                 }
+                navigationView.setOnItemReselectedListener {}
             }
             is NavigationView -> NavigationUI.setupWithNavController(navigationView, navController)
         }
