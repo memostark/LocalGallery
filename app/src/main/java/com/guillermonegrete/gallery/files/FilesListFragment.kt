@@ -16,7 +16,6 @@ import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
-import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.paging.CombinedLoadStates
@@ -33,6 +32,7 @@ import com.guillermonegrete.gallery.data.source.SettingsRepository
 import com.guillermonegrete.gallery.databinding.FragmentFilesListBinding
 import com.guillermonegrete.gallery.files.details.AddTagFragment
 import com.guillermonegrete.gallery.folders.MainActivity
+import com.guillermonegrete.gallery.utils.hiltNavGraphViewModels
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -46,7 +46,9 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
     private  var _binding: FragmentFilesListBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: FilesViewModel by hiltNavGraphViewModels(R.id.all_files_dest)
+    private val viewModel: FilesViewModel by hiltNavGraphViewModels {
+        if (isAllFiles) R.id.nav_graph else R.id.files_graph
+    }
     private val args: FilesListFragmentArgs by navArgs()
 
     private val disposable = CompositeDisposable()

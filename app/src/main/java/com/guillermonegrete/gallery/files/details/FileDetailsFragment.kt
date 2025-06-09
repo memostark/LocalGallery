@@ -18,7 +18,6 @@ import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
-import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -37,6 +36,7 @@ import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.databinding.FragmentFileDetailsBinding
 import com.guillermonegrete.gallery.files.FilesViewModel
 import com.guillermonegrete.gallery.files.SortField
+import com.guillermonegrete.gallery.utils.hiltNavGraphViewModels
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -51,7 +51,9 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
     private  var _binding: FragmentFileDetailsBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: FilesViewModel by hiltNavGraphViewModels(R.id.all_files_dest)
+    private val viewModel: FilesViewModel by hiltNavGraphViewModels {
+        if (isAllFiles) R.id.nav_graph else R.id.files_graph
+    }
     private val args: FileDetailsFragmentArgs by navArgs()
     private var exoPlayer: ExoPlayer? = null
 
@@ -86,6 +88,9 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
     private var checkedField = SortField.DEFAULT.field
     private var checkedOrder = Order.DEFAULT.oder
     private var tagId = SortingDialog.NO_TAG_ID
+
+    private val isAllFiles: Boolean
+        get() = args.folder == Folder.NULL_FOLDER
 
     override fun onAttach(context: Context) {
         super.onAttach(context)

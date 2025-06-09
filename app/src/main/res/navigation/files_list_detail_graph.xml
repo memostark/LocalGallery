@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation
-    android:id="@+id/all_files_dest"
+    android:id="@+id/files_graph"
     app:startDestination="@id/files_fragment_dest"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -51,7 +51,7 @@
         tools:layout="@layout/fragment_file_details">
         <action
             android:id="@+id/fileDetails_to_files_fragment"
-            app:destination="@id/all_files_dest">
+            app:destination="@id/open_file_details">
             <argument
                 android:name="folder"
                 android:defaultValue="@null"
