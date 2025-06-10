@@ -51,7 +51,7 @@
         tools:layout="@layout/fragment_file_details">
         <action
             android:id="@+id/fileDetails_to_files_fragment"
-            app:destination="@id/open_file_details">
+            app:destination="@id/files_graph">
             <argument
                 android:name="folder"
                 android:defaultValue="@null"

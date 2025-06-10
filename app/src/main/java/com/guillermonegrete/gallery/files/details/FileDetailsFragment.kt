@@ -26,6 +26,7 @@ import androidx.media3.ui.PlayerView
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.viewpager2.widget.ViewPager2
 import com.guillermonegrete.gallery.R
@@ -112,18 +113,12 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
             adapter.snapshot().items[pos].tags = newTags
             adapter.notifyItemChanged(pos)
         }
-        if (savedInstanceState == null) index = args.fileIndex
+        index = savedInstanceState?.getInt(SAVED_INDEX_KEY) ?: args.fileIndex
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentFileDetailsBinding.bind(view)
-        // Set the order because it might have changed (e.g. when navigating back from a folder with a different sort)
-        val isAllFiles =  args.folder == Folder.NULL_FOLDER
-        if (isAllFiles) {
-            viewModel.setTag(tagId)
-            viewModel.setFilter(FilesViewModel.ListFilter(checkedField, checkedOrder))
-        }
 
         shouldSetIndex = true
 
@@ -173,6 +168,11 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
         initializePlayer()
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt(SAVED_INDEX_KEY, index)
+    }
+
     private fun setUpViewModel() {
         val viewpager = binding.fileDetailsViewpager
         viewpager.adapter = adapter
@@ -216,17 +216,14 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
             },
         )
 
-        adapter.addLoadStateListener {
-            val state = it.source
-            if (shouldSetIndex &&
-                state.refresh is LoadState.NotLoading &&
-                state.append is LoadState.NotLoading) {
-                // Try to set the item, if the index is bigger than the item count, the adapter will load more items and the listener will trigger again.
-                viewpager.setCurrentItem(index, false)
-                // Once the count reaches the index, the item is set. Shouldn't set anymore.
-                if (adapter.itemCount > index) shouldSetIndex = false
+        adapter.addLoadStateListener(loadListener)
+
+        viewpager.registerOnPageChangeCallback(object: ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                index = position
             }
-        }
+        })
     }
 
     private fun toggleBars() {
@@ -262,9 +259,10 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
         val decorView = requireActivity().window.decorView
         ViewCompat.setOnApplyWindowInsetsListener(decorView, null)
+        adapter.removeLoadStateListener(loadListener)
+        disposable.clear()
         binding.fileDetailsViewpager.adapter = null
         _binding = null
-        disposable.clear()
         super.onDestroyView()
     }
 
@@ -458,10 +456,23 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
     }
 
+    private val loadListener  = { loadStates: CombinedLoadStates ->
+        val state = loadStates.source
+        if (shouldSetIndex &&
+            state.refresh is LoadState.NotLoading &&
+            state.append is LoadState.NotLoading) {
+            // Try to set the item, if the index is bigger than the item count, the adapter will load more items and the listener will trigger again.
+            binding.fileDetailsViewpager.setCurrentItem(index, false)
+            // Once the count reaches the index, the item is set. Shouldn't set anymore.
+            if (adapter.itemCount > index) shouldSetIndex = false
+        }
+    }
+
     companion object{
 
         const val FOLDER_UPDATE_KEY = "folder-updated"
         const val COVER_URL_KEY = "cover-url"
+        const val SAVED_INDEX_KEY = "list_index"
 
         const val SWIPE_THRESHOLD = FileDetailsAdapter.SWIPE_THRESHOLD
         const val SWIPE_VELOCITY_THRESHOLD = FileDetailsAdapter.SWIPE_VELOCITY_THRESHOLD
