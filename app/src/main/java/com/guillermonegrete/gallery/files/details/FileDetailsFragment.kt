@@ -29,6 +29,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.common.Order
 import com.guillermonegrete.gallery.common.SortingDialog
@@ -186,21 +187,30 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
                 { adapter.submitData(lifecycle, it) },
                 { error -> Timber.e(error, "Error loading files") }
             ),
+            viewModel.detailsState.subscribe {
+                adapter.setSheet(it.sheetVisible)
+            },
             adapter.panelTouchSubject.distinctUntilChanged()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ panelTouched ->
-                    // User finished touching, update adapter to update bottom sheet
-                    if(!panelTouched) {
-                        // Use post() to avoid: "IllegalStateException: Cannot call this method while RecyclerView is computing a layout or scrolling"
-                        viewpager.post {
-                            adapter.notifySheetChange()
+                .subscribe({ sheetState ->
+                    val panelTouched = when(sheetState){
+                        BottomSheetBehavior.STATE_COLLAPSED -> {
+                            viewModel.setSheet(false)
+                            false
                         }
+                        BottomSheetBehavior.STATE_EXPANDED  -> {
+                            viewModel.setSheet(true)
+                            false
+                        }
+                        BottomSheetBehavior.STATE_DRAGGING -> true
+                        else -> false
                     }
 
                     // Prevents clunky sideways movement when dragging the bottom panel
                     viewpager.isUserInputEnabled = !panelTouched
-                    }, { error -> Timber.e(error, "Error detecting panel touch") })
-            ,
+                },
+                { error -> Timber.e(error, "Error detecting panel touch") }
+            ),
             adapter.setCoverSubject.subscribe(
                 { fileId -> updateFolderCover(fileId) },
                 { error -> Timber.e(error, "On set cover click error") }
@@ -447,7 +457,7 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
             // Detects horizontal swipes in any direction
             if (abs(diffY) > abs(diffX)) {
                 if (diffY < -SWIPE_THRESHOLD && velocityY < -SWIPE_VELOCITY_THRESHOLD) {
-                    adapter.showSheet()
+                    viewModel.setSheet(true)
                     return true
                 }
             }

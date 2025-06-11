@@ -36,7 +36,7 @@ import kotlin.math.abs
 
 class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>(FileDiffCallback){
 
-    val panelTouchSubject: PublishSubject<Boolean> = PublishSubject.create()
+    val panelTouchSubject: PublishSubject<Int> = PublishSubject.create()
 
     val setCoverSubject: PublishSubject<Long> = PublishSubject.create()
 
@@ -98,9 +98,9 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun showSheet() {
-        if(!isSheetVisible) {
-            isSheetVisible = true
+    fun setSheet(visibility: Boolean) {
+        if(visibility != isSheetVisible) {
+            isSheetVisible = visibility
             notifyDataSetChanged()
         }
     }
@@ -145,18 +145,7 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
             // Hidden state is not considered because it's not enabled for this bottom sheet
             behaviour.addBottomSheetCallback(object: BottomSheetBehavior.BottomSheetCallback(){
                 override fun onStateChanged(p0: View, p1: Int) {
-                    when(p1){
-                        BottomSheetBehavior.STATE_COLLAPSED -> {
-                            isSheetVisible = false
-                            panelTouchSubject.onNext(false)
-                        }
-                        BottomSheetBehavior.STATE_EXPANDED  -> {
-                            isSheetVisible = true
-                            panelTouchSubject.onNext(false)
-                        }
-                        BottomSheetBehavior.STATE_DRAGGING -> panelTouchSubject.onNext(true)
-                        else -> {}
-                    }
+                    panelTouchSubject.onNext(p1)
                 }
 
                 override fun onSlide(p0: View, p1: Float) {}
@@ -258,8 +247,7 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
                 if (abs(diffY) > abs(diffX)) {
                     if (diffY < -SWIPE_THRESHOLD && velocityY < -SWIPE_VELOCITY_THRESHOLD) {
                         // State is false, change to true so when it reaches the expanded state the new false state is processed
-                        panelTouchSubject.onNext(true)
-                        behaviour.state = BottomSheetBehavior.STATE_EXPANDED
+                        panelTouchSubject.onNext(BottomSheetBehavior.STATE_EXPANDED)
                         return@setOnSingleFlingListener true
                     }
                 }

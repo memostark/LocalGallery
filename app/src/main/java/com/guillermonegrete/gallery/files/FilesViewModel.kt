@@ -43,6 +43,7 @@ class FilesViewModel @Inject constructor(
     val newFilePos: Subject<Int> = PublishSubject.create()
 
     var audioOn = true
+    val detailsState: BehaviorSubject<DetailsUIState> = BehaviorSubject.createDefault(DetailsUIState())
 
     var folderId = -1L
         private set
@@ -169,6 +170,12 @@ class FilesViewModel @Inject constructor(
 
     fun isAutoplayEnabled() = settings.getAutoPlayMode()
 
+    fun setSheet(visible: Boolean) {
+        detailsState.value?.let {
+            detailsState.onNext(it.copy(sheetVisible = visible))
+        }
+    }
+
     @Synchronized
     private fun normalizeHeights(subList: List<Size>, height: Float) {
         var totalWidth = 0
@@ -237,4 +244,6 @@ class FilesViewModel @Inject constructor(
         val sortType: String = SortField.DEFAULT.field,
         val order: String = Order.DEFAULT.oder,
     )
+
+    data class DetailsUIState(val sheetVisible: Boolean = false)
 }

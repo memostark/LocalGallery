@@ -196,6 +196,8 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
 
         if (viewModel.width != width) viewModel.setListWidth(width)
         viewModel.setFolderName(folder)
+        // When navigating back to files list, reset the details sheet to hidden
+        viewModel.setSheet(false)
     }
 
     private fun setFileClickEvent(){
