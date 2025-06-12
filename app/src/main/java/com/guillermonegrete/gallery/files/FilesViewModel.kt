@@ -241,8 +241,8 @@ class FilesViewModel @Inject constructor(
     data class UpdatedRow(val pos: Int, val size: Size)
 
     data class ListFilter(
-        val sortType: String = SortField.DEFAULT.field,
-        val order: String = Order.DEFAULT.oder,
+        val sortType: String = SortField.CREATED.field,
+        val order: String = Order.DESC.oder,
     )
 
     data class DetailsUIState(val sheetVisible: Boolean = false)
