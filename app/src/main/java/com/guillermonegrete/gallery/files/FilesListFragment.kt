@@ -71,17 +71,18 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         super.onAttach(context)
         adapter = FilesAdapter(viewModel)
 
-        // Reset tags because the ViewModel is shared it may have a previous configuration
-        // Reset in this method instead of onCreateView() to avoid resetting everytime the user navigates back to this fragment (e.g. from details frag)
+        // Set in this method instead of onCreateView() to avoid resetting everytime the user navigates back to this fragment (e.g. from details frag)
         if(isAllFiles) {
-            // Default sort for all files (most recent)
-            checkedField = SortField.CREATED
-            checkedOrder = Order.DESC
+            viewModel.getFilter()?.let {
+                checkedField = SortField.fromField(it.sortType) ?: SortField.DEFAULT
+                checkedOrder = Order.fromOrder(it.order)
+            }
         } else {
             val sorting = preferences.getFileSort()
             checkedField = sorting.field
             checkedOrder = sorting.sort
         }
+        tagId = viewModel.getTag() ?: SortingDialog.NO_TAG_ID
         val newFilter = FilesViewModel.ListFilter(checkedField.field, checkedOrder.oder)
         viewModel.setFilter(newFilter)
     }
