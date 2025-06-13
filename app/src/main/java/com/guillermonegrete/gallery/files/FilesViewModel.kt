@@ -72,6 +72,7 @@ class FilesViewModel @Inject constructor(
         this.width = width
         pagingData
     }.map { pagingData ->
+        dataSize = 0
         pagingData.map { dataSize++; it }
     }.map { pagingData ->
         var arSum = 0f
