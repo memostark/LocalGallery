@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Because the nav bar is transparent, the bottom insets should be ignored so the sheet doesn't display behind the  bar-->
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/bottom_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    style="@style/Widget.Material3.BottomSheet"
+    app:gestureInsetBottomIgnored="true"
+    app:paddingBottomSystemWindowInsets="false"
+    app:behavior_peekHeight="0dp"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+    tools:layout_gravity="bottom">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginTop="16dp"
+            android:contentDescription="@string/image_icon"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/guideline_top"
+            app:srcCompat="@drawable/ic_image_24dp" />
+
+        <TextView
+            android:id="@+id/file_name_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+            app:layout_constraintBottom_toBottomOf="@+id/imageView"
+            app:layout_constraintStart_toEndOf="@+id/imageView"
+            app:layout_constraintTop_toTopOf="@+id/imageView"
+            app:layout_constraintEnd_toStartOf="@id/open_folder_button"
+            tools:text="dummy_file_name.jpg" />
+
+        <TextView
+            android:id="@+id/folder_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="@+id/file_name_text"
+            app:layout_constraintStart_toStartOf="@+id/file_name_text"
+            app:layout_constraintTop_toBottomOf="@+id/file_name_text"
+            tools:text="folder name"
+            tools:visibility="visible" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_top"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_begin="8dp" />
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/barrier_bottom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="file_name_text,folder_text,imageView" />
+
+        <TextView
+            android:id="@+id/file_size"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="@+id/file_name_text"
+            app:layout_constraintStart_toStartOf="@+id/file_name_text"
+            app:layout_constraintTop_toBottomOf="@+id/barrier_bottom"
+            tools:text="1000x500" />
+
+        <TextView
+            android:id="@+id/creation_date"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintStart_toEndOf="@id/dates_barrier"
+            app:layout_constraintTop_toBottomOf="@+id/file_size"
+            tools:text="21 Oct 2021" />
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/created"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/file_size" />
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/dates_barrier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="right"
+            app:constraint_referenced_ids="textView4, textView3" />
+
+        <TextView
+            android:id="@+id/modified_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            app:layout_constraintBottom_toBottomOf="@+id/textView4"
+            app:layout_constraintStart_toEndOf="@id/dates_barrier"
+            app:layout_constraintTop_toTopOf="@+id/textView4"
+            tools:text="22 Oct 2021" />
+
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/modified"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView3" />
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/chips_scroll"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:clipToPadding="false"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_max="150dp"
+            app:layout_constraintStart_toEndOf="@id/barrier_end"
+            app:layout_constraintTop_toTopOf="@id/barrier_bottom">
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/tags_chip_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/add_tag_btn"
+                    style="@style/Widget.Material3.Chip.Assist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/add_tag"
+                    app:chipIcon="@drawable/ic_baseline_add_24"
+                    app:chipIconTint="?colorOnSurface"
+                    app:ensureMinTouchTargetSize="true"
+                    app:textEndPadding="@dimen/chip_text_padding"
+                    app:textStartPadding="@dimen/chip_text_padding" />
+
+                <include
+                    layout="@layout/choice_chip"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+            </com.google.android.material.chip.ChipGroup>
+
+        </androidx.core.widget.NestedScrollView>
+
+        <ImageButton
+            android:id="@+id/open_folder_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?android:selectableItemBackground"
+            android:contentDescription="@string/open_folder"
+            android:padding="4dp"
+            android:scaleType="fitCenter"
+            android:visibility="gone"
+            app:layout_constraintEnd_toStartOf="@id/set_cover_btn"
+            app:layout_constraintTop_toTopOf="@+id/open_link_button"
+            app:srcCompat="@drawable/baseline_folder_24"
+            app:tint="?colorOnSurface"
+            tools:visibility="visible" />
+
+        <ImageButton
+            android:id="@+id/set_cover_btn"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:background="?android:selectableItemBackground"
+            android:contentDescription="@string/cover_btn_description"
+            android:padding="8dp"
+            android:scaleType="fitCenter"
+            app:layout_constraintEnd_toStartOf="@+id/open_link_button"
+            app:layout_constraintTop_toTopOf="@id/guideline_top"
+            app:srcCompat="@drawable/ic_baseline_photo_album_24"
+            app:tint="?colorOnSurface" />
+
+        <ImageButton
+            android:id="@+id/open_link_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?android:selectableItemBackground"
+            android:contentDescription="@string/open_in_browser"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            android:padding="4dp"
+            android:scaleType="fitCenter"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/set_cover_btn"
+            app:srcCompat="@drawable/ic_open_in_browser_black_24dp"
+            app:tint="#2196F3" />
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/barrier_end"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="end"
+            app:constraint_referenced_ids="creation_date,modified_date" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</FrameLayout>

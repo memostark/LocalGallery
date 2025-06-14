@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="8dp"
+    android:paddingHorizontal="16dp"
+    tools:layout_gravity="bottom">
+
+    <Button
+        android:id="@+id/done_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/done"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/sort_by_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/sort_by"
+        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+        android:layout_marginVertical="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <RadioGroup
+        android:id="@+id/field_sort"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checkedButton="@+id/radio_button_1"
+        app:layout_constraintTop_toBottomOf="@+id/sort_by_label"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <RadioButton
+            android:id="@+id/by_name"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/name"
+            style="@style/SortDialogRadioButton"/>
+
+        <RadioButton
+            android:id="@+id/by_creation"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/creation_date"
+            style="@style/SortDialogRadioButton" />
+
+        <RadioButton
+            android:id="@+id/by_last_modified"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/last_modified"
+            style="@style/SortDialogRadioButton" />
+
+        <!--        Causes a problem with the backend server-->
+        <!--<RadioButton
+            android:id="@+id/by_type"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/type"
+            style="@style/SortDialogRadioButton" />-->
+    </RadioGroup>
+
+    <TextView
+        android:id="@+id/order_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/order"
+        android:layout_marginBottom="8dp"
+        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/field_sort" />
+
+    <RadioGroup
+        android:id="@+id/order_sort"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checkedButton="@+id/radio_button_1"
+        app:layout_constraintTop_toBottomOf="@+id/order_label"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <RadioButton
+            android:id="@+id/descending_order"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/descending"
+            style="@style/SortDialogRadioButton" />
+
+        <RadioButton
+            android:id="@+id/ascending_order"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/ascending"
+            style="@style/SortDialogRadioButton" />
+
+    </RadioGroup>
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrier_radio_groups"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="end"
+        app:constraint_referenced_ids="field_sort,order_sort" />
+
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/chip_scroll"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:paddingBottom="32dp"
+        android:clipToPadding="false"
+        android:layout_marginStart="8dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@+id/done_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/barrier_radio_groups"
+        tools:visibility="visible">
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/tags_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:singleSelection="true"
+            app:layout_constraintTop_toBottomOf="@+id/order_sort">
+
+            <include layout="@layout/choice_chip"
+                android:visibility="gone"
+                tools:visibility="visible"/>
+
+        </com.google.android.material.chip.ChipGroup>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -27,7 +27,7 @@
                 android:minWidth="48dp"
                 android:minHeight="48dp"
                 android:hint="@string/add_tag_label"
-                android:imeOptions="actionDone"/>
+                android:imeOptions="actionDone|flagNoExtractUi"/>
 
         </com.google.android.material.chip.ChipGroup>
 
