@@ -33,7 +33,7 @@ import com.guillermonegrete.gallery.files.SortField
 import com.guillermonegrete.gallery.files.details.FileDetailsFragment
 import com.guillermonegrete.gallery.folders.models.FolderUI
 import com.guillermonegrete.gallery.servers.ServersFragment
-import com.jakewharton.rxbinding4.appcompat.queryTextChanges
+import com.jakewharton.rxbinding4.appcompat.queryTextChangeEvents
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -230,12 +230,18 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
         searchView.imeOptions = searchView.imeOptions or EditorInfo.IME_FLAG_NO_EXTRACT_UI
 
         disposable.add(
-            searchView.queryTextChanges()
+            searchView.queryTextChangeEvents()
                 .skip(1) // ignore the first event that happens automatically when subscribing it cause an undesired list refresh
                 .debounce(300, TimeUnit.MILLISECONDS)
                 .distinctUntilChanged()
                 .subscribe(
-                    { viewModel.updateFilter(it) },
+                    {
+                        if (!it.isSubmitted) {
+                            viewModel.updateFilter(it.queryText)
+                        } else {
+                            hideKeyboard()
+                        }
+                    },
                     { Timber.e(it, "Error when querying search view") }
                 )
         )
