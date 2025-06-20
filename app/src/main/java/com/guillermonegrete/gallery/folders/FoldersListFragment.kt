@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
 import androidx.core.os.BundleCompat
@@ -224,7 +225,8 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
 
     private fun setSearchViewConfig(menu: Menu){
         val searchManager = context?.getSystemService(Context.SEARCH_SERVICE) as SearchManager
-        val searchView = menu.findItem(R.id.action_search).actionView as SearchView
+        val searchItem = menu.findItem(R.id.action_search)
+        val searchView = searchItem.actionView as SearchView
         searchView.setSearchableInfo(searchManager.getSearchableInfo(activity?.componentName))
         searchView.maxWidth = Int.MAX_VALUE
         searchView.imeOptions = searchView.imeOptions or EditorInfo.IME_FLAG_NO_EXTRACT_UI
@@ -246,19 +248,21 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                 )
         )
 
-        searchView.setOnQueryTextFocusChangeListener { _, hasFocus ->
-            // If keyboard is closed (hasFocus is false) and no text in search
-            if(!hasFocus && searchView.query.isNullOrBlank()) searchView.isIconified = true
+        val searchBackCallback = requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, false) {
+            searchItem.collapseActionView()
         }
 
-        view?.isFocusableInTouchMode = true
-        view?.setOnKeyListener { _, keyCode, _ ->
-            return@setOnKeyListener if(keyCode == KeyEvent.KEYCODE_BACK && !searchView.isIconified) {
-                // If search view is open, close it instead of closing the app
-                searchView.isIconified = true
-                true
-            } else false
-        }
+        searchItem.setOnActionExpandListener(object: MenuItem.OnActionExpandListener {
+            override fun onMenuItemActionExpand(item: MenuItem): Boolean {
+                searchBackCallback.isEnabled = true
+                return true
+            }
+
+            override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
+                searchBackCallback.isEnabled = false
+                return true
+            }
+        })
     }
 
     private fun setMessageContainer(visible: Boolean, message: String, icon: Int){
