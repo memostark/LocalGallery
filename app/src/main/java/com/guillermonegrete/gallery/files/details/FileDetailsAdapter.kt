@@ -2,7 +2,6 @@ package com.guillermonegrete.gallery.files.details
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,6 +31,8 @@ import io.reactivex.rxjava3.subjects.PublishSubject
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.abs
+import androidx.core.net.toUri
+import com.github.chrisbanes.photoview.PhotoView
 
 
 class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>(FileDiffCallback){
@@ -101,7 +102,7 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
     fun setSheet(visibility: Boolean) {
         if(visibility != isSheetVisible) {
             isSheetVisible = visibility
-            notifyDataSetChanged()
+            notifySheetChange()
         }
     }
 
@@ -218,7 +219,7 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
         private fun openLink(item: String){
             val intent = Intent().apply {
                 action = Intent.ACTION_VIEW
-                data = Uri.parse(item)
+                data = item.toUri()
             }
             itemView.context.startActivity(intent)
         }
@@ -236,17 +237,16 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
 
     inner class ImageViewHolder(itemView: View): ViewHolder(itemView){
 
-        private val fileImage: ImageView = itemView.findViewById(R.id.file_image)
+        private val fileImage: PhotoView = itemView.findViewById(R.id.file_image)
+        private val attacher: PhotoViewAttacher = PhotoViewAttacher(fileImage)
 
         init {
-            val attacher = PhotoViewAttacher(fileImage)
             attacher.setOnSingleFlingListener { e1, e2, _, velocityY ->
                 val diffY = e2.y - e1.y
                 val diffX = e2.x - e1.x
                 // Detects upwards vertical swipe (distance and speed are negative)
                 if (abs(diffY) > abs(diffX)) {
                     if (diffY < -SWIPE_THRESHOLD && velocityY < -SWIPE_VELOCITY_THRESHOLD) {
-                        // State is false, change to true so when it reaches the expanded state the new false state is processed
                         panelTouchSubject.onNext(BottomSheetBehavior.STATE_EXPANDED)
                         return@setOnSingleFlingListener true
                     }
@@ -266,9 +266,10 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
         }
 
         override fun updateLayout() {
-            fileImage.layoutParams = fileImage.layoutParams.apply {
-                height = if(isSheetVisible) ViewGroup.LayoutParams.WRAP_CONTENT else ViewGroup.LayoutParams.MATCH_PARENT
-            }
+            // When using the attacher, both it and the image have to be updated to get consistent behavior
+            val type = if(isSheetVisible) ImageView.ScaleType.FIT_START else ImageView.ScaleType.FIT_CENTER
+            attacher.scaleType = type
+            fileImage.scaleType = type
         }
     }
 
