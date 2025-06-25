@@ -266,28 +266,18 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
         override fun bind(file: File){
             super.bind(file)
             Glide.with(itemView.context)
-                .load("file.name")
+                .load(file.name)
                 .error(R.drawable.ic_image_24dp)
                 .listener(object: RequestListener<Drawable> {
 
                     @SuppressLint("ClickableViewAccessibility")
-                    override fun onLoadFailed(
-                        e: GlideException?,
-                        model: Any?,
-                        target: Target<Drawable?>,
-                        isFirstResource: Boolean
-                    ): Boolean {
+                    override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable?>, isFirstResource: Boolean): Boolean {
                         fileImage.post {
                             fileImage.isZoomable = false
                             fileImage.scaleType = ImageView.ScaleType.FIT_CENTER
 
                             val gesture = GestureDetector(fileImage.context, object: GestureDetector.SimpleOnGestureListener() {
-                                override fun onFling(
-                                    e1: MotionEvent?,
-                                    e2: MotionEvent,
-                                    velocityX: Float,
-                                    velocityY: Float
-                                ): Boolean {
+                                override fun onFling(e1: MotionEvent?, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
                                     e1 ?: return false
                                     val diffY = e2.y - e1.y
                                     val diffX = e2.x - e1.x
@@ -304,9 +294,7 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
                                 override fun onDown(e: MotionEvent) = true
                             })
                             fileImage.setOnTouchListener { _, event -> return@setOnTouchListener gesture.onTouchEvent(event) }
-
                         }
-
 
                         return false
                     }
@@ -317,9 +305,7 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
                         target: Target<Drawable?>?,
                         dataSource: DataSource,
                         isFirstResource: Boolean
-                    ): Boolean {
-                        return false
-                    }
+                    ) = false
 
                 })
                 .into(fileImage)
