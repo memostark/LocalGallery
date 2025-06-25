@@ -2,7 +2,10 @@ package com.guillermonegrete.gallery.files.details
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.drawable.Drawable
+import android.view.GestureDetector
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
@@ -16,7 +19,6 @@ import androidx.navigation.findNavController
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.github.chrisbanes.photoview.PhotoViewAttacher
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
@@ -32,6 +34,10 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.abs
 import androidx.core.net.toUri
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.github.chrisbanes.photoview.PhotoView
 
 
@@ -238,10 +244,9 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
     inner class ImageViewHolder(itemView: View): ViewHolder(itemView){
 
         private val fileImage: PhotoView = itemView.findViewById(R.id.file_image)
-        private val attacher: PhotoViewAttacher = PhotoViewAttacher(fileImage)
 
         init {
-            attacher.setOnSingleFlingListener { e1, e2, _, velocityY ->
+            fileImage.setOnSingleFlingListener { e1, e2, _, velocityY ->
                 val diffY = e2.y - e1.y
                 val diffX = e2.x - e1.x
                 // Detects upwards vertical swipe (distance and speed are negative)
@@ -253,7 +258,7 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
                 }
                 return@setOnSingleFlingListener false
             }
-            attacher.setOnViewTapListener { _, _, _ ->
+            fileImage.setOnViewTapListener { _, _, _ ->
                 onImageTapSubject.onNext(true)
             }
         }
@@ -261,14 +266,67 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
         override fun bind(file: File){
             super.bind(file)
             Glide.with(itemView.context)
-                .load(file.name)
+                .load("file.name")
+                .error(R.drawable.ic_image_24dp)
+                .listener(object: RequestListener<Drawable> {
+
+                    @SuppressLint("ClickableViewAccessibility")
+                    override fun onLoadFailed(
+                        e: GlideException?,
+                        model: Any?,
+                        target: Target<Drawable?>,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        fileImage.post {
+                            fileImage.isZoomable = false
+                            fileImage.scaleType = ImageView.ScaleType.FIT_CENTER
+
+                            val gesture = GestureDetector(fileImage.context, object: GestureDetector.SimpleOnGestureListener() {
+                                override fun onFling(
+                                    e1: MotionEvent?,
+                                    e2: MotionEvent,
+                                    velocityX: Float,
+                                    velocityY: Float
+                                ): Boolean {
+                                    e1 ?: return false
+                                    val diffY = e2.y - e1.y
+                                    val diffX = e2.x - e1.x
+                                    // Detects upwards vertical swipe (distance and speed are negative)
+                                    if (abs(diffY) > abs(diffX)) {
+                                        if (diffY < -SWIPE_THRESHOLD && velocityY < -SWIPE_VELOCITY_THRESHOLD) {
+                                            panelTouchSubject.onNext(BottomSheetBehavior.STATE_EXPANDED)
+                                            return true
+                                        }
+                                    }
+                                    return false
+                                }
+
+                                override fun onDown(e: MotionEvent) = true
+                            })
+                            fileImage.setOnTouchListener { _, event -> return@setOnTouchListener gesture.onTouchEvent(event) }
+
+                        }
+
+
+                        return false
+                    }
+
+                    override fun onResourceReady(
+                        resource: Drawable,
+                        model: Any,
+                        target: Target<Drawable?>?,
+                        dataSource: DataSource,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        return false
+                    }
+
+                })
                 .into(fileImage)
         }
 
         override fun updateLayout() {
-            // When using the attacher, both it and the image have to be updated to get consistent behavior
-            val type = if(isSheetVisible) ImageView.ScaleType.FIT_START else ImageView.ScaleType.FIT_CENTER
-            attacher.scaleType = type
+            val type = if(isSheetVisible && fileImage.isZoomable) ImageView.ScaleType.FIT_START else ImageView.ScaleType.FIT_CENTER
             fileImage.scaleType = type
         }
     }
