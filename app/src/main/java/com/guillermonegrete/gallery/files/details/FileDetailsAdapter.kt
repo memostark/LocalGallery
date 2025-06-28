@@ -241,25 +241,39 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     inner class ImageViewHolder(itemView: View): ViewHolder(itemView){
 
         private val fileImage: PhotoView = itemView.findViewById(R.id.file_image)
 
         init {
-            fileImage.setOnSingleFlingListener { e1, e2, _, velocityY ->
-                val diffY = e2.y - e1.y
-                val diffX = e2.x - e1.x
-                // Detects upwards vertical swipe (distance and speed are negative)
-                if (abs(diffY) > abs(diffX)) {
-                    if (diffY < -SWIPE_THRESHOLD && velocityY < -SWIPE_VELOCITY_THRESHOLD) {
-                        panelTouchSubject.onNext(BottomSheetBehavior.STATE_EXPANDED)
-                        return@setOnSingleFlingListener true
+            val gesture = GestureDetector(fileImage.context, object: GestureDetector.SimpleOnGestureListener() {
+                override fun onFling(e1: MotionEvent?, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
+                    e1 ?: return false
+                    val diffY = e2.y - e1.y
+                    val diffX = e2.x - e1.x
+                    // Detects upwards vertical swipe (distance and speed are negative)
+                    if (abs(diffY) > abs(diffX)) {
+                        if (diffY < -SWIPE_THRESHOLD && velocityY < -SWIPE_VELOCITY_THRESHOLD) {
+                            panelTouchSubject.onNext(BottomSheetBehavior.STATE_EXPANDED)
+                            return true
+                        }
                     }
+                    return false
                 }
-                return@setOnSingleFlingListener false
-            }
-            fileImage.setOnViewTapListener { _, _, _ ->
-                onImageTapSubject.onNext(true)
+
+                override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+                    onImageTapSubject.onNext(true)
+                    return true
+                }
+
+                override fun onDown(e: MotionEvent) = true
+            })
+
+            fileImage.setOnTouchListener { v, event ->
+                val imageHandled = fileImage.attacher.onTouch(v, event)
+                val gestureHandled = gesture.onTouchEvent(event)
+                return@setOnTouchListener imageHandled || gestureHandled
             }
         }
 
@@ -267,33 +281,13 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
             super.bind(file)
             Glide.with(itemView.context)
                 .load(file.name)
-                .error(R.drawable.ic_image_24dp)
                 .listener(object: RequestListener<Drawable> {
 
-                    @SuppressLint("ClickableViewAccessibility")
                     override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable?>, isFirstResource: Boolean): Boolean {
                         fileImage.post {
+                            fileImage.setImageResource(R.drawable.ic_image_24dp)
                             fileImage.isZoomable = false
                             fileImage.scaleType = ImageView.ScaleType.FIT_CENTER
-
-                            val gesture = GestureDetector(fileImage.context, object: GestureDetector.SimpleOnGestureListener() {
-                                override fun onFling(e1: MotionEvent?, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
-                                    e1 ?: return false
-                                    val diffY = e2.y - e1.y
-                                    val diffX = e2.x - e1.x
-                                    // Detects upwards vertical swipe (distance and speed are negative)
-                                    if (abs(diffY) > abs(diffX)) {
-                                        if (diffY < -SWIPE_THRESHOLD && velocityY < -SWIPE_VELOCITY_THRESHOLD) {
-                                            panelTouchSubject.onNext(BottomSheetBehavior.STATE_EXPANDED)
-                                            return true
-                                        }
-                                    }
-                                    return false
-                                }
-
-                                override fun onDown(e: MotionEvent) = true
-                            })
-                            fileImage.setOnTouchListener { _, event -> return@setOnTouchListener gesture.onTouchEvent(event) }
                         }
 
                         return false
@@ -305,7 +299,10 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
                         target: Target<Drawable?>?,
                         dataSource: DataSource,
                         isFirstResource: Boolean
-                    ) = false
+                    ) : Boolean {
+                        fileImage.post { fileImage.isZoomable = true }
+                        return false
+                    }
 
                 })
                 .into(fileImage)
