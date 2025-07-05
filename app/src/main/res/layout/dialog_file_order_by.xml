@@ -28,9 +28,11 @@
 
     <RadioGroup
         android:id="@+id/field_sort"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:checkedButton="@+id/radio_button_1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/order_sort"
         app:layout_constraintTop_toBottomOf="@+id/sort_by_label">
 
         <RadioButton
@@ -70,15 +72,17 @@
         android:text="@string/order"
         android:layout_marginBottom="8dp"
         android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/field_sort" />
+        app:layout_constraintStart_toStartOf="@id/order_sort"
+        app:layout_constraintTop_toBottomOf="@+id/done_button" />
 
     <RadioGroup
         android:id="@+id/order_sort"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:checkedButton="@+id/radio_button_1"
-        app:layout_constraintTop_toBottomOf="@+id/order_label">
+        app:layout_constraintTop_toBottomOf="@+id/order_label"
+        app:layout_constraintStart_toEndOf="@id/field_sort"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <RadioButton
             android:id="@+id/descending_order"
@@ -96,22 +100,29 @@
 
     </RadioGroup>
 
-    <androidx.core.widget.NestedScrollView
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrier_bottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="field_sort, order_sort" />
+
+    <com.guillermonegrete.gallery.common.views.MaxHeightNestedScrollView
         android:id="@+id/chip_scroll"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
+        android:layout_height="wrap_content"
+        app:maxHeight="200dp"
         android:paddingBottom="32dp"
         android:clipToPadding="false"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@+id/order_sort"
+        app:layout_constraintTop_toBottomOf="@+id/barrier_bottom"
         tools:visibility="visible">
 
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/tags_group"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:singleSelection="true"
-            app:layout_constraintTop_toBottomOf="@+id/order_sort">
+            app:singleSelection="true">
 
             <include layout="@layout/choice_chip"
                 android:visibility="gone"
@@ -119,6 +130,6 @@
 
         </com.google.android.material.chip.ChipGroup>
 
-    </androidx.core.widget.NestedScrollView>
+    </com.guillermonegrete.gallery.common.views.MaxHeightNestedScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
