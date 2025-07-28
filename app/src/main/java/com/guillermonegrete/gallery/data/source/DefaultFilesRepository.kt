@@ -35,11 +35,10 @@ class DefaultFilesRepository @Inject constructor(
         }
     }
 
-    override fun getPagedFiles(folder: Folder, tagId: Long, sort: String?): Flowable<PagingData<File>> {
-        return Pager(PagingConfig(pageSize = 20)) {
-            FilesPageSource(fileAPI, folder, sort, tagId)
+    override fun getPagedFiles(folder: Folder, tagIds: List<Long>, sort: String?)
+        = Pager(PagingConfig(pageSize = 20)) {
+            FilesPageSource(fileAPI, folder, sort, tagIds.ifEmpty { null })
         }.flowable
-    }
 
     override fun updateFolderCover(id: Long, fileId: Long) = foldersAPI.updateFolderCover(id, fileId)
 

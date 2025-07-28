@@ -33,7 +33,7 @@ class SortingDialog: BottomSheetDialogFragment() {
     private val disposable = CompositeDisposable()
 
     private var checkedOrder = Order.DEFAULT
-    private var checkedTagId = NO_TAG_ID
+    private var checkedTagIds = mutableSetOf<Long>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val binding = DialogFileOrderByBinding.inflate(inflater, container, false)
@@ -65,8 +65,8 @@ class SortingDialog: BottomSheetDialogFragment() {
 
             doneButton.setOnClickListener {
                 dismiss()
-                if(selections.field != checkedField || selections.sort != checkedOrder || selections.tagId != checkedTagId) {
-                    setFragmentResult(RESULT_KEY, bundleOf(SORT_KEY to SortDialogChecked(checkedField, checkedOrder, checkedTagId)))
+                if(selections.field != checkedField || selections.sort != checkedOrder || selections.tagIds != checkedTagIds) {
+                    setFragmentResult(RESULT_KEY, bundleOf(SORT_KEY to SortDialogChecked(checkedField, checkedOrder, checkedTagIds.toList())))
                 }
             }
 
@@ -83,13 +83,12 @@ class SortingDialog: BottomSheetDialogFragment() {
                                 val chip =  ChoiceChipBinding.inflate(LayoutInflater.from(context)).root
                                 val text = "${tag.name} (${tag.count})"
                                 chip.text = text
-                                if (tag.id == args.selections.tagId) {
-                                    checkedTagId = tag.id
+                                if (tag.id in args.selections.tagIds) {
+                                    checkedTagIds.add(tag.id)
                                     chip.isChecked = true
                                 }
                                 chip.setOnCheckedChangeListener { _, isChecked ->
-                                    if(isChecked) checkedTagId = tag.id
-                                    else if (checkedTagId == tag.id) checkedTagId = NO_TAG_ID // unselected
+                                    if (isChecked) checkedTagIds.add(tag.id) else checkedTagIds.remove(tag.id)
                                 }
                                 tagsGroup.addView(chip)
                             }
@@ -113,8 +112,6 @@ class SortingDialog: BottomSheetDialogFragment() {
     companion object{
         const val RESULT_KEY = "sort_dialog_result"
         const val SORT_KEY = "sort_key"
-
-        const val NO_TAG_ID = 0L
 
         /**
          * Used to indicate to get all the tags instead of just the tags of a specific folder
@@ -155,7 +152,7 @@ data class Field(val display: String, val id: Int): Parcelable
 data class SortDialogChecked(
     val field: SortField,
     val sort: Order,
-    val tagId: Long = 0L,
+    val tagIds: List<Long> = emptyList(),
 ): Parcelable {
 
     companion object{

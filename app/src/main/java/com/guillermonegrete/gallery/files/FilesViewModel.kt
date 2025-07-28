@@ -29,7 +29,7 @@ class FilesViewModel @Inject constructor(
 
     private val folderName: Subject<Folder> = PublishSubject.create()
     private val filter: BehaviorSubject<ListFilter> = BehaviorSubject.createDefault(ListFilter())
-    private val tag: BehaviorSubject<Long> = BehaviorSubject.createDefault(0L)
+    private val tags: BehaviorSubject<List<Long>> = BehaviorSubject.createDefault(emptyList())
     private val forceUpdate: Subject<Boolean> = BehaviorSubject.createDefault(true)
 
     /**
@@ -55,13 +55,13 @@ class FilesViewModel @Inject constructor(
 
     var width = 0
 
-    private val filesFlow = tag.distinctUntilChanged().switchMap { tagId ->
+    private val filesFlow = tags.distinctUntilChanged().switchMap { tagIds ->
         filter.distinctUntilChanged().switchMap { filter ->
             folderName.distinctUntilChanged().switchMap { folder ->
                 forceUpdate.switchMap {
                     dataSize = 0
                     val finalFilter = "${filter.sortType},${filter.order}"
-                    filesRepository.getPagedFiles(folder, tagId, finalFilter).toObservable()
+                    filesRepository.getPagedFiles(folder, tagIds, finalFilter).toObservable()
                 }
             }
         }
@@ -153,12 +153,12 @@ class FilesViewModel @Inject constructor(
         return filter.value
     }
 
-    fun setTag(tagId: Long){
-        tag.onNext(tagId)
+    fun setTag(tags: List<Long>){
+        this.tags.onNext(tags)
     }
 
-    fun getTag(): Long? {
-        return tag.value
+    fun getTags(): List<Long> {
+        return tags.value ?: emptyList()
     }
 
     fun setNewPos(pos: Int){

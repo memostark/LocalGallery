@@ -32,7 +32,6 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.common.Order
-import com.guillermonegrete.gallery.common.SortingDialog
 import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.databinding.FragmentFileDetailsBinding
@@ -89,7 +88,6 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
     private var checkedField = SortField.DEFAULT.field
     private var checkedOrder = Order.DEFAULT.oder
-    private var tagId = SortingDialog.NO_TAG_ID
 
     private val isAllFiles: Boolean
         get() = args.folder == Folder.NULL_FOLDER
@@ -100,7 +98,6 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
             checkedField = filter.sortType
             checkedOrder = filter.order
         }
-        viewModel.getTag()?.let { tagId = it }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
