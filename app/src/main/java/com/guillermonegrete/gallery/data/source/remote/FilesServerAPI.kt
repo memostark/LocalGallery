@@ -4,7 +4,10 @@ import com.guillermonegrete.gallery.data.FileResponse
 import com.guillermonegrete.gallery.data.GetFolderResponse
 import com.guillermonegrete.gallery.data.PagedFileResponse
 import io.reactivex.rxjava3.core.Single
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.HTTP
+import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -26,10 +29,10 @@ interface FilesServerAPI{
         @Query("size") size: Int = 30,
     ): Single<PagedFileResponse>
 
-    @GET("folders/{folderId}/tags/{tagId}")
+    @POST("folders/{folderId}/files")
     fun getPagedFilesByTag(
         @Path(value="folderId") folderId: Long,
-        @Path(value="tagId") tagId: Long,
+        @Body fileIds: List<Long>,
         @Query("page") page: Int,
         @Query("sort") sort: String? = null,
         @Query("size") size: Int = 30,
@@ -42,9 +45,9 @@ interface FilesServerAPI{
         @Query("size") size: Int = 30,
     ): Single<PagedFileResponse>
 
-    @GET("tags/{tagId}/files")
+    @POST("tags/files")
     fun getAllFilesByTag(
-        @Path(value="tagId") tagId: Long,
+        @Body fileIds: List<Long>,
         @Query("page") page: Int,
         @Query("sort") sort: String? = null,
         @Query("size") size: Int = 30,

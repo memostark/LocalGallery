@@ -62,7 +62,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
     // Default values for the checked items in the sorting dialog
     private var checkedField = SortField.DEFAULT
     private var checkedOrder = Order.DEFAULT
-    private var tagId = SortingDialog.NO_TAG_ID
+    private var tagIds = emptyList<Long>()
 
     private val isAllFiles: Boolean
         get() = args.folder == null
@@ -82,7 +82,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
             checkedField = sorting.field
             checkedOrder = sorting.sort
         }
-        tagId = viewModel.getTag() ?: SortingDialog.NO_TAG_ID
+        tagIds = viewModel.getTags()
         val newFilter = FilesViewModel.ListFilter(checkedField.field, checkedOrder.oder)
         viewModel.setFilter(newFilter)
     }
@@ -93,9 +93,9 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
             val result: SortDialogChecked = BundleCompat.getParcelable(bundle, SortingDialog.SORT_KEY, SortDialogChecked::class.java) ?: return@setFragmentResultListener
             checkedField = result.field
             checkedOrder = result.sort
-            tagId = result.tagId
+            tagIds = result.tagIds
 
-            viewModel.setTag(tagId)
+            viewModel.setTag(tagIds)
             val newFilter = FilesViewModel.ListFilter(checkedField.field, checkedOrder.oder)
             viewModel.setFilter(newFilter)
             // The sort for All Files is independent from the preference sort
@@ -235,7 +235,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
 
     private fun showSortDialog(id: Long) {
         val options = SortField.toDisplayArray(listOf(SortField.FILENAME, SortField.CREATED, SortField.MODIFIED))
-        val action = FilesListFragmentDirections.actionFilesToSortingDialog(options, SortDialogChecked(checkedField, checkedOrder, tagId), id)
+        val action = FilesListFragmentDirections.actionFilesToSortingDialog(options, SortDialogChecked(checkedField, checkedOrder, tagIds), id)
         findNavController().navigate(action)
     }
 
@@ -250,7 +250,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         if(state is LoadState.Error) Timber.e(state.error, "Error when loading files")
     }
 
-    private fun Fragment.getListWidth() = binding.filesList.width
+    private fun getListWidth() = binding.filesList.width
 
     private val actionModeCallback = object: ActionMode.Callback {
 
