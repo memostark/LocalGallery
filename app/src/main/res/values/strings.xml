@@ -65,4 +65,7 @@
     <string name="toggle_audio">toggle audio</string>
     <string name="add_tag_label">Type tag</string>
 
+    <!-- Sorting dialog-->
+    <string name="clear_tags">Clear tags</string>
+
 </resources>
