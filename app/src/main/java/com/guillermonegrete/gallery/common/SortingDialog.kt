@@ -70,6 +70,12 @@ class SortingDialog: BottomSheetDialogFragment() {
                 }
             }
 
+            clearTagsButton.setOnClickListener { tagsGroup.clearCheck() }
+
+            tagsGroup.setOnCheckedStateChangeListener { group, checkedIds ->
+                clearTagsButton.isVisible = checkedIds.isNotEmpty()
+            }
+
             // handle tags
             val folderId = args.folderId
             if(folderId != 0L) {
@@ -86,6 +92,7 @@ class SortingDialog: BottomSheetDialogFragment() {
                                 if (tag.id in args.selections.tagIds) {
                                     checkedTagIds.add(tag.id)
                                     chip.isChecked = true
+                                    clearTagsButton.isVisible = true
                                 }
                                 chip.setOnCheckedChangeListener { _, isChecked ->
                                     if (isChecked) checkedTagIds.add(tag.id) else checkedTagIds.remove(tag.id)
