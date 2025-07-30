@@ -10,26 +10,29 @@ import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.setFragmentResult
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.databinding.ChoiceChipBinding
 import com.guillermonegrete.gallery.databinding.DialogFileOrderByBinding
 import com.guillermonegrete.gallery.files.SortField
-import com.guillermonegrete.gallery.tags.TagRepository
 import dagger.hilt.android.AndroidEntryPoint
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import dagger.hilt.android.lifecycle.withCreationCallback
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.parcelize.Parcelize
 import timber.log.Timber
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class SortingDialog: BottomSheetDialogFragment() {
 
     private val args: SortingDialogArgs by navArgs()
 
-    @Inject lateinit var tagRepository: TagRepository
+    val viewModel: SortingDialogViewModel by viewModels(extrasProducer = {
+        defaultViewModelCreationExtras.withCreationCallback<SortingDialogViewModel.Factory> { factory ->
+            factory.create(args.folderId)
+        }
+    })
     private val disposable = CompositeDisposable()
 
     private var checkedOrder = Order.DEFAULT
@@ -79,15 +82,14 @@ class SortingDialog: BottomSheetDialogFragment() {
             // handle tags
             val folderId = args.folderId
             if(folderId != 0L) {
-                val tagSource = if(folderId == GET_ALL_TAGS) tagRepository.getTags() else tagRepository.getTags(folderId)
-                disposable.add(tagSource
-                    .observeOn(AndroidSchedulers.mainThread())
+                disposable.add(viewModel.tags
                     .subscribe(
                         { tags ->
                             chipScroll.isVisible = true
                             tags.forEach { tag ->
                                 val chip =  ChoiceChipBinding.inflate(LayoutInflater.from(context)).root
                                 val text = "${tag.name} (${tag.count})"
+                                chip.id = tag.id.toInt()
                                 chip.text = text
                                 if (tag.id in args.selections.tagIds) {
                                     checkedTagIds.add(tag.id)
@@ -100,7 +102,7 @@ class SortingDialog: BottomSheetDialogFragment() {
                                 tagsGroup.addView(chip)
                             }
                         },
-                        { Timber.e(it) }
+                        Timber::e
                     )
                 )
             }
