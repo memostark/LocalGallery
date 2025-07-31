@@ -35,31 +35,33 @@ class SortingDialog: BottomSheetDialogFragment() {
     })
     private val disposable = CompositeDisposable()
 
-    private var checkedOrder = Order.DEFAULT
     private var checkedTagIds = mutableSetOf<Long>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val binding = DialogFileOrderByBinding.inflate(inflater, container, false)
 
         with(binding){
-            fieldSort.removeAllViews()
 
-            args.options.map { option ->
-                val rb = RadioButton(ContextThemeWrapper(context, R.style.SortDialogRadioButton)).apply {
-                    text = option.display
-                    id = option.id
+            val options = args.options
+            if (options != null) {
+                fieldSort.removeAllViews()
+                options.map { option ->
+                    val rb = RadioButton(ContextThemeWrapper(context, R.style.SortDialogRadioButton)).apply {
+                        text = option.display
+                        id = option.id
+                    }
+                    fieldSort.addView(rb)
                 }
-                fieldSort.addView(rb)
             }
 
             val selections = args.selections
             var checkedField = selections.field
-            checkedOrder = selections.sort
-            fieldSort.check(checkedField.ordinal)
+            var checkedOrder = selections.sort
+            fieldSort.check(checkedField.id)
             orderSort.check(checkedOrder.id)
 
             fieldSort.setOnCheckedChangeListener { _, i ->
-                checkedField = SortField.fromInteger(i)
+                checkedField = SortField.fromId(i)
             }
 
             orderSort.setOnCheckedChangeListener { _, i ->

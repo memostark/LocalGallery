@@ -44,20 +44,6 @@
                 app:argType="com.guillermonegrete.gallery.data.Folder" />
         </action>
         <action
-            android:id="@+id/action_files_to_sorting_dialog"
-            app:destination="@id/sorting_dialog">
-            <argument
-                android:name="options"
-                app:argType="com.guillermonegrete.gallery.common.Field[]"/>
-            <argument
-                android:name="selections"
-                app:argType="com.guillermonegrete.gallery.common.SortDialogChecked"/>
-            <argument
-                android:name="folder_id"
-                android:defaultValue="0L"
-                app:argType="long"/>
-        </action>
-        <action
             android:id="@+id/action_files_to_addTagFragment"
             app:destination="@id/addTagFragment">
             <argument
@@ -115,11 +101,13 @@
         android:label="SortingDialog"
         tools:layout="@layout/dialog_file_order_by">
         <argument
-            android:name="options"
-            app:argType="com.guillermonegrete.gallery.common.Field[]"/>
-        <argument
             android:name="selections"
             app:argType="com.guillermonegrete.gallery.common.SortDialogChecked"/>
+        <argument
+            android:name="options"
+            android:defaultValue="@null"
+            app:nullable="true"
+            app:argType="com.guillermonegrete.gallery.common.Field[]"/>
         <argument
             android:name="folder_id"
             android:defaultValue="0L"
@@ -137,5 +125,9 @@
             android:name="tags"
             app:argType="com.guillermonegrete.gallery.data.Tag[]"/>
     </dialog>
+
+    <action
+        android:id="@+id/global_to_sorting_dialog"
+        app:destination="@id/sorting_dialog"/>
 
 </navigation>
