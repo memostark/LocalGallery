@@ -14,20 +14,6 @@
             android:id="@+id/open_file_details"
             app:destination="@id/file_details_dest"/>
         <action
-            android:id="@+id/action_files_to_sorting_dialog"
-            app:destination="@id/sorting_dialog">
-            <argument
-                android:name="options"
-                app:argType="com.guillermonegrete.gallery.common.Field[]"/>
-            <argument
-                android:name="selections"
-                app:argType="com.guillermonegrete.gallery.common.SortDialogChecked"/>
-            <argument
-                android:name="folder_id"
-                android:defaultValue="0L"
-                app:argType="long"/>
-        </action>
-        <action
             android:id="@+id/action_files_to_addTagFragment"
             app:destination="@id/addTagFragment">
             <argument

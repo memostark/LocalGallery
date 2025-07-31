@@ -22,6 +22,7 @@ import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.snackbar.Snackbar
+import com.guillermonegrete.gallery.NavGraphDirections
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.common.Order
 import com.guillermonegrete.gallery.common.SortDialogChecked
@@ -234,8 +235,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
     }
 
     private fun showSortDialog(id: Long) {
-        val options = SortField.toDisplayArray(listOf(SortField.FILENAME, SortField.CREATED, SortField.MODIFIED))
-        val action = FilesListFragmentDirections.actionFilesToSortingDialog(options, SortDialogChecked(checkedField, checkedOrder, tagIds), id)
+        val action = NavGraphDirections.globalToSortingDialog(SortDialogChecked(checkedField, checkedOrder, tagIds), folderId = id)
         findNavController().navigate(action)
     }
 

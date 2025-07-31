@@ -23,6 +23,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.GridLayoutManager
+import com.guillermonegrete.gallery.NavGraphDirections
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.common.Order
 import com.guillermonegrete.gallery.common.SortDialogChecked
@@ -106,7 +107,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                     }
                     R.id.action_sort -> {
                         val options = SortField.toDisplayArray(listOf(SortField.NAME, SortField.COUNT))
-                        val action = FoldersListFragmentDirections.actionFoldersToSortingDialog(options, SortDialogChecked(checkedField, checkedOrder))
+                        val action = NavGraphDirections.globalToSortingDialog( SortDialogChecked(checkedField, checkedOrder), options)
                         findNavController().navigate(action)
                         setFragmentResultListener(SortingDialog.RESULT_KEY) { _, bundle ->
                             // We use a String here, but any type that can be put in a Bundle is supported
