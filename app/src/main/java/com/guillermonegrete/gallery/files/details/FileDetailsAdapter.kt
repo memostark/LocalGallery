@@ -180,8 +180,8 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
             }
 
             val folder = file.folder
-            folderText.isVisible = folder != null
-            folderButton.isVisible = folder != null
+            folderText.isVisible = isAllFilesDest && folder != null
+            folderButton.isVisible = isAllFilesDest && folder != null
             if (folder != null) {
                 folderText.text = folder.name
                 folderButton.setOnClickListener {
