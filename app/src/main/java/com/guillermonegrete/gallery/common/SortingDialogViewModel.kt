@@ -24,19 +24,25 @@ class SortingDialogViewModel @AssistedInject constructor(
     private val disposable = CompositeDisposable()
 
     init {
-        loadTags(folderId)
+        if(folderId == SortingDialog.FOLDER_TAGS) {
+            loadFolderTags()
+        } else {
+            loadTags(folderId)
+        }
     }
 
-    fun loadTags(folderId: Long) {
+    private fun loadTags(folderId: Long) {
         val tagSource = if(folderId == GET_ALL_TAGS) tagRepository.getTags() else tagRepository.getTags(folderId)
         disposable.add(tagSource
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-                { tags ->
-                    this.tags.onNext(tags)
-                },
-                Timber::e
-            )
+            .subscribe(this.tags::onNext, Timber::e)
+        )
+    }
+
+    fun loadFolderTags() {
+        disposable.add(tagRepository.getFolderTags()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(this.tags::onNext, Timber::e)
         )
     }
 
