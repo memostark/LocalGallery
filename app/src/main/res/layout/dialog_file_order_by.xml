@@ -122,14 +122,40 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:maxHeight="200dp"
-        android:paddingBottom="32dp"
-        android:clipToPadding="false"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@+id/clear_tags_button"
         tools:visibility="visible">
 
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/tags_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <include layout="@layout/choice_chip"
+                android:visibility="gone"
+                tools:visibility="visible"/>
+
+        </com.google.android.material.chip.ChipGroup>
+
+    </com.guillermonegrete.gallery.common.views.MaxHeightNestedScrollView>
+
+    <View android:id="@+id/tags_separator"
+        app:layout_constraintTop_toBottomOf="@id/chip_scroll"
+        android:background="?colorOnSurface"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"/>
+
+    <com.guillermonegrete.gallery.common.views.MaxHeightNestedScrollView
+        android:id="@+id/folder_chip_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:maxHeight="200dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@+id/tags_separator"
+        tools:visibility="visible">
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/folder_tags_group"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 

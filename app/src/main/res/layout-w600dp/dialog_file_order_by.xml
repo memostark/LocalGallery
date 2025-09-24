@@ -121,8 +121,6 @@
         android:id="@+id/chip_scroll"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:paddingBottom="32dp"
-        android:clipToPadding="false"
         android:layout_marginStart="8dp"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@+id/done_button"
@@ -143,5 +141,37 @@
         </com.google.android.material.chip.ChipGroup>
 
     </androidx.core.widget.NestedScrollView>
+
+    <View android:id="@+id/tags_separator"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="?colorOnSurface"
+        app:layout_constraintTop_toBottomOf="@id/chip_scroll"
+        app:layout_constraintStart_toEndOf="@id/barrier_radio_groups"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <com.guillermonegrete.gallery.common.views.MaxHeightNestedScrollView
+        android:id="@+id/folder_chip_scroll"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="8dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@+id/tags_separator"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/barrier_radio_groups"
+        tools:visibility="visible">
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/folder_tags_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <include layout="@layout/choice_chip"
+                android:visibility="gone"
+                tools:visibility="visible"/>
+
+        </com.google.android.material.chip.ChipGroup>
+
+    </com.guillermonegrete.gallery.common.views.MaxHeightNestedScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

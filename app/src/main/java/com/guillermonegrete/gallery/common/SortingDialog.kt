@@ -14,6 +14,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.guillermonegrete.gallery.R
+import com.guillermonegrete.gallery.data.TagType
 import com.guillermonegrete.gallery.databinding.ChoiceChipBinding
 import com.guillermonegrete.gallery.databinding.DialogFileOrderByBinding
 import com.guillermonegrete.gallery.files.SortField
@@ -75,40 +76,55 @@ class SortingDialog: BottomSheetDialogFragment() {
                 }
             }
 
-            clearTagsButton.setOnClickListener { tagsGroup.clearCheck() }
+            clearTagsButton.setOnClickListener {
+                tagsGroup.clearCheck()
+                folderTagsGroup.clearCheck()
+            }
 
             tagsGroup.setOnCheckedStateChangeListener { group, checkedIds ->
-                clearTagsButton.isVisible = checkedIds.isNotEmpty()
+                clearTagsButton.isVisible = checkedIds.isNotEmpty() || folderTagsGroup.checkedChipIds.isNotEmpty()
+            }
+            folderTagsGroup.setOnCheckedStateChangeListener { group, checkedIds ->
+                clearTagsButton.isVisible = checkedIds.isNotEmpty() || tagsGroup.checkedChipIds.isNotEmpty()
             }
 
             // handle tags
             val folderId = args.folderId
-            if(folderId != 0L) {
-                disposable.add(viewModel.tags
-                    .subscribe(
-                        { tags ->
-                            chipScroll.isVisible = true
-                            tags.forEach { tag ->
-                                val chip =  ChoiceChipBinding.inflate(LayoutInflater.from(context)).root
-                                val text = "${tag.name} (${tag.count})"
-                                chip.id = tag.id.toInt()
-                                chip.text = text
-                                if (tag.id in args.selections.tagIds) {
-                                    checkedTagIds.add(tag.id)
-                                    chip.isChecked = true
-                                    clearTagsButton.isVisible = true
-                                }
-                                chip.setOnCheckedChangeListener { _, isChecked ->
-                                    if (isChecked) checkedTagIds.add(tag.id) else checkedTagIds.remove(tag.id)
-                                }
-                                tagsGroup.addView(chip)
-                            }
-                        },
-                        Timber::e
-                    )
-                )
-            }
+            val folderList = folderId == FOLDER_TAGS
+            val isSingleFolder = !folderList && folderId != GET_ALL_TAGS
 
+            var hasFileTag = false
+            var hasFolderTag = false
+
+            disposable.add(viewModel.tags
+                .subscribe(
+                    { tags ->
+                        chipScroll.isVisible = true
+                        folderChipScroll.isVisible = true
+                        tags.forEach { tag ->
+                            val chip =  ChoiceChipBinding.inflate(LayoutInflater.from(context)).root
+                            val isFileTag = tag.type == TagType.File
+                            if (isFileTag) hasFileTag = true else hasFolderTag = true
+                            val text = if (folderList || isFileTag) "${tag.name} (${tag.count})" else tag.name
+                            chip.id = tag.id.toInt()
+                            chip.text = text
+                            if (tag.id in args.selections.tagIds) {
+                                checkedTagIds.add(tag.id)
+                                chip.isChecked = true
+                                clearTagsButton.isVisible = true
+                            }
+                            // All file tags are checkable and folder tags are only not checkable when viewing a single folder
+                            chip.isCheckable = isFileTag || !isSingleFolder
+                            chip.setOnCheckedChangeListener { _, isChecked ->
+                                if (isChecked) checkedTagIds.add(tag.id) else checkedTagIds.remove(tag.id)
+                            }
+                            if (isFileTag) tagsGroup.addView(chip) else folderTagsGroup.addView(chip)
+                        }
+                        tagsSeparator.isVisible = hasFileTag && hasFolderTag
+                    },
+                    Timber::e
+                )
+            )
         }
 
 
@@ -128,6 +144,7 @@ class SortingDialog: BottomSheetDialogFragment() {
          * Used to indicate to get all the tags instead of just the tags of a specific folder
          */
         const val GET_ALL_TAGS = -1L
+        const val FOLDER_TAGS = 0L
     }
 }
 

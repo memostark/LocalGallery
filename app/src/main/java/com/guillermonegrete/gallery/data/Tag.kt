@@ -2,6 +2,7 @@ package com.guillermonegrete.gallery.data
 
 import android.os.Parcel
 import android.os.Parcelable
+import com.squareup.moshi.Json
 import kotlinx.parcelize.Parceler
 import kotlinx.parcelize.Parcelize
 import java.util.*
@@ -12,6 +13,8 @@ data class Tag(
     val creationDate: Date,
     val id: Long,
 ): Parcelable {
+
+    @Json(name = "tag_type") var type: TagType? = null
     /**
      * The amount of files in the folder that have this tag applied.
      */
@@ -23,11 +26,21 @@ data class Tag(
             parcel.writeString(name)
             parcel.writeLong(creationDate.time)
             parcel.writeLong(id)
-            parcel.writeLong(count)
+            parcel.writeString(type?.name)
         }
 
         override fun create(parcel: Parcel)
-            = Tag(parcel.readString() ?: "", Date(parcel.readLong()), parcel.readLong())
-                .apply { count = parcel.readLong() }
+            = Tag(parcel.readString() ?: "", Date(parcel.readLong()),  parcel.readLong())
+                .apply {
+                    val typeText = parcel.readString()
+                    type = if (typeText != null) TagType.valueOf(typeText) else null
+                    count = parcel.readLong()
+                }
     }
 }
+
+enum class TagType{
+    Folder,
+    File,
+}
+

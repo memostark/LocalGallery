@@ -22,4 +22,7 @@ interface TagService {
 
     @DELETE("/files/{fileId}/tags/{tagId}")
     fun deleteTagFromFile(@Path("fileId") fileId: Long, @Path("tagId") tagId: Long) : Completable
+
+    @GET("/tags/folders")
+    fun getFolderTags(): Single<Set<Tag>>
 }
