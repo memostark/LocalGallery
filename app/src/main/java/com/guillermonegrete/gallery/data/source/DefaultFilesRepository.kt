@@ -22,9 +22,9 @@ class DefaultFilesRepository @Inject constructor(
         return fileAPI.getFolders()
     }
 
-    override fun getPagedFolders(query: String?, sort: String?): Flowable<PagingData<Folder>> {
+    override fun getPagedFolders(tagIds: List<Long>, query: String?, sort: String?): Flowable<PagingData<Folder>> {
         return Pager(PagingConfig(pageSize = 20)) {
-            FoldersPageSource(foldersAPI, query, sort)
+            FoldersPageSource(foldersAPI, query, sort, tagIds.ifEmpty { null })
         }.flowable
     }
 

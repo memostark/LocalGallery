@@ -58,6 +58,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
 
     private lateinit var checkedField: SortField
     private lateinit var checkedOrder: Order
+    private var tagIds = emptyList<Long>()
 
     private val disposable = CompositeDisposable()
 
@@ -73,6 +74,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             val newCoverUrl = bundle.getString(FileDetailsFragment.COVER_URL_KEY) ?: return@setFragmentResultListener
             updateFolderItem(newCoverUrl)
         }
+        tagIds = viewModel.getTags()
     }
 
     override fun onAttach(context: Context) {
@@ -107,15 +109,18 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                     }
                     R.id.action_sort -> {
                         val options = SortField.toDisplayArray(listOf(SortField.NAME, SortField.COUNT))
-                        val action = NavGraphDirections.globalToSortingDialog( SortDialogChecked(checkedField, checkedOrder), options)
+                        val action = NavGraphDirections.globalToSortingDialog( SortDialogChecked(checkedField, checkedOrder, tagIds), options)
                         findNavController().navigate(action)
                         setFragmentResultListener(SortingDialog.RESULT_KEY) { _, bundle ->
                             // We use a String here, but any type that can be put in a Bundle is supported
                             val result = BundleCompat.getParcelable(bundle, SortingDialog.SORT_KEY, SortDialogChecked::class.java) ?: return@setFragmentResultListener
                             checkedField = result.field
                             checkedOrder = result.sort
+                            tagIds = result.tagIds
 
-                            viewModel.updateSort(checkedField.field, checkedOrder.oder)
+                            val filter = FoldersViewModel.ListFilter(checkedField.field, checkedOrder.oder)
+                            viewModel.updateSort(filter)
+                            viewModel.setTag(result.tagIds)
                         }
                         true
                     }

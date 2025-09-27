@@ -26,7 +26,7 @@ class FakeFilesRepository: FilesRepository {
         return Single.just(GetFolderResponse("Name", foldersServiceData))
     }
 
-    override fun getPagedFolders(query: String?, sort: String?): Flowable<PagingData<Folder>> {
+    override fun getPagedFolders(tagIds: List<Long>, query: String?, sort: String?): Flowable<PagingData<Folder>> {
         return Flowable.just(PagingData.from(foldersServiceData))
     }
 
@@ -38,7 +38,7 @@ class FakeFilesRepository: FilesRepository {
 
     override fun getPagedFiles(
         folder: Folder,
-        tagId: Long,
+        tagIds: List<Long>,
         sort: String?
     ): Flowable<PagingData<File>> {
         TODO("Not yet implemented")
