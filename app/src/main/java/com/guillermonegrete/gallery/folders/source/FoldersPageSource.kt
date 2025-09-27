@@ -9,15 +9,21 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 class FoldersPageSource(
     private val foldersAPI: FoldersAPI,
     private val query: String?,
-    private val sort: String?
+    private val sort: String?,
+    private val tagIds: List<Long>?,
 ): RxPagingSource<Int, Folder>()  {
 
     override fun loadSingle(params: LoadParams<Int>): Single<LoadResult<Int, Folder>> {
         val nextPageNumber = params.key ?: 0
-        return foldersAPI.getFolders(nextPageNumber, query, sort)
+        return getFolderSource(nextPageNumber)
             .subscribeOn(Schedulers.io())
             .map { toLoadResult(it, nextPageNumber) }
             .onErrorReturn { LoadResult.Error(it) }
+    }
+
+    private fun getFolderSource(nextPageNumber: Int): Single<PagedFolderResponse> {
+        val tags = tagIds
+        return if (tags == null) foldersAPI.getFolders(nextPageNumber, query, sort) else foldersAPI.getPagedFoldersByTags(tags,nextPageNumber, query, sort)
     }
 
     private fun toLoadResult(response: PagedFolderResponse, nextPageNumber: Int): LoadResult<Int, Folder> {

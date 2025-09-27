@@ -5,8 +5,10 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.insertSeparators
 import androidx.paging.map
 import androidx.paging.rxjava3.cachedIn
+import com.guillermonegrete.gallery.common.Order
 import com.guillermonegrete.gallery.data.source.FilesRepository
 import com.guillermonegrete.gallery.data.source.SettingsRepository
+import com.guillermonegrete.gallery.files.SortField
 import com.guillermonegrete.gallery.folders.models.FolderUI
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.BackpressureStrategy
@@ -28,23 +30,26 @@ class FoldersViewModel @Inject constructor(
 
     private var searchQuery: Subject<String> = BehaviorSubject.createDefault("")
 
-    private val sort: Subject<String> = PublishSubject.create()
+    private val sort: Subject<ListFilter> = BehaviorSubject.createDefault(ListFilter())
+    private val tags: BehaviorSubject<List<Long>> = BehaviorSubject.createDefault(emptyList())
 
     var folderSelection = -1
 
-    val pagedFolders = sort.distinctUntilChanged().switchMap { filter ->
-        searchQuery.distinctUntilChanged().switchMap { query ->
-            val finalQuery = query.ifEmpty { null }
-            forceUpdate.switchMap {
-                filesRepository.getPagedFolders(finalQuery, filter)
-                    .map { pagingData ->
-                        pagingData.map { folder -> FolderUI.Model(folder) }
-                            .insertSeparators { before: FolderUI.Model?, after: FolderUI.Model? ->
-                                if (before == null && after != null)
-                                    return@insertSeparators FolderUI.HeaderModel(after.title ?: "")
-                                return@insertSeparators null
-                            }
-                    }.toObservable()
+    val pagedFolders = tags.distinctUntilChanged().switchMap { tagIds ->
+        sort.distinctUntilChanged().switchMap { filter ->
+            searchQuery.distinctUntilChanged().switchMap { query ->
+                val finalQuery = query.ifEmpty { null }
+                forceUpdate.switchMap {
+                    filesRepository.getPagedFolders(tagIds, finalQuery, "${filter.sortType},${filter.order}")
+                        .map { pagingData ->
+                            pagingData.map { folder -> FolderUI.Model(folder) }
+                                .insertSeparators { before: FolderUI.Model?, after: FolderUI.Model? ->
+                                    if (before == null && after != null)
+                                        return@insertSeparators FolderUI.HeaderModel(after.title ?: "")
+                                    return@insertSeparators null
+                                }
+                        }.toObservable()
+                }
             }
         }
     }.toFlowable(BackpressureStrategy.LATEST).cachedIn(viewModelScope)
@@ -60,7 +65,8 @@ class FoldersViewModel @Inject constructor(
         } else {
             urlAvailable.onNext(true)
             val sorting = settings.getFolderSort()
-            sort.onNext("${sorting.field.field},${sorting.sort.oder}")
+            val filter = ListFilter(sorting.field.field, sorting.sort.oder)
+            sort.onNext(filter)
         }
     }
 
@@ -72,7 +78,8 @@ class FoldersViewModel @Inject constructor(
         } else {
             urlAvailable.onNext(true)
             val sorting = settings.getFolderSort()
-            sort.onNext("${sorting.field.field},${sorting.sort.oder}")
+            val filter = ListFilter(sorting.field.field, sorting.sort.oder)
+            sort.onNext(filter)
         }
     }
 
@@ -80,9 +87,17 @@ class FoldersViewModel @Inject constructor(
         searchQuery.onNext(query.toString())
     }
 
-    fun updateSort(field: String, order: String) {
-        settings.setFolderSort(field, order)
-        sort.onNext("$field,$order")
+    fun updateSort(filter: ListFilter) {
+        settings.setFolderSort(filter.sortType, filter.order)
+        sort.onNext(filter)
+    }
+
+    fun setTag(tags: List<Long>){
+        this.tags.onNext(tags)
+    }
+
+    fun getTags(): List<Long> {
+        return tags.value ?: emptyList()
     }
 
     fun refresh(){
@@ -92,4 +107,9 @@ class FoldersViewModel @Inject constructor(
     fun setAutoplayVideo(checked: Boolean) {
         settings.setAutoPlayVideo(checked)
     }
+
+    data class ListFilter(
+        val sortType: String = SortField.DEFAULT_FOLDER.field,
+        val order: String = Order.DESC.oder,
+    )
 }
