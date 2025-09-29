@@ -159,6 +159,20 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+            <com.google.android.material.chip.Chip
+                android:id="@+id/add_tag_btn"
+                style="@style/Widget.Material3.Chip.Assist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_tag"
+                app:textStartPadding="@dimen/chip_text_padding"
+                app:textEndPadding="@dimen/chip_text_padding"
+                app:chipIcon="@drawable/ic_baseline_add_24"
+                app:chipIconTint="?colorOnSurface"
+                app:ensureMinTouchTargetSize="true"
+                android:visibility="gone"
+                tools:visibility="visible"/>
+
             <include layout="@layout/choice_chip"
                 android:visibility="gone"
                 tools:visibility="visible"/>
