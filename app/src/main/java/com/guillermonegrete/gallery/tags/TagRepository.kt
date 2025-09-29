@@ -13,9 +13,13 @@ interface TagRepository {
 
     fun addTag(fileId: Long, tag: Tag): Single<Tag>
 
+    fun addFolderTag(fileId: Long, tag: Tag): Single<Tag>
+
     fun addTagToFiles(tagId: Long, fileIds: List<Long>): Single<List<FileResponse>>
 
     fun deleteTagFromFile(fileId: Long, id: Long): Completable
+
+    fun deleteTagFromFolder(folderId: Long, id: Long): Completable
 
     fun getFolderTags(): Single<Set<Tag>>
 }

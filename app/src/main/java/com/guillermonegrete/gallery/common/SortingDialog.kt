@@ -11,9 +11,12 @@ import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.guillermonegrete.gallery.NavGraphDirections
 import com.guillermonegrete.gallery.R
+import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.data.TagType
 import com.guillermonegrete.gallery.databinding.ChoiceChipBinding
 import com.guillermonegrete.gallery.databinding.DialogFileOrderByBinding
@@ -96,6 +99,13 @@ class SortingDialog: BottomSheetDialogFragment() {
             var hasFileTag = false
             var hasFolderTag = false
 
+            val folderTagIds = mutableListOf<Tag>()
+            binding.addTagBtn.isVisible = isSingleFolder
+            binding.addTagBtn.setOnClickListener {
+                val action = NavGraphDirections.globalToAddTagFragment(longArrayOf(folderId), folderTagIds.toTypedArray(), TagType.Folder)
+                findNavController().navigate(action)
+            }
+
             disposable.add(viewModel.tags
                 .subscribe(
                     { tags ->
@@ -104,7 +114,12 @@ class SortingDialog: BottomSheetDialogFragment() {
                         tags.forEach { tag ->
                             val chip =  ChoiceChipBinding.inflate(LayoutInflater.from(context)).root
                             val isFileTag = tag.type == TagType.File
-                            if (isFileTag) hasFileTag = true else hasFolderTag = true
+                            if (isFileTag) {
+                                hasFileTag = true
+                            } else {
+                                hasFolderTag = true
+                                folderTagIds.add(tag)
+                            }
                             val text = if (folderList || isFileTag) "${tag.name} (${tag.count})" else tag.name
                             chip.id = tag.id.toInt()
                             chip.text = text

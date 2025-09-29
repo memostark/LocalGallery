@@ -17,11 +17,17 @@ interface TagService {
     @POST("/files/{id}/tags")
     fun addTag(@Path("id") id: Long, @Body tag: Tag): Single<Tag>
 
+    @POST("/folders/{id}/tags")
+    fun addFolderTag(@Path("id") id: Long, @Body tag: Tag): Single<Tag>
+
     @POST("/tags/{id}/files")
     fun addTagToFiles(@Path("id") id: Long, @Body fileIds: List<Long>): Single<List<FileResponse>>
 
     @DELETE("/files/{fileId}/tags/{tagId}")
     fun deleteTagFromFile(@Path("fileId") fileId: Long, @Path("tagId") tagId: Long) : Completable
+
+    @DELETE("/folders/{folderId}/tags/{tagId}")
+    fun deleteTagFromFolder(@Path("folderId") folderId: Long, @Path("tagId") tagId: Long) : Completable
 
     @GET("/tags/folders")
     fun getFolderTags(): Single<Set<Tag>>

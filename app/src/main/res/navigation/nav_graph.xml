@@ -124,10 +124,18 @@
         <argument
             android:name="tags"
             app:argType="com.guillermonegrete.gallery.data.Tag[]"/>
+        <argument
+            android:name="tag_type"
+            app:argType="com.guillermonegrete.gallery.data.TagType"
+            android:defaultValue="File"/>
     </dialog>
 
     <action
         android:id="@+id/global_to_sorting_dialog"
         app:destination="@id/sorting_dialog"/>
+
+    <action
+        android:id="@+id/global_to_addTagFragment"
+        app:destination="@id/addTagFragment"/>
 
 </navigation>

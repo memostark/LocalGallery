@@ -15,12 +15,22 @@ class AddTagViewModel @Inject constructor (private val tagRepository: TagReposit
 
     fun getAllTags() = tagRepository.getTags()
 
+    fun getFolderTags() = tagRepository.getFolderTags()
+
     fun addTag(id: Long, tag: Tag): Single<Tag> =
         tagRepository.addTag(id, tag)
         .doOnSuccess { appliedTags.add(it) }
 
+    fun addFolderTag(id: Long, tag: Tag): Single<Tag> =
+        tagRepository.addFolderTag(id, tag)
+            .doOnSuccess { appliedTags.add(it) }
+
     fun deleteTagFromFile(fileId: Long, tag: Tag): Completable =
         tagRepository.deleteTagFromFile(fileId, tag.id)
+            .doOnComplete { appliedTags.remove(tag) }
+
+    fun deleteTagFromFolder(folderId: Long, tag: Tag): Completable =
+        tagRepository.deleteTagFromFolder(folderId, tag.id)
             .doOnComplete { appliedTags.remove(tag) }
 
     fun addTagToFiles(id: Long, fileIds: List<Long>) = tagRepository.addTagToFiles(id, fileIds)

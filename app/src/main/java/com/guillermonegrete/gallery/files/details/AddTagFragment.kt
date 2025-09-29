@@ -17,6 +17,7 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.snackbar.Snackbar
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.Tag
+import com.guillermonegrete.gallery.data.TagType
 import com.guillermonegrete.gallery.databinding.FragmentAddTagBinding
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -53,7 +54,8 @@ class AddTagFragment: BottomSheetDialogFragment() {
         _binding = FragmentAddTagBinding.inflate(inflater, container, false)
 
         // if the origin destination is the files, it means this is a file multi selection
-        singleSelect = findNavController().previousBackStackEntry?.destination?.id == R.id.file_details_dest
+        val previousDest = findNavController().previousBackStackEntry?.destination?.id
+        singleSelect = previousDest == R.id.file_details_dest || previousDest == R.id.sorting_dialog
 
         setupViewModel()
 
@@ -160,7 +162,8 @@ class AddTagFragment: BottomSheetDialogFragment() {
     private fun setupViewModel() {
         viewModel.appliedTags.addAll(args.tags)
 
-        disposable.add(viewModel.getAllTags()
+        val tagSource = if (args.tagType == TagType.File) viewModel.getAllTags() else viewModel.getFolderTags()
+        disposable.add(tagSource
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 {
@@ -179,8 +182,9 @@ class AddTagFragment: BottomSheetDialogFragment() {
     private fun addChip(tag: Tag, fileId: Long) {
         val tagsGroup = binding.tagsGroup
 
-        disposable.add(viewModel
-            .addTag(fileId, tag)
+        val tagTarget =
+            if (args.tagType == TagType.File) viewModel.addTag(fileId, tag) else viewModel.addFolderTag(fileId, tag)
+        disposable.add(tagTarget
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({ newTag ->
                 // Creates and adds chip view
@@ -203,8 +207,8 @@ class AddTagFragment: BottomSheetDialogFragment() {
 
     private fun removeChip(chipView: View, tag: Tag, fileId: Long) {
 
-        disposable.add(
-            viewModel.deleteTagFromFile(fileId, tag)
+        val tagTarget = if (args.tagType == TagType.File) viewModel.deleteTagFromFile(fileId, tag) else viewModel.deleteTagFromFolder(fileId, tag)
+        disposable.add(tagTarget
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
                     binding.tagsGroup.removeView(chipView)
