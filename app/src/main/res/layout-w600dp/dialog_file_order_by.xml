@@ -188,4 +188,21 @@
 
     </com.guillermonegrete.gallery.common.views.MaxHeightNestedScrollView>
 
+    <com.guillermonegrete.gallery.common.views.MaxHeightNestedScrollView
+        android:id="@+id/compose_chip_scroll"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="8dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@+id/folder_chip_scroll"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/barrier_radio_groups"
+        tools:visibility="visible">
+
+        <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/compose_root"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+    </com.guillermonegrete.gallery.common.views.MaxHeightNestedScrollView>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
