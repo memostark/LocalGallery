@@ -3,10 +3,34 @@ package com.guillermonegrete.gallery.common
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.LayoutInflater
+import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RadioButton
 import androidx.appcompat.view.ContextThemeWrapper
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.InputChip
+import androidx.compose.material3.InputChipDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.paint
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.setFragmentResult
@@ -25,7 +49,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.withCreationCallback
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.parcelize.Parcelize
+import okhttp3.internal.notify
 import timber.log.Timber
+import java.util.Calendar
+import java.util.Date
 
 @AndroidEntryPoint
 class SortingDialog: BottomSheetDialogFragment() {
@@ -106,11 +133,14 @@ class SortingDialog: BottomSheetDialogFragment() {
                 findNavController().navigate(action)
             }
 
+            val tagsState = mutableStateListOf<Tag>()
+
             disposable.add(viewModel.tags
                 .subscribe(
                     { tags ->
                         chipScroll.isVisible = true
                         folderChipScroll.isVisible = true
+                        val folderTags = mutableListOf<Tag>()
                         tags.forEach { tag ->
                             val chip =  ChoiceChipBinding.inflate(LayoutInflater.from(context)).root
                             val isFileTag = tag.type == TagType.File
@@ -133,13 +163,32 @@ class SortingDialog: BottomSheetDialogFragment() {
                             chip.setOnCheckedChangeListener { _, isChecked ->
                                 if (isChecked) checkedTagIds.add(tag.id) else checkedTagIds.remove(tag.id)
                             }
-                            if (isFileTag) tagsGroup.addView(chip) else folderTagsGroup.addView(chip)
+                            if (isFileTag) tagsGroup.addView(chip) else folderTags.add(tag)
                         }
+                        tagsState.clear()
+                        tagsState.addAll(folderTags)
                         tagsSeparator.isVisible = hasFileTag && hasFolderTag
                     },
                     Timber::e
                 )
             )
+
+            composeRoot.apply {
+                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+                setContent {
+                    Surface {
+                        TagGroup(
+                            tagsState.toList(),
+                            isSingleFolder,
+                            onAddClicked = {
+                                val action = NavGraphDirections.globalToAddTagFragment(longArrayOf(folderId), folderTagIds.toTypedArray(), TagType.Folder)
+                                findNavController().navigate(action)
+                            },
+                            onSelectionChanged = {}
+                        )
+                    }
+                }
+            }
         }
 
 
@@ -201,5 +250,55 @@ data class SortDialogChecked(
     companion object{
         val DEFAULT_FILE = SortDialogChecked(SortField.DEFAULT, Order.DEFAULT)
         val DEFAULT_FOLDER = SortDialogChecked(SortField.DEFAULT_FOLDER, Order.DEFAULT)
+    }
+}
+
+@Composable
+fun TagGroup(
+    tags: List<Tag>,
+    canAddTag: Boolean,
+    onAddClicked: () -> Unit,
+    onSelectionChanged: (List<Long>) -> Unit
+) {
+    val selectedTags = remember { mutableStateListOf<Long>() }
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp),) {
+        if (canAddTag) {
+            AssistChip(
+                onClick = onAddClicked,
+                label = { Text("Add tag") },
+                leadingIcon = {
+                    Icon(
+                        Icons.Filled.Add,
+                        contentDescription = "Add tag",
+                        Modifier.size(AssistChipDefaults.IconSize)
+                    )
+                },
+            )
+        }
+
+        tags.forEach { tag ->
+            val isSelected = selectedTags.contains(tag.id)
+            FilterChip(
+                onClick = {
+                    if (isSelected) {
+                        selectedTags.remove(tag.id)
+                    } else {
+                        selectedTags.add(tag.id)
+                    }
+                    onSelectionChanged(selectedTags.toList())
+                },
+                label = { Text(tag.name) },
+                selected = isSelected,
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun TagGroupPreview() {
+    val tags = listOf(Tag("Test", Date(), 0), Tag("Test 2", Date(), 1))
+    Surface {
+        TagGroup(tags, true, onAddClicked = {} , onSelectionChanged = {})
     }
 }
