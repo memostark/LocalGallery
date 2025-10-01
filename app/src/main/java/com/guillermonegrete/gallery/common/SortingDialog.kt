@@ -3,7 +3,6 @@ package com.guillermonegrete.gallery.common
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.LayoutInflater
-import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RadioButton
@@ -14,21 +13,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
-import androidx.compose.material3.InputChip
-import androidx.compose.material3.InputChipDefaults
+import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.paint
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
@@ -45,13 +44,12 @@ import com.guillermonegrete.gallery.data.TagType
 import com.guillermonegrete.gallery.databinding.ChoiceChipBinding
 import com.guillermonegrete.gallery.databinding.DialogFileOrderByBinding
 import com.guillermonegrete.gallery.files.SortField
+import com.guillermonegrete.gallery.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.withCreationCallback
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.parcelize.Parcelize
-import okhttp3.internal.notify
 import timber.log.Timber
-import java.util.Calendar
 import java.util.Date
 
 @AndroidEntryPoint
@@ -106,16 +104,12 @@ class SortingDialog: BottomSheetDialogFragment() {
                 }
             }
 
+            val selectedTags = args.selections.tagIds.toMutableStateList()
+
             clearTagsButton.setOnClickListener {
                 tagsGroup.clearCheck()
-                folderTagsGroup.clearCheck()
-            }
-
-            tagsGroup.setOnCheckedStateChangeListener { group, checkedIds ->
-                clearTagsButton.isVisible = checkedIds.isNotEmpty() || folderTagsGroup.checkedChipIds.isNotEmpty()
-            }
-            folderTagsGroup.setOnCheckedStateChangeListener { group, checkedIds ->
-                clearTagsButton.isVisible = checkedIds.isNotEmpty() || tagsGroup.checkedChipIds.isNotEmpty()
+                checkedTagIds.clear()
+                selectedTags.clear()
             }
 
             // handle tags
@@ -125,13 +119,6 @@ class SortingDialog: BottomSheetDialogFragment() {
 
             var hasFileTag = false
             var hasFolderTag = false
-
-            val folderTagIds = mutableListOf<Tag>()
-            binding.addTagBtn.isVisible = isSingleFolder
-            binding.addTagBtn.setOnClickListener {
-                val action = NavGraphDirections.globalToAddTagFragment(longArrayOf(folderId), folderTagIds.toTypedArray(), TagType.Folder)
-                findNavController().navigate(action)
-            }
 
             val tagsState = mutableStateListOf<Tag>()
 
@@ -148,7 +135,7 @@ class SortingDialog: BottomSheetDialogFragment() {
                                 hasFileTag = true
                             } else {
                                 hasFolderTag = true
-                                folderTagIds.add(tag)
+                                folderTags.add(tag)
                             }
                             val text = if (folderList || isFileTag) "${tag.name} (${tag.count})" else tag.name
                             chip.id = tag.id.toInt()
@@ -162,8 +149,9 @@ class SortingDialog: BottomSheetDialogFragment() {
                             chip.isCheckable = isFileTag || !isSingleFolder
                             chip.setOnCheckedChangeListener { _, isChecked ->
                                 if (isChecked) checkedTagIds.add(tag.id) else checkedTagIds.remove(tag.id)
+                                clearTagsButton.isVisible = checkedTagIds.isNotEmpty()
                             }
-                            if (isFileTag) tagsGroup.addView(chip) else folderTags.add(tag)
+                            if (isFileTag) tagsGroup.addView(chip)
                         }
                         tagsState.clear()
                         tagsState.addAll(folderTags)
@@ -176,15 +164,26 @@ class SortingDialog: BottomSheetDialogFragment() {
             composeRoot.apply {
                 setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
                 setContent {
-                    Surface {
+                    AppTheme {
                         TagGroup(
                             tagsState.toList(),
+                            selectedTags.toList(),
                             isSingleFolder,
+                            folderList,
                             onAddClicked = {
-                                val action = NavGraphDirections.globalToAddTagFragment(longArrayOf(folderId), folderTagIds.toTypedArray(), TagType.Folder)
+                                val action = NavGraphDirections.globalToAddTagFragment(longArrayOf(folderId), tagsState.toTypedArray(), TagType.Folder)
                                 findNavController().navigate(action)
                             },
-                            onSelectionChanged = {}
+                            onCheckedStateChange = { id, isChecked ->
+                                if (isChecked) {
+                                    checkedTagIds.add(id)
+                                    selectedTags.add(id)
+                                } else {
+                                    checkedTagIds.remove(id)
+                                    selectedTags.remove(id)
+                                }
+                                clearTagsButton.isVisible = checkedTagIds.isNotEmpty()
+                            }
                         )
                     }
                 }
@@ -256,40 +255,62 @@ data class SortDialogChecked(
 @Composable
 fun TagGroup(
     tags: List<Tag>,
+    selectedTags: List<Long>,
     canAddTag: Boolean,
-    onAddClicked: () -> Unit,
-    onSelectionChanged: (List<Long>) -> Unit
+    showCount: Boolean = false,
+    onAddClicked: () -> Unit = {},
+    onSelectionChanged: (List<Long>) -> Unit = {},
+    onCheckedStateChange: (id: Long, isChecked: Boolean) -> Unit = {_, _ -> },
 ) {
-    val selectedTags = remember { mutableStateListOf<Long>() }
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp),) {
+    val selectedTags = remember(selectedTags) { selectedTags.toMutableStateList() }
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         if (canAddTag) {
+            val icon = tags.isNotEmpty()
             AssistChip(
                 onClick = onAddClicked,
-                label = { Text("Add tag") },
+                label = {
+                    val text = if (icon) "" else stringResource(R.string.add_tag)
+                    Text(text)
+                },
                 leadingIcon = {
                     Icon(
-                        Icons.Filled.Add,
+                        if (icon) Icons.Filled.Edit else Icons.Filled.Add,
                         contentDescription = "Add tag",
                         Modifier.size(AssistChipDefaults.IconSize)
                     )
                 },
+                modifier = if (icon)
+                    Modifier.padding(vertical = 8.dp) // This value is the default padding for AssistChip
+                        .size(AssistChipDefaults.Height)
+                else Modifier
             )
         }
 
         tags.forEach { tag ->
             val isSelected = selectedTags.contains(tag.id)
-            FilterChip(
-                onClick = {
-                    if (isSelected) {
-                        selectedTags.remove(tag.id)
-                    } else {
-                        selectedTags.add(tag.id)
-                    }
-                    onSelectionChanged(selectedTags.toList())
-                },
-                label = { Text(tag.name) },
-                selected = isSelected,
-            )
+            if (canAddTag) {
+                SuggestionChip(
+                    onClick = {},
+                    label = { Text(tag.name) }
+                )
+            } else {
+                FilterChip(
+                    onClick = {
+                        if (isSelected) {
+                            selectedTags.remove(tag.id)
+                        } else {
+                            selectedTags.add(tag.id)
+                        }
+                        onSelectionChanged(selectedTags.toList())
+                        onCheckedStateChange(tag.id, !isSelected)
+                    },
+                    label = {
+                        val text = if (showCount) "${tag.name} (${tag.count})" else tag.name
+                        Text(text)
+                    },
+                    selected = isSelected,
+                )
+            }
         }
     }
 }
@@ -299,6 +320,14 @@ fun TagGroup(
 fun TagGroupPreview() {
     val tags = listOf(Tag("Test", Date(), 0), Tag("Test 2", Date(), 1))
     Surface {
-        TagGroup(tags, true, onAddClicked = {} , onSelectionChanged = {})
+        TagGroup(tags, listOf(0), true, onAddClicked = {} , onSelectionChanged = {})
+    }
+}
+
+@Preview
+@Composable
+fun TagGroupEmptyPreview() {
+    Surface {
+        TagGroup(emptyList(), emptyList(), true, onAddClicked = {} , onSelectionChanged = {})
     }
 }
