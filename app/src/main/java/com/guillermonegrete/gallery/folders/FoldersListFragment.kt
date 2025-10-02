@@ -74,6 +74,18 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             val newCoverUrl = bundle.getString(FileDetailsFragment.COVER_URL_KEY) ?: return@setFragmentResultListener
             updateFolderItem(newCoverUrl)
         }
+
+        setFragmentResultListener(SortingDialog.RESULT_KEY) { _, bundle ->
+            // We use a String here, but any type that can be put in a Bundle is supported
+            val result = BundleCompat.getParcelable(bundle, SortingDialog.SORT_KEY, SortDialogChecked::class.java) ?: return@setFragmentResultListener
+            checkedField = result.field
+            checkedOrder = result.sort
+            tagIds = result.tagIds
+
+            val filter = FoldersViewModel.ListFilter(checkedField.field, checkedOrder.oder)
+            viewModel.updateSort(filter)
+            viewModel.setTag(result.tagIds)
+        }
         tagIds = viewModel.getTags()
     }
 
@@ -111,17 +123,6 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                         val options = SortField.toDisplayArray(listOf(SortField.NAME, SortField.COUNT))
                         val action = NavGraphDirections.globalToSortingDialog( SortDialogChecked(checkedField, checkedOrder, tagIds), options)
                         findNavController().navigate(action)
-                        setFragmentResultListener(SortingDialog.RESULT_KEY) { _, bundle ->
-                            // We use a String here, but any type that can be put in a Bundle is supported
-                            val result = BundleCompat.getParcelable(bundle, SortingDialog.SORT_KEY, SortDialogChecked::class.java) ?: return@setFragmentResultListener
-                            checkedField = result.field
-                            checkedOrder = result.sort
-                            tagIds = result.tagIds
-
-                            val filter = FoldersViewModel.ListFilter(checkedField.field, checkedOrder.oder)
-                            viewModel.updateSort(filter)
-                            viewModel.setTag(result.tagIds)
-                        }
                         true
                     }
                     R.id.night_mode_menu_item -> {
