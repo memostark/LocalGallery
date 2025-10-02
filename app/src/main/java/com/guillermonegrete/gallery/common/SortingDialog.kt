@@ -11,9 +11,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.FilterChip
@@ -24,9 +21,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -104,14 +103,6 @@ class SortingDialog: BottomSheetDialogFragment() {
                 }
             }
 
-            val selectedTags = args.selections.tagIds.toMutableStateList()
-
-            clearTagsButton.setOnClickListener {
-                tagsGroup.clearCheck()
-                checkedTagIds.clear()
-                selectedTags.clear()
-            }
-
             // handle tags
             val folderId = args.folderId
             val folderList = folderId == FOLDER_TAGS
@@ -133,29 +124,29 @@ class SortingDialog: BottomSheetDialogFragment() {
                             val isFileTag = tag.type == TagType.File
                             if (isFileTag) {
                                 hasFileTag = true
+                                val text = if (folderList) "${tag.name} (${tag.count})" else tag.name
+                                chip.id = tag.id.toInt()
+                                chip.text = text
+                                if (tag.id in args.selections.tagIds) {
+                                    checkedTagIds.add(tag.id)
+                                    chip.isChecked = true
+                                    clearTagsButton.isVisible = true
+                                }
+                                // All file tags are checkable and folder tags are only not checkable when viewing a single folder
+                                chip.isCheckable = !isSingleFolder
+                                chip.setOnCheckedChangeListener { _, isChecked ->
+                                    if (isChecked) checkedTagIds.add(tag.id) else checkedTagIds.remove(tag.id)
+                                    clearTagsButton.isVisible = checkedTagIds.isNotEmpty()
+                                }
+                                tagsGroup.addView(chip)
                             } else {
                                 hasFolderTag = true
                                 folderTags.add(tag)
                             }
-                            val text = if (folderList || isFileTag) "${tag.name} (${tag.count})" else tag.name
-                            chip.id = tag.id.toInt()
-                            chip.text = text
-                            if (tag.id in args.selections.tagIds) {
-                                checkedTagIds.add(tag.id)
-                                chip.isChecked = true
-                                clearTagsButton.isVisible = true
-                            }
-                            // All file tags are checkable and folder tags are only not checkable when viewing a single folder
-                            chip.isCheckable = isFileTag || !isSingleFolder
-                            chip.setOnCheckedChangeListener { _, isChecked ->
-                                if (isChecked) checkedTagIds.add(tag.id) else checkedTagIds.remove(tag.id)
-                                clearTagsButton.isVisible = checkedTagIds.isNotEmpty()
-                            }
-                            if (isFileTag) tagsGroup.addView(chip)
                         }
                         tagsState.clear()
                         tagsState.addAll(folderTags)
-                        tagsSeparator.isVisible = hasFileTag && hasFolderTag
+                        tagsSeparator.isVisible = hasFileTag && (hasFolderTag || isSingleFolder) // single folder always has the add tag chip
                     },
                     Timber::e
                 )
@@ -164,6 +155,17 @@ class SortingDialog: BottomSheetDialogFragment() {
             composeRoot.apply {
                 setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
                 setContent {
+                    val selectedTags = rememberSaveable { args.selections.tagIds.toMutableStateList() }
+
+                    clearTagsButton.setOnClickListener {
+                        tagsGroup.clearCheck()
+                        checkedTagIds.clear()
+                        selectedTags.clear()
+                        clearTagsButton.isVisible = false
+                    }
+                    checkedTagIds.addAll(selectedTags.toList())
+                    clearTagsButton.isVisible = checkedTagIds.isNotEmpty()
+
                     AppTheme {
                         TagGroup(
                             tagsState.toList(),
@@ -263,6 +265,7 @@ fun TagGroup(
     onCheckedStateChange: (id: Long, isChecked: Boolean) -> Unit = {_, _ -> },
 ) {
     val selectedTags = remember(selectedTags) { selectedTags.toMutableStateList() }
+//    Timber.d("Current tags param: $selectedTagsIds, internal: ${selectedTags.toList()}")
     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         if (canAddTag) {
             val icon = tags.isNotEmpty()
@@ -274,7 +277,7 @@ fun TagGroup(
                 },
                 leadingIcon = {
                     Icon(
-                        if (icon) Icons.Filled.Edit else Icons.Filled.Add,
+                        painterResource(if (icon) R.drawable.ic_baseline_edit_24 else R.drawable.ic_baseline_add_24),
                         contentDescription = "Add tag",
                         Modifier.size(AssistChipDefaults.IconSize)
                     )
