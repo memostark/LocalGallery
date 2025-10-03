@@ -29,9 +29,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.setFragmentResult
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -43,6 +45,7 @@ import com.guillermonegrete.gallery.data.TagType
 import com.guillermonegrete.gallery.databinding.ChoiceChipBinding
 import com.guillermonegrete.gallery.databinding.DialogFileOrderByBinding
 import com.guillermonegrete.gallery.files.SortField
+import com.guillermonegrete.gallery.files.details.AddTagFragment
 import com.guillermonegrete.gallery.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.withCreationCallback
@@ -64,6 +67,17 @@ class SortingDialog: BottomSheetDialogFragment() {
     private val disposable = CompositeDisposable()
 
     private var checkedTagIds = mutableSetOf<Long>()
+
+    private val tagsState = mutableStateListOf<Tag>()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setFragmentResultListener(AddTagFragment.REQUEST_KEY) { _, result ->
+            val newTags = BundleCompat.getParcelableArrayList(result, AddTagFragment.TAGS_KEY, Tag::class.java) ?: return@setFragmentResultListener
+            tagsState.clear()
+            tagsState.addAll(newTags)
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val binding = DialogFileOrderByBinding.inflate(inflater, container, false)
@@ -110,8 +124,6 @@ class SortingDialog: BottomSheetDialogFragment() {
 
             var hasFileTag = false
             var hasFolderTag = false
-
-            val tagsState = mutableStateListOf<Tag>()
 
             disposable.add(viewModel.tags
                 .subscribe(
