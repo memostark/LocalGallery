@@ -30,6 +30,7 @@ import com.guillermonegrete.gallery.common.SortDialogChecked
 import com.guillermonegrete.gallery.common.SortingDialog
 import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.source.SettingsRepository
+import com.guillermonegrete.gallery.data.source.remote.FilterTags
 import com.guillermonegrete.gallery.databinding.FragmentFoldersListBinding
 import com.guillermonegrete.gallery.files.SortField
 import com.guillermonegrete.gallery.files.details.FileDetailsFragment
@@ -93,11 +94,11 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             val result = BundleCompat.getParcelable(bundle, SortingDialog.SORT_KEY, SortDialogChecked::class.java) ?: return@setFragmentResultListener
             checkedField = result.field
             checkedOrder = result.sort
-            tagIds = result.tagIds
+            tagIds = result.tags.folderTagIds
 
             val filter = FoldersViewModel.ListFilter(checkedField.field, checkedOrder.oder)
             viewModel.updateSort(filter)
-            viewModel.setTag(result.tagIds)
+            viewModel.setTag(tagIds)
         }
 
         _binding = FragmentFoldersListBinding.bind(view)
@@ -122,7 +123,10 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                     }
                     R.id.action_sort -> {
                         val options = SortField.toDisplayArray(listOf(SortField.NAME, SortField.COUNT))
-                        val action = NavGraphDirections.globalToSortingDialog( SortDialogChecked(checkedField, checkedOrder, tagIds), options)
+                        val selections = SortDialogChecked(checkedField, checkedOrder,
+                            FilterTags(folderTagIds = tagIds)
+                        )
+                        val action = NavGraphDirections.globalToSortingDialog(selections, options)
                         findNavController().navigate(action)
                         true
                     }

@@ -7,6 +7,7 @@ import androidx.paging.rxjava3.flowable
 import com.guillermonegrete.gallery.data.*
 import com.guillermonegrete.gallery.data.source.remote.FilesPageSource
 import com.guillermonegrete.gallery.data.source.remote.FilesServerAPI
+import com.guillermonegrete.gallery.data.source.remote.FilterTags
 import com.guillermonegrete.gallery.folders.source.FoldersAPI
 import com.guillermonegrete.gallery.folders.source.FoldersPageSource
 import io.reactivex.rxjava3.core.Flowable
@@ -35,9 +36,10 @@ class DefaultFilesRepository @Inject constructor(
         }
     }
 
-    override fun getPagedFiles(folder: Folder, tagIds: List<Long>, sort: String?)
+    override fun getPagedFiles(folder: Folder, tagIds: FilterTags, sort: String?)
         = Pager(PagingConfig(pageSize = 20)) {
-            FilesPageSource(fileAPI, folder, sort, tagIds.ifEmpty { null })
+            val tags = if (tagIds.folderTagIds.isEmpty() && tagIds.fileTagIds.isEmpty()) null else tagIds
+            FilesPageSource(fileAPI, folder, sort, tags)
         }.flowable
 
     override fun updateFolderCover(id: Long, fileId: Long) = foldersAPI.updateFolderCover(id, fileId)

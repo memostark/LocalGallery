@@ -42,8 +42,10 @@ import com.guillermonegrete.gallery.NavGraphDirections
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.data.TagType
+import com.guillermonegrete.gallery.data.source.remote.FilterTags
 import com.guillermonegrete.gallery.databinding.ChoiceChipBinding
 import com.guillermonegrete.gallery.databinding.DialogFileOrderByBinding
+import com.guillermonegrete.gallery.databinding.FragmentFoldersListBinding
 import com.guillermonegrete.gallery.files.SortField
 import com.guillermonegrete.gallery.files.details.AddTagFragment
 import com.guillermonegrete.gallery.ui.theme.AppTheme
@@ -57,6 +59,9 @@ import java.util.Date
 @AndroidEntryPoint
 class SortingDialog: BottomSheetDialogFragment() {
 
+    private  var _binding: DialogFileOrderByBinding? = null
+    private val binding get() = _binding!!
+
     private val args: SortingDialogArgs by navArgs()
 
     val viewModel: SortingDialogViewModel by viewModels(extrasProducer = {
@@ -66,7 +71,8 @@ class SortingDialog: BottomSheetDialogFragment() {
     })
     private val disposable = CompositeDisposable()
 
-    private var checkedTagIds = mutableSetOf<Long>()
+    private var checkedFileTagIds = mutableSetOf<Long>()
+    private var checkedFolderTagIds = mutableSetOf<Long>()
 
     private val tagsState = mutableStateListOf<Tag>()
 
@@ -80,7 +86,7 @@ class SortingDialog: BottomSheetDialogFragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val binding = DialogFileOrderByBinding.inflate(inflater, container, false)
+        _binding = DialogFileOrderByBinding.inflate(inflater, container, false)
 
         with(binding){
 
@@ -112,8 +118,10 @@ class SortingDialog: BottomSheetDialogFragment() {
 
             doneButton.setOnClickListener {
                 dismiss()
-                if(selections.field != checkedField || selections.sort != checkedOrder || selections.tagIds != checkedTagIds) {
-                    setFragmentResult(RESULT_KEY, bundleOf(SORT_KEY to SortDialogChecked(checkedField, checkedOrder, checkedTagIds.toList())))
+                val tags = FilterTags(checkedFileTagIds.toList(), checkedFolderTagIds.toList())
+                if(selections.field != checkedField || selections.sort != checkedOrder || selections.tags != tags) {
+                    val formValues = SortDialogChecked(checkedField, checkedOrder, tags)
+                    setFragmentResult(RESULT_KEY, bundleOf(SORT_KEY to formValues))
                 }
             }
 
@@ -136,19 +144,17 @@ class SortingDialog: BottomSheetDialogFragment() {
                             val isFileTag = tag.type == TagType.File
                             if (isFileTag) {
                                 hasFileTag = true
-                                val text = if (folderList) "${tag.name} (${tag.count})" else tag.name
+                                val text = "${tag.name} (${tag.count})"
                                 chip.id = tag.id.toInt()
                                 chip.text = text
-                                if (tag.id in args.selections.tagIds) {
-                                    checkedTagIds.add(tag.id)
+                                if (tag.id in args.selections.tags.fileTagIds) {
+                                    checkedFileTagIds.add(tag.id)
                                     chip.isChecked = true
                                     clearTagsButton.isVisible = true
                                 }
-                                // All file tags are checkable and folder tags are only not checkable when viewing a single folder
-                                chip.isCheckable = !isSingleFolder
                                 chip.setOnCheckedChangeListener { _, isChecked ->
-                                    if (isChecked) checkedTagIds.add(tag.id) else checkedTagIds.remove(tag.id)
-                                    clearTagsButton.isVisible = checkedTagIds.isNotEmpty()
+                                    if (isChecked) checkedFileTagIds.add(tag.id) else checkedFileTagIds.remove(tag.id)
+                                    updateClearButton()
                                 }
                                 tagsGroup.addView(chip)
                             } else {
@@ -167,16 +173,17 @@ class SortingDialog: BottomSheetDialogFragment() {
             composeRoot.apply {
                 setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
                 setContent {
-                    val selectedTags = rememberSaveable { args.selections.tagIds.toMutableStateList() }
+                    val selectedTags = rememberSaveable { args.selections.tags.folderTagIds.toMutableStateList() }
 
                     clearTagsButton.setOnClickListener {
                         tagsGroup.clearCheck()
-                        checkedTagIds.clear()
+                        checkedFileTagIds.clear()
+                        checkedFolderTagIds.clear()
                         selectedTags.clear()
                         clearTagsButton.isVisible = false
                     }
-                    checkedTagIds.addAll(selectedTags.toList())
-                    clearTagsButton.isVisible = checkedTagIds.isNotEmpty()
+                    checkedFolderTagIds.addAll(selectedTags.toList())
+                    updateClearButton()
 
                     AppTheme {
                         TagGroup(
@@ -190,13 +197,13 @@ class SortingDialog: BottomSheetDialogFragment() {
                             },
                             onCheckedStateChange = { id, isChecked ->
                                 if (isChecked) {
-                                    checkedTagIds.add(id)
+                                    checkedFolderTagIds.add(id)
                                     selectedTags.add(id)
                                 } else {
-                                    checkedTagIds.remove(id)
+                                    checkedFolderTagIds.remove(id)
                                     selectedTags.remove(id)
                                 }
-                                clearTagsButton.isVisible = checkedTagIds.isNotEmpty()
+                                updateClearButton()
                             }
                         )
                     }
@@ -208,8 +215,13 @@ class SortingDialog: BottomSheetDialogFragment() {
         return binding.root
     }
 
+    fun updateClearButton() {
+        binding.clearTagsButton.isVisible = checkedFileTagIds.isNotEmpty() || checkedFolderTagIds.isNotEmpty()
+    }
+
     override fun onDestroyView() {
         disposable.clear()
+        _binding = null
         super.onDestroyView()
     }
 
@@ -257,7 +269,7 @@ data class Field(val display: String, val id: Int): Parcelable
 data class SortDialogChecked(
     val field: SortField,
     val sort: Order,
-    val tagIds: List<Long> = emptyList(),
+    val tags: FilterTags = FilterTags(),
 ): Parcelable {
 
     companion object{
@@ -277,7 +289,7 @@ fun TagGroup(
     onCheckedStateChange: (id: Long, isChecked: Boolean) -> Unit = {_, _ -> },
 ) {
     val selectedTags = remember(selectedTags) { selectedTags.toMutableStateList() }
-//    Timber.d("Current tags param: $selectedTagsIds, internal: ${selectedTags.toList()}")
+
     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         if (canAddTag) {
             val icon = tags.isNotEmpty()
