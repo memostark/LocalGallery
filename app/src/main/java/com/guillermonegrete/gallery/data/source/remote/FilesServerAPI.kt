@@ -1,12 +1,13 @@
 package com.guillermonegrete.gallery.data.source.remote
 
+import android.os.Parcelable
 import com.guillermonegrete.gallery.data.FileResponse
 import com.guillermonegrete.gallery.data.GetFolderResponse
 import com.guillermonegrete.gallery.data.PagedFileResponse
 import io.reactivex.rxjava3.core.Single
+import kotlinx.parcelize.Parcelize
 import retrofit2.http.Body
 import retrofit2.http.GET
-import retrofit2.http.HTTP
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -45,11 +46,17 @@ interface FilesServerAPI{
         @Query("size") size: Int = 30,
     ): Single<PagedFileResponse>
 
-    @POST("tags/files")
-    fun getAllFilesByTag(
-        @Body fileIds: List<Long>,
+    @POST("files")
+    fun getAllFilesByTags(
+        @Body fileIds: FilterTags,
         @Query("page") page: Int,
         @Query("sort") sort: String? = null,
         @Query("size") size: Int = 30,
     ): Single<PagedFileResponse>
 }
+
+@Parcelize
+data class FilterTags(
+    val fileTagIds: List<Long> = emptyList(),
+    val folderTagIds: List<Long> = emptyList()
+) : Parcelable

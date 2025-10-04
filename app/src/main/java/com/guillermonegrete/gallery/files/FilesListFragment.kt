@@ -30,6 +30,7 @@ import com.guillermonegrete.gallery.common.SortingDialog
 import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.data.source.SettingsRepository
+import com.guillermonegrete.gallery.data.source.remote.FilterTags
 import com.guillermonegrete.gallery.databinding.FragmentFilesListBinding
 import com.guillermonegrete.gallery.files.details.AddTagFragment
 import com.guillermonegrete.gallery.folders.MainActivity
@@ -63,7 +64,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
     // Default values for the checked items in the sorting dialog
     private var checkedField = SortField.DEFAULT
     private var checkedOrder = Order.DEFAULT
-    private var tagIds = emptyList<Long>()
+    private var tagIds = FilterTags()
 
     private val isAllFiles: Boolean
         get() = args.folder == null
@@ -94,7 +95,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
             val result: SortDialogChecked = BundleCompat.getParcelable(bundle, SortingDialog.SORT_KEY, SortDialogChecked::class.java) ?: return@setFragmentResultListener
             checkedField = result.field
             checkedOrder = result.sort
-            tagIds = result.tagIds
+            tagIds = result.tags
 
             viewModel.setTag(tagIds)
             val newFilter = FilesViewModel.ListFilter(checkedField.field, checkedOrder.oder)

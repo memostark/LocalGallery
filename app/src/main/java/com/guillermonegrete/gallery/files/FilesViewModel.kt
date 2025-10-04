@@ -10,6 +10,7 @@ import com.guillermonegrete.gallery.data.File
 import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.source.FilesRepository
 import com.guillermonegrete.gallery.data.source.SettingsRepository
+import com.guillermonegrete.gallery.data.source.remote.FilterTags
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Observable
@@ -29,7 +30,7 @@ class FilesViewModel @Inject constructor(
 
     private val folderName: Subject<Folder> = PublishSubject.create()
     private val filter: BehaviorSubject<ListFilter> = BehaviorSubject.createDefault(ListFilter())
-    private val tags: BehaviorSubject<List<Long>> = BehaviorSubject.createDefault(emptyList())
+    private val tags = BehaviorSubject.createDefault(FilterTags())
     private val forceUpdate: Subject<Boolean> = BehaviorSubject.createDefault(true)
 
     /**
@@ -153,12 +154,12 @@ class FilesViewModel @Inject constructor(
         return filter.value
     }
 
-    fun setTag(tags: List<Long>){
+    fun setTag(tags: FilterTags){
         this.tags.onNext(tags)
     }
 
-    fun getTags(): List<Long> {
-        return tags.value ?: emptyList()
+    fun getTags(): FilterTags {
+        return tags.value ?: FilterTags()
     }
 
     fun setNewPos(pos: Int){

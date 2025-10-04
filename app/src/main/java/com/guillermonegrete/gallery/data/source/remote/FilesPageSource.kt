@@ -10,7 +10,7 @@ class FilesPageSource(
     private val filesApi: FilesServerAPI,
     private val folder: Folder,
     private val sort: String?,
-    private val tagIds: List<Long>?
+    private val tagIds: FilterTags?
 ): RxPagingSource<Int, File>() {
 
     override fun loadSingle(params: LoadParams<Int>): Single<LoadResult<Int, File>> {
@@ -28,9 +28,9 @@ class FilesPageSource(
     private fun getFilesSource(nextPageNumber: Int): Single<PagedFileResponse> {
         val tags = tagIds
         return if(folder.name.isNotEmpty()) {
-            if (tags == null) filesApi.getPagedFiles(folder.name, nextPageNumber, sort) else filesApi.getPagedFilesByTag(folder.id, tags, nextPageNumber, sort)
+            if (tags == null) filesApi.getPagedFiles(folder.name, nextPageNumber, sort) else filesApi.getPagedFilesByTag(folder.id, tags.fileTagIds, nextPageNumber, sort)
         } else {
-            if (tags == null) filesApi.getAllFiles(nextPageNumber, sort) else filesApi.getAllFilesByTag(tags, nextPageNumber, sort)
+            if (tags == null) filesApi.getAllFiles(nextPageNumber, sort) else filesApi.getAllFilesByTags(tags, nextPageNumber, sort)
         }
     }
 
