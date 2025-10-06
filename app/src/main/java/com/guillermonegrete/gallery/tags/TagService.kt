@@ -29,6 +29,9 @@ interface TagService {
     @DELETE("/folders/{folderId}/tags/{tagId}")
     fun deleteTagFromFolder(@Path("folderId") folderId: Long, @Path("tagId") tagId: Long) : Completable
 
+    @GET("/tags/files")
+    fun getFileTags(): Single<Set<Tag>>
+
     @GET("/tags/folders")
     fun getFolderTags(): Single<Set<Tag>>
 }
