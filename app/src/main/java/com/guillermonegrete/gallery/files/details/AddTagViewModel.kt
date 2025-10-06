@@ -13,7 +13,7 @@ class AddTagViewModel @Inject constructor (private val tagRepository: TagReposit
 
     val appliedTags = mutableSetOf<Tag>()
 
-    fun getAllTags() = tagRepository.getTags()
+    fun getFileTags() = tagRepository.getFileTags()
 
     fun getFolderTags() = tagRepository.getFolderTags()
 

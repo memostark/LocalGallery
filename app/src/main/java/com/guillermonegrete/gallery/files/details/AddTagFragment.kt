@@ -162,7 +162,7 @@ class AddTagFragment: BottomSheetDialogFragment() {
     private fun setupViewModel() {
         viewModel.appliedTags.addAll(args.tags)
 
-        val tagSource = if (args.tagType == TagType.File) viewModel.getAllTags() else viewModel.getFolderTags()
+        val tagSource = if (args.tagType == TagType.File) viewModel.getFileTags() else viewModel.getFolderTags()
         disposable.add(tagSource
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(

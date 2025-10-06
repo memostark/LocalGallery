@@ -21,5 +21,7 @@ interface TagRepository {
 
     fun deleteTagFromFolder(folderId: Long, id: Long): Completable
 
+    fun getFileTags(): Single<Set<Tag>>
+
     fun getFolderTags(): Single<Set<Tag>>
 }
