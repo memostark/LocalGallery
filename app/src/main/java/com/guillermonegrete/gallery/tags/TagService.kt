@@ -11,8 +11,8 @@ interface TagService {
     @GET("/tags")
     fun getAllTags(): Single<Set<Tag>>
 
-    @GET("folders/{id}/tags")
-    fun getFolderTags(@Path("id") id: Long): Single<Set<Tag>>
+    @GET("folders/{folderId}/tags")
+    fun getTags(@Path("folderId") folderId: Long): Single<Set<Tag>>
 
     @POST("/files/{id}/tags")
     fun addTag(@Path("id") id: Long, @Body tag: Tag): Single<Tag>
@@ -34,4 +34,7 @@ interface TagService {
 
     @GET("/tags/folders")
     fun getFolderTags(): Single<Set<Tag>>
+
+    @GET("/tags/folders/{folderId}")
+    fun getFolderTags(@Path("folderId") folderId: Long): Single<Set<Tag>>
 }

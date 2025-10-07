@@ -54,7 +54,7 @@
     <!-- File details-->
     <string name="created">Created:</string>
     <string name="modified">Modified:</string>
-    <string name="edit_tags">edit tags</string>
+    <string name="edit_tags">Edit tags</string>
     <string name="cover_btn_description">set as cover</string>
 
     <!-- Server search-->

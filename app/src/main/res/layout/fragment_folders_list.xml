@@ -25,6 +25,11 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
+        <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/compose_root"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
         <LinearLayout
             android:id="@+id/message_container"
             android:layout_width="wrap_content"

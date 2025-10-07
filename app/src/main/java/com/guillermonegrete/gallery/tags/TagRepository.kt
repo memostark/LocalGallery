@@ -24,4 +24,6 @@ interface TagRepository {
     fun getFileTags(): Single<Set<Tag>>
 
     fun getFolderTags(): Single<Set<Tag>>
+
+    fun getFolderTags(folderId: Long): Single<Set<Tag>>
 }

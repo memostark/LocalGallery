@@ -1,5 +1,8 @@
 package com.guillermonegrete.gallery.folders
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.insertSeparators
@@ -16,6 +19,7 @@ import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
 import io.reactivex.rxjava3.subjects.Subject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import javax.inject.Inject
 
 @HiltViewModel
@@ -35,6 +39,10 @@ class FoldersViewModel @Inject constructor(
 
     var folderSelection = -1
 
+    var showBottomSheet by mutableStateOf<Long?>(null)
+        private set
+
+    @OptIn(ExperimentalCoroutinesApi::class)
     val pagedFolders = tags.distinctUntilChanged().switchMap { tagIds ->
         sort.distinctUntilChanged().switchMap { filter ->
             searchQuery.distinctUntilChanged().switchMap { query ->
@@ -106,6 +114,14 @@ class FoldersViewModel @Inject constructor(
 
     fun setAutoplayVideo(checked: Boolean) {
         settings.setAutoPlayVideo(checked)
+    }
+
+    fun setFolderMenu(folderId: Long) {
+        showBottomSheet = folderId
+    }
+
+    fun removeFolderMenu() {
+        showBottomSheet = null
     }
 
     data class ListFilter(
