@@ -55,7 +55,10 @@ class AddTagFragment: BottomSheetDialogFragment() {
 
         // if the origin destination is the files, it means this is a file multi selection
         val previousDest = findNavController().previousBackStackEntry?.destination?.id
-        singleSelect = previousDest == R.id.file_details_dest || previousDest == R.id.sorting_dialog
+        singleSelect = when(previousDest) {
+            R.id.file_details_dest, R.id.sorting_dialog, R.id.folders_fragment_dest -> true
+            else -> false
+        }
 
         setupViewModel()
 
@@ -161,7 +164,27 @@ class AddTagFragment: BottomSheetDialogFragment() {
 
     private fun setupViewModel() {
         viewModel.appliedTags.addAll(args.tags)
+        val fromFolderList = findNavController().previousBackStackEntry?.destination?.id == R.id.folders_fragment_dest
+        if (fromFolderList) {
+            // When navigating from the folders list, the tags for the folder are not provided so they need to be queried
+            val folderId = args.fileIds.first()
+            disposable.add(viewModel.getFolderTags(folderId)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    { tags ->
+                        viewModel.appliedTags.addAll(tags)
+                        addAppliedTags(viewModel.appliedTags, folderId)
+                        getAllTags()
+                    },
+                    Timber::e
+                )
+            )
+        } else {
+            getAllTags()
+        }
+    }
 
+    private fun getAllTags() {
         val tagSource = if (args.tagType == TagType.File) viewModel.getFileTags() else viewModel.getFolderTags()
         disposable.add(tagSource
             .observeOn(AndroidSchedulers.mainThread())
@@ -169,7 +192,7 @@ class AddTagFragment: BottomSheetDialogFragment() {
                 {
                     // Remove tags that are already applied
                     val newList = it.toMutableSet()
-                    newList.removeAll(args.tags.toSet())
+                    newList.removeAll(viewModel.appliedTags)
                     adapter.modifyList(newList)
                 }, { Timber.e(it) }
             )

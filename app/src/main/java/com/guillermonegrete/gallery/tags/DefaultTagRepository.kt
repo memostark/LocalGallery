@@ -8,7 +8,7 @@ class DefaultTagRepository @Inject constructor (private val tagService: TagServi
 
     override fun getTags() = tagService.getAllTags()
 
-    override fun getTags(folderId: Long) = tagService.getFolderTags(folderId)
+    override fun getTags(folderId: Long) = tagService.getTags(folderId)
 
     override fun addTag(fileId: Long, tag: Tag): Single<Tag> = tagService.addTag(fileId, tag)
 
@@ -23,4 +23,6 @@ class DefaultTagRepository @Inject constructor (private val tagService: TagServi
     override fun getFileTags() = tagService.getFileTags()
 
     override fun getFolderTags() = tagService.getFolderTags()
+
+    override fun getFolderTags(folderId: Long) = tagService.getFolderTags(folderId)
 }

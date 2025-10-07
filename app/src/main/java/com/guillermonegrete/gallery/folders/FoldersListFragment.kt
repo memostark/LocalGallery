@@ -9,6 +9,19 @@ import android.view.inputmethod.InputMethodManager
 import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.core.os.BundleCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -29,6 +42,7 @@ import com.guillermonegrete.gallery.common.Order
 import com.guillermonegrete.gallery.common.SortDialogChecked
 import com.guillermonegrete.gallery.common.SortingDialog
 import com.guillermonegrete.gallery.data.Folder
+import com.guillermonegrete.gallery.data.TagType
 import com.guillermonegrete.gallery.data.source.SettingsRepository
 import com.guillermonegrete.gallery.data.source.remote.FilterTags
 import com.guillermonegrete.gallery.databinding.FragmentFoldersListBinding
@@ -36,6 +50,7 @@ import com.guillermonegrete.gallery.files.SortField
 import com.guillermonegrete.gallery.files.details.FileDetailsFragment
 import com.guillermonegrete.gallery.folders.models.FolderUI
 import com.guillermonegrete.gallery.servers.ServersFragment
+import com.guillermonegrete.gallery.ui.theme.AppTheme
 import com.jakewharton.rxbinding4.appcompat.queryTextChangeEvents
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -161,6 +176,25 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             }
 
             messageIcon.setOnClickListener { viewModel.refresh() }
+
+            composeRoot.apply {
+                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+
+                setContent {
+                    AppTheme {
+                        viewModel.showBottomSheet?.let { folderId ->
+                            FolderItemMenu(
+                                {
+                                    // get the folder tags
+                                    val action = NavGraphDirections.globalToAddTagFragment(longArrayOf(folderId), arrayOf(), TagType.Folder)
+                                    findNavController().navigate(action)
+                                },
+                                { viewModel.removeFolderMenu() }
+                            )
+                        }
+                    }
+                }
+            }
         }
 
         setViewModel()
@@ -198,7 +232,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             )
         )
 
-        disposable.add(adapter.clickSubject
+        disposable.addAll(adapter.clickSubject
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 {
@@ -207,7 +241,12 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                     openFileFragment(Folder(it.item))
                 },
                 { error -> Timber.e(error, "Error on clicking folder") }
-            )
+            ),
+            adapter.longPressSubject
+                .subscribe(
+                    { viewModel.setFolderMenu(it.id) },
+                    Timber::e,
+                )
         )
 
         viewModel.getFolders()
@@ -310,6 +349,25 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             setMessageContainer(true, getString(R.string.error_message), R.drawable.ic_refresh_black_24dp)
         } else if(state is LoadState.NotLoading){
             setMessageContainer(adapter.itemCount < 1, getString(R.string.folder_empty_message), R.drawable.ic_folder_open_black_24dp)
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FolderItemMenu(
+    onItemClick: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(modifier = Modifier.padding(horizontal = 8.dp)) {
+            DropdownMenuItem(
+                leadingIcon = {
+                    Icon(painterResource(R.drawable.ic_baseline_edit_24), contentDescription = "Edit tags")
+                },
+                text = { Text(stringResource(R.string.edit_tags)) },
+                onClick = onItemClick
+            )
         }
     }
 }
