@@ -3,11 +3,16 @@ package com.guillermonegrete.gallery.folders
 import android.app.SearchManager
 import android.content.Context
 import android.os.Bundle
-import android.view.*
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.addCallback
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -46,6 +51,7 @@ import com.guillermonegrete.gallery.data.TagType
 import com.guillermonegrete.gallery.data.source.SettingsRepository
 import com.guillermonegrete.gallery.data.source.remote.FilterTags
 import com.guillermonegrete.gallery.databinding.FragmentFoldersListBinding
+import com.guillermonegrete.gallery.files.DragSelectTouchListener
 import com.guillermonegrete.gallery.files.SortField
 import com.guillermonegrete.gallery.files.details.FileDetailsFragment
 import com.guillermonegrete.gallery.folders.models.FolderUI
@@ -67,6 +73,8 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
     private val binding get() = _binding!!
 
     private lateinit var adapter: FolderAdapter
+    private var actionMode: ActionMode? = null
+    private var dragSelectTouchListener: DragSelectTouchListener? = null
 
     private val viewModel: FoldersViewModel by viewModels()
 
@@ -157,16 +165,40 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                         viewModel.setAutoplayVideo(autoplayItem.isChecked)
                         true
                     }
+                    R.id.select_folders_menu_item -> {
+                        actionMode = (requireActivity() as AppCompatActivity).startSupportActionMode(actionModeCallback)
+                        true
+                    }
                     else -> false
                 }
             }
 
 
+            // Set up list
             val layoutManager = GridLayoutManager(requireContext(), 2)
             layoutManager.spanSizeLookup = object: GridLayoutManager.SpanSizeLookup(){
                 override fun getSpanSize(position: Int) = if(position == 0) 2 else 1
             }
             foldersList.layoutManager = layoutManager
+
+            val selectListener = object: DragSelectTouchListener.OnAdvancedDragSelectListener {
+                override fun onSelectionStarted(start: Int) {
+                    actionMode = (requireActivity() as AppCompatActivity).startSupportActionMode(actionModeCallback)
+                    actionMode?.title = "(1)"
+                    adapter.setSelected(start)
+                }
+
+                override fun onSelectionFinished(end: Int) {}
+
+                override fun onSelectChange(start: Int, end: Int, isSelected: Boolean) {
+                    if (isSelected) adapter.setSelected(start, end) else adapter.setUnselected(start, end)
+                    actionMode?.title = "(${adapter.selectedItems.size})"
+                }
+            }
+            val listener = DragSelectTouchListener().withSelectListener(selectListener)
+            foldersList.addOnItemTouchListener(listener)
+            dragSelectTouchListener = listener
+
 
             ViewCompat.setOnApplyWindowInsetsListener(toolbar) { v, viewInsets ->
                 val insets = viewInsets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -244,8 +276,13 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             ),
             adapter.longPressSubject
                 .subscribe(
-                    { viewModel.setFolderMenu(it.id) },
+                    { dragSelectTouchListener?.startDragSelection(it) },
                     Timber::e,
+                ),
+            adapter.itemSelectedSubject
+                .subscribe(
+                    { actionMode?.title = "(${adapter.selectedItems.size})" },
+                    { error -> Timber.e(error, "Error on clicking folder") }
                 )
         )
 
@@ -349,6 +386,33 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             setMessageContainer(true, getString(R.string.error_message), R.drawable.ic_refresh_black_24dp)
         } else if(state is LoadState.NotLoading){
             setMessageContainer(adapter.itemCount < 1, getString(R.string.folder_empty_message), R.drawable.ic_folder_open_black_24dp)
+        }
+    }
+
+    private val actionModeCallback = object: ActionMode.Callback {
+
+        override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+            adapter.setSelectionMode(true)
+            mode.menuInflater.inflate(R.menu.files_action_mode_menu, menu)
+            return true
+        }
+
+        override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?) = false
+
+        override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+            return when (item.itemId) {
+                R.id.add_tag -> {
+                    val action = NavGraphDirections.globalToAddTagFragment(adapter.selectedIds.toLongArray(), emptyArray(), TagType.Folder)
+                    findNavController().navigate(action)
+                    true
+                }
+                else -> false
+            }
+        }
+
+        override fun onDestroyActionMode(mode: ActionMode?) {
+            adapter.setSelectionMode(false)
+            actionMode = null
         }
     }
 }

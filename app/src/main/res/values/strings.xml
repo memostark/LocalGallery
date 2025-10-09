@@ -67,5 +67,6 @@
 
     <!-- Sorting dialog-->
     <string name="clear_tags">Clear tags</string>
+    <string name="select_folders">Select folders</string>
 
 </resources>
