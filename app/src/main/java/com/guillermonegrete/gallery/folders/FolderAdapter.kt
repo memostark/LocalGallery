@@ -1,21 +1,53 @@
 package com.guillermonegrete.gallery.folders
 
+import android.annotation.SuppressLint
+import android.content.res.Configuration
+import android.graphics.Color
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.android.material.color.MaterialColors
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.databinding.FolderItemBinding
 import com.guillermonegrete.gallery.databinding.FolderNameItemBinding
 import com.guillermonegrete.gallery.folders.models.FolderUI
 import io.reactivex.rxjava3.subjects.PublishSubject
+import kotlin.math.abs
+
 
 class FolderAdapter : PagingDataAdapter<FolderUI, RecyclerView.ViewHolder>(FolderDiffCallback) {
 
     val clickSubject: PublishSubject<ClickInfo> = PublishSubject.create()
-    val longPressSubject: PublishSubject<FolderUI.Model> = PublishSubject.create()
+    val longPressSubject: PublishSubject<Int> = PublishSubject.create()
+    val itemSelectedSubject: PublishSubject<Int> = PublishSubject.create()
+
+    private var multiSelect = false
+
+    val selectedItems = mutableSetOf<Int>()
+    val selectedIds: MutableSet<Long>
+        get() {
+            return selectedItems.mapNotNull { (peek(it) as? FolderUI.Model)?.id }.toMutableSet()
+        }
+
+    var cardDefaultBackgroundColor = R.color.cardview_dark_background
+    var cardDefaultTextColor = 0
+    var selectedContainerColor = 0
+    var selectedTextColor = 0
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+        val context = recyclerView.context
+        val currentNightMode = recyclerView.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        cardDefaultBackgroundColor = if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) R.color.cardview_dark_background else R.color.cardview_light_background
+        cardDefaultTextColor =  MaterialColors.getColor(context, R.attr.colorOnSurface, Color.BLACK)
+        selectedContainerColor = MaterialColors.getColor(context, R.attr.colorPrimaryContainer, Color.WHITE)
+        selectedTextColor =  MaterialColors.getColor(context, R.attr.colorOnPrimaryContainer, Color.BLACK)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -41,6 +73,34 @@ class FolderAdapter : PagingDataAdapter<FolderUI, RecyclerView.ViewHolder>(Folde
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
+    fun setSelectionMode(isMultiSelection: Boolean) {
+        if(isMultiSelection != multiSelect) {
+            multiSelect = isMultiSelection
+            if(!multiSelect) {
+                selectedItems.clear()
+            }
+            notifyDataSetChanged()
+        }
+    }
+
+    fun setSelected(position: Int) {
+        selectedItems.add(position)
+        notifyItemChanged(position)
+    }
+
+    fun setSelected(start: Int, end: Int) {
+        selectedItems.addAll(start..end)
+        val count = abs(end - start) + 1 // add one because the end index is inclusive
+        notifyItemRangeChanged(start, count)
+    }
+
+    fun setUnselected(start: Int, end: Int) {
+        selectedItems.removeAll(start..end)
+        val count = abs(end - start) + 1
+        notifyItemRangeChanged(start, count)
+    }
+
     inner class ViewHolder(
         private val binding: FolderItemBinding,
     ): RecyclerView.ViewHolder(binding.root){
@@ -58,13 +118,30 @@ class FolderAdapter : PagingDataAdapter<FolderUI, RecyclerView.ViewHolder>(Folde
                 )
 
                 itemView.setOnClickListener {
-                    clickSubject.onNext(ClickInfo(absoluteAdapterPosition, item))
+                    val pos = absoluteAdapterPosition
+                    if(multiSelect){
+                        if(pos in selectedItems) {
+                            selectedItems.remove(pos)
+                        } else {
+                            selectedItems.add(pos)
+                        }
+                        notifyItemChanged(pos)
+                        itemSelectedSubject.onNext(pos)
+                    } else {
+                        clickSubject.onNext(ClickInfo(absoluteAdapterPosition, item))
+                    }
                 }
-            }
 
-            binding.root.setOnLongClickListener {
-                longPressSubject.onNext(item)
-                true
+                root.setOnLongClickListener {
+                    longPressSubject.onNext(absoluteAdapterPosition)
+                    true
+                }
+
+                val isSelected = multiSelect && absoluteAdapterPosition in selectedItems
+                val background = if (isSelected) selectedContainerColor else ContextCompat.getColor(root.context, cardDefaultBackgroundColor)
+                val text = if (isSelected) selectedTextColor else cardDefaultTextColor
+                root.setCardBackgroundColor(background)
+                nameText.setTextColor(text)
             }
         }
     }

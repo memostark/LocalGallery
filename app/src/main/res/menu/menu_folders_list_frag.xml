@@ -26,4 +26,8 @@
         android:id="@+id/autoplay_menu_item"
         android:title="@string/autoplay"
         android:checkable="true" />
+
+    <item
+        android:id="@+id/select_folders_menu_item"
+        android:title="@string/select_folders"/>
 </menu>
