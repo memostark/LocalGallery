@@ -3,7 +3,6 @@ package com.guillermonegrete.gallery.folders
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.graphics.Color
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
@@ -34,7 +33,7 @@ class FolderAdapter : PagingDataAdapter<FolderUI, RecyclerView.ViewHolder>(Folde
             return selectedItems.mapNotNull { (peek(it) as? FolderUI.Model)?.id }.toMutableSet()
         }
 
-    var cardDefaultBackgroundColor = R.color.cardview_dark_background
+    var cardDefaultBackgroundColor = 0
     var cardDefaultTextColor = 0
     var selectedContainerColor = 0
     var selectedTextColor = 0
@@ -43,7 +42,7 @@ class FolderAdapter : PagingDataAdapter<FolderUI, RecyclerView.ViewHolder>(Folde
         super.onAttachedToRecyclerView(recyclerView)
         val context = recyclerView.context
         val currentNightMode = recyclerView.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        cardDefaultBackgroundColor = if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) R.color.cardview_dark_background else R.color.cardview_light_background
+        cardDefaultBackgroundColor = ContextCompat.getColor(context, if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) R.color.cardview_dark_background else R.color.cardview_light_background)
         cardDefaultTextColor =  MaterialColors.getColor(context, R.attr.colorOnSurface, Color.BLACK)
         selectedContainerColor = MaterialColors.getColor(context, R.attr.colorPrimaryContainer, Color.WHITE)
         selectedTextColor =  MaterialColors.getColor(context, R.attr.colorOnPrimaryContainer, Color.BLACK)
@@ -138,10 +137,11 @@ class FolderAdapter : PagingDataAdapter<FolderUI, RecyclerView.ViewHolder>(Folde
                 }
 
                 val isSelected = multiSelect && absoluteAdapterPosition in selectedItems
-                val background = if (isSelected) selectedContainerColor else ContextCompat.getColor(root.context, cardDefaultBackgroundColor)
+                val background = if (isSelected) selectedContainerColor else cardDefaultBackgroundColor
                 val text = if (isSelected) selectedTextColor else cardDefaultTextColor
                 root.setCardBackgroundColor(background)
                 nameText.setTextColor(text)
+                itemsCountText.setTextColor(text)
             }
         }
     }
