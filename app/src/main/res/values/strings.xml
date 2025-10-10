@@ -30,6 +30,7 @@
     <!-- Folders list-->
     <string name="night_mode">Night mode</string>
     <string name="autoplay">Autoplay</string>
+    <string name="open_item_menu">Open item menu</string>
 
     <!-- Files list-->
     <string name="files">Files</string>

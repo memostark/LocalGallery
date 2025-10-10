@@ -184,7 +184,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             val selectListener = object: DragSelectTouchListener.OnAdvancedDragSelectListener {
                 override fun onSelectionStarted(start: Int) {
                     actionMode = (requireActivity() as AppCompatActivity).startSupportActionMode(actionModeCallback)
-                    actionMode?.title = "(1)"
+                    updateActionModeBar(1)
                     adapter.setSelected(start)
                 }
 
@@ -192,7 +192,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
 
                 override fun onSelectChange(start: Int, end: Int, isSelected: Boolean) {
                     if (isSelected) adapter.setSelected(start, end) else adapter.setUnselected(start, end)
-                    actionMode?.title = "(${adapter.selectedItems.size})"
+                    updateActionModeBar(adapter.selectedItems.size)
                 }
             }
             val listener = DragSelectTouchListener().withSelectListener(selectListener)
@@ -281,7 +281,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                 ),
             adapter.itemSelectedSubject
                 .subscribe(
-                    { actionMode?.title = "(${adapter.selectedItems.size})" },
+                    { updateActionModeBar(adapter.selectedItems.size) },
                     { error -> Timber.e(error, "Error on clicking folder") }
                 )
         )
@@ -377,6 +377,14 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
         if(folderUi is FolderUI.Model) folderUi.coverUrl = newCoverUrl
     }
 
+    private fun updateActionModeBar(items: Int) {
+        actionMode?.title = "($items)"
+        val folderMenuItem = actionMode?.menu?.findItem(R.id.show_item_menu)
+        if (folderMenuItem != null) {
+            folderMenuItem.isVisible = items == 1
+        }
+    }
+
     private val loadListener  = { loadStates: CombinedLoadStates ->
         val state = loadStates.refresh
         binding.loadingBar.isVisible = state is LoadState.Loading
@@ -393,7 +401,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
 
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
             adapter.setSelectionMode(true)
-            mode.menuInflater.inflate(R.menu.files_action_mode_menu, menu)
+            mode.menuInflater.inflate(R.menu.folders_action_mode_menu, menu)
             return true
         }
 
@@ -404,6 +412,11 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                 R.id.add_tag -> {
                     val action = NavGraphDirections.globalToAddTagFragment(adapter.selectedIds.toLongArray(), emptyArray(), TagType.Folder)
                     findNavController().navigate(action)
+                    true
+                }
+                R.id.show_item_menu -> {
+                    val item = adapter.selectedIds.firstOrNull() ?: return false
+                    viewModel.setFolderMenu(item)
                     true
                 }
                 else -> false
