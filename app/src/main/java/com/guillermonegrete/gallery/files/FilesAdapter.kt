@@ -141,6 +141,8 @@ class FilesAdapter(
             notifyDataSetChanged()
         }
     }
+
+    fun getSingleSelectedItem() = if (selectedItems.size == 1) peek(selectedItems.first()) else null
 }
 
 object FileDiffCallback : DiffUtil.ItemCallback<File>() {

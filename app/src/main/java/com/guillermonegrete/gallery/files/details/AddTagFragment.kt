@@ -10,7 +10,6 @@ import androidx.core.os.bundleOf
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.chip.Chip
@@ -54,11 +53,7 @@ class AddTagFragment: BottomSheetDialogFragment() {
         _binding = FragmentAddTagBinding.inflate(inflater, container, false)
 
         // if the origin destination is the files, it means this is a file multi selection
-        val previousDest = findNavController().previousBackStackEntry?.destination?.id
-        singleSelect = when(previousDest) {
-            R.id.file_details_dest, R.id.sorting_dialog, R.id.folders_fragment_dest -> true
-            else -> false
-        }
+        singleSelect = args.fileIds.size == 1
 
         setupViewModel()
 
@@ -70,7 +65,7 @@ class AddTagFragment: BottomSheetDialogFragment() {
                     addChip(tag, fileIds.first())
                     if (newTagEdit.text.isNotEmpty()) newTagEdit.setText("")
                 } else {
-                    addTagToFiles(tag, fileIds)
+                    addTagToItems(tag, fileIds)
                 }
             }
 
@@ -92,19 +87,35 @@ class AddTagFragment: BottomSheetDialogFragment() {
         return binding.root
     }
 
-    private fun addTagToFiles(tag: Tag, fileIds: LongArray) {
-        disposable.add(viewModel.addTagToFiles(tag.id, fileIds.toList())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-                { files ->
-                    val ids = files.map { it.id }.toLongArray()
-                    val bundle = bundleOf(SELECTED_TAG_KEY to tag, UPDATED_FILES_IDS_KEY to ids)
-                    setFragmentResult(SELECT_TAG_REQUEST_KEY, bundle)
-                    dismiss()
-                },
-                { Timber.e(it, "Error adding tag to multiple files") }
+    private fun addTagToItems(tag: Tag, ids: LongArray) {
+        if (args.tagType == TagType.File) {
+            disposable.add(
+                viewModel.addTagToFiles(tag.id, ids.toList())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    { files ->
+                        setUpdatedItemsResult(tag, files.map { it.id })
+                    },
+                    { Timber.e(it, "Error adding tag to multiple files") }
+                )
             )
-        )
+        } else {
+            disposable.add(viewModel.addTagToFolders(tag.id, ids.toList())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    { folders ->
+                        setUpdatedItemsResult(tag, folders.map { it.id })
+                    },
+                    { Timber.e(it, "Error adding tag to multiple folders") }
+                )
+            )
+        }
+    }
+
+    private fun setUpdatedItemsResult(tag: Tag, updatedIds: List<Long>) {
+        val bundle = bundleOf(SELECTED_TAG_KEY to tag, UPDATED_ITEMS_IDS_KEY to updatedIds.toLongArray())
+        setFragmentResult(SELECT_TAG_REQUEST_KEY, bundle)
+        dismiss()
     }
 
     private fun setEditKeyListener(tags: Set<Tag>, fileId: Long) {
@@ -164,8 +175,7 @@ class AddTagFragment: BottomSheetDialogFragment() {
 
     private fun setupViewModel() {
         viewModel.appliedTags.addAll(args.tags)
-        val fromFolderList = findNavController().previousBackStackEntry?.destination?.id == R.id.folders_fragment_dest
-        if (fromFolderList) {
+        if (args.tagType == TagType.Folder && singleSelect) {
             // When navigating from the folders list, the tags for the folder are not provided so they need to be queried
             val folderId = args.fileIds.first()
             disposable.add(viewModel.getFolderTags(folderId)
@@ -249,7 +259,7 @@ class AddTagFragment: BottomSheetDialogFragment() {
         // For adding a tag to multiple files
         const val SELECT_TAG_REQUEST_KEY = "select_tag_request"
         const val SELECTED_TAG_KEY = "selected_tag"
-        const val UPDATED_FILES_IDS_KEY = "updated_files_ids"
+        const val UPDATED_ITEMS_IDS_KEY = "updated_items_ids"
     }
 
 }

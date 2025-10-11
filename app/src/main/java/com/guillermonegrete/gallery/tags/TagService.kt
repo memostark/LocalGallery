@@ -1,6 +1,7 @@
 package com.guillermonegrete.gallery.tags
 
 import com.guillermonegrete.gallery.data.FileResponse
+import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.Tag
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
@@ -22,6 +23,9 @@ interface TagService {
 
     @POST("/tags/{id}/files")
     fun addTagToFiles(@Path("id") id: Long, @Body fileIds: List<Long>): Single<List<FileResponse>>
+
+    @POST("/tags/{id}/folders")
+    fun addTagToFolders(@Path("id") id: Long, @Body folderIds: List<Long>): Single<List<Folder>>
 
     @DELETE("/files/{fileId}/tags/{tagId}")
     fun deleteTagFromFile(@Path("fileId") fileId: Long, @Path("tagId") tagId: Long) : Completable

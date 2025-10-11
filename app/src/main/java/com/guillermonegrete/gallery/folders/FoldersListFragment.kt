@@ -53,6 +53,7 @@ import com.guillermonegrete.gallery.data.source.remote.FilterTags
 import com.guillermonegrete.gallery.databinding.FragmentFoldersListBinding
 import com.guillermonegrete.gallery.files.DragSelectTouchListener
 import com.guillermonegrete.gallery.files.SortField
+import com.guillermonegrete.gallery.files.details.AddTagFragment
 import com.guillermonegrete.gallery.files.details.FileDetailsFragment
 import com.guillermonegrete.gallery.folders.models.FolderUI
 import com.guillermonegrete.gallery.servers.ServersFragment
@@ -97,6 +98,17 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
         setFragmentResultListener(FileDetailsFragment.FOLDER_UPDATE_KEY) { _, bundle ->
             val newCoverUrl = bundle.getString(FileDetailsFragment.COVER_URL_KEY) ?: return@setFragmentResultListener
             updateFolderItem(newCoverUrl)
+        }
+
+        setFragmentResultListener(AddTagFragment.SELECT_TAG_REQUEST_KEY) { _, bundle ->
+            val ids = bundle.getLongArray(AddTagFragment.UPDATED_ITEMS_IDS_KEY) ?: return@setFragmentResultListener
+            val act = activity
+            val message = resources.getQuantityString(
+                R.plurals.folders_updated_text,
+                ids.size,
+                ids.size
+            )
+            if (act is MainActivity) act.showSnackBar(message)
         }
 
         tagIds = viewModel.getTags()
@@ -237,6 +249,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
         disposable.clear()
         adapter.removeLoadStateListener(loadListener)
         binding.foldersList.adapter = null
+        dragSelectTouchListener = null
         _binding = null
         super.onDestroyView()
     }

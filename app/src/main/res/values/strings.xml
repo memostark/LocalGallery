@@ -31,6 +31,10 @@
     <string name="night_mode">Night mode</string>
     <string name="autoplay">Autoplay</string>
     <string name="open_item_menu">Open item menu</string>
+    <plurals name="folders_updated_text">
+        <item quantity="one">Modified %d folder</item>
+        <item quantity="other">Modified %d folders</item>
+    </plurals>
 
     <!-- Files list-->
     <string name="files">Files</string>
