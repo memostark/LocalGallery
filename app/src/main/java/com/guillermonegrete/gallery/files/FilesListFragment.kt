@@ -158,6 +158,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
 
     override fun onDestroyView() {
         binding.filesList.adapter = null
+        dragSelectTouchListener = null
         _binding = null
         disposable.clear()
         adapter.removeLoadStateListener(loadListener)
@@ -267,7 +268,8 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
             return when (item.itemId) {
                 R.id.add_tag -> {
                     setTagsUpdateListener()
-                    val action = FilesListFragmentDirections.actionFilesToAddTagFragment(adapter.selectedIds.toLongArray(), emptyArray())
+                    val tags = adapter.getSingleSelectedItem()?.tags?.toTypedArray() ?: emptyArray()
+                    val action = FilesListFragmentDirections.actionFilesToAddTagFragment(adapter.selectedIds.toLongArray(), tags)
                     findNavController().navigate(action)
                     true
                 }
@@ -283,7 +285,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
     private fun setTagsUpdateListener() {
         setFragmentResultListener(AddTagFragment.SELECT_TAG_REQUEST_KEY) { _, bundle ->
             val newTag = BundleCompat.getParcelable(bundle, AddTagFragment.SELECTED_TAG_KEY, Tag::class.java) ?: return@setFragmentResultListener
-            val ids = bundle.getLongArray(AddTagFragment.UPDATED_FILES_IDS_KEY) ?: return@setFragmentResultListener
+            val ids = bundle.getLongArray(AddTagFragment.UPDATED_ITEMS_IDS_KEY) ?: return@setFragmentResultListener
 
             for (pos in adapter.selectedItems) {
                 val file = adapter.snapshot().items[pos]

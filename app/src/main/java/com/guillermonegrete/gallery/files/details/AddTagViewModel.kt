@@ -35,5 +35,7 @@ class AddTagViewModel @Inject constructor (private val tagRepository: TagReposit
 
     fun addTagToFiles(id: Long, fileIds: List<Long>) = tagRepository.addTagToFiles(id, fileIds)
 
+    fun addTagToFolders(id: Long, folderIds: List<Long>) = tagRepository.addTagToFolders(id, folderIds)
+
     fun getFolderTags(folderId: Long) = tagRepository.getFolderTags(folderId)
 }
