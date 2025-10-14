@@ -48,6 +48,11 @@ class TagSuggestionsAdapter(private val listener: (Tag) -> Unit): ListAdapter<Ta
         submitList(list.toList())
     }
 
+    fun removeItems(list : Set<Tag>) {
+        unfilteredSet.removeAll(list)
+        submitList(unfilteredSet.toList())
+    }
+
     fun filter(query: CharSequence) {
         val list = mutableListOf<Tag>()
 
