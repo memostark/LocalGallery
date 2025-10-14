@@ -19,6 +19,7 @@ import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.data.TagType
 import com.guillermonegrete.gallery.databinding.FragmentAddTagBinding
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.lifecycle.withCreationCallback
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import timber.log.Timber
@@ -27,7 +28,11 @@ import java.util.*
 @AndroidEntryPoint
 class AddTagFragment: BottomSheetDialogFragment() {
 
-    private val viewModel: AddTagViewModel by viewModels()
+    private val viewModel: AddTagViewModel by viewModels(extrasProducer = {
+        defaultViewModelCreationExtras.withCreationCallback<AddTagViewModel.Factory> { factory ->
+            factory.create(args.tagType, args.fileIds.toList(), args.tags.toSet())
+        }
+    })
 
     private  var _binding: FragmentAddTagBinding? = null
     private val binding get() = _binding!!
@@ -70,10 +75,8 @@ class AddTagFragment: BottomSheetDialogFragment() {
             }
 
             if(singleSelect) {
-                val tags = viewModel.appliedTags
                 val fileId = fileIds.first()
-                addAppliedTags(tags, fileId)
-                setEditKeyListener(tags, fileId)
+                setEditKeyListener(fileId)
             }
 
             savedTagsList.adapter = adapter
@@ -118,7 +121,7 @@ class AddTagFragment: BottomSheetDialogFragment() {
         dismiss()
     }
 
-    private fun setEditKeyListener(tags: Set<Tag>, fileId: Long) {
+    private fun setEditKeyListener(fileId: Long) {
 
         val newTagEdit = binding.newTagEdit
         newTagEdit.setOnEditorActionListener { v, actionId, _ ->
@@ -133,7 +136,7 @@ class AddTagFragment: BottomSheetDialogFragment() {
                 newTagEdit.setText("")
 
                 // if tag is already applied, skip
-                if (tags.any { it.name == text }) return@setOnEditorActionListener true
+                if (viewModel.appliedTags.any { it.name == text }) return@setOnEditorActionListener true
 
                 // Set id as 0 to indicate to the backend the tag is new
                 addChip(Tag(text, Date(), 0), fileId)
@@ -144,21 +147,25 @@ class AddTagFragment: BottomSheetDialogFragment() {
         }
     }
 
-    private fun addAppliedTags(tags: Set<Tag>, fileId: Long) {
+    private fun addAppliedTags(tags: List<Tag>) {
+        if (!singleSelect) return
+        val itemId = args.fileIds.first()
         val tagsGroup = binding.tagsGroup
+        tagsGroup.removeViews(0, tagsGroup.childCount - 1)
         tags.forEach { tag ->
             val chip = Chip(context)
             chip.text = tag.name
             chip.isCloseIconVisible = true
             chip.setOnCloseIconClickListener {
-                removeChip(it, tag, fileId)
+                removeChip(it, tag, itemId)
             }
             tagsGroup.addView(chip, tagsGroup.childCount - 1)
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
+        disposable.clear()
         _binding = null
     }
 
@@ -174,29 +181,7 @@ class AddTagFragment: BottomSheetDialogFragment() {
     }
 
     private fun setupViewModel() {
-        viewModel.appliedTags.addAll(args.tags)
-        if (args.tagType == TagType.Folder && singleSelect) {
-            // When navigating from the folders list, the tags for the folder are not provided so they need to be queried
-            val folderId = args.fileIds.first()
-            disposable.add(viewModel.getFolderTags(folderId)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                    { tags ->
-                        viewModel.appliedTags.addAll(tags)
-                        addAppliedTags(viewModel.appliedTags, folderId)
-                        getAllTags()
-                    },
-                    Timber::e
-                )
-            )
-        } else {
-            getAllTags()
-        }
-    }
-
-    private fun getAllTags() {
-        val tagSource = if (args.tagType == TagType.File) viewModel.getFileTags() else viewModel.getFolderTags()
-        disposable.add(tagSource
+        disposable.add(viewModel.tags
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 {
@@ -204,7 +189,20 @@ class AddTagFragment: BottomSheetDialogFragment() {
                     val newList = it.toMutableSet()
                     newList.removeAll(viewModel.appliedTags)
                     adapter.modifyList(newList)
-                }, { Timber.e(it) }
+                    addAppliedTags(viewModel.appliedTags.toList())
+                }, Timber::e
+            )
+        )
+
+        // Load the initial tags
+        disposable.add(viewModel.itemTags
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { tags ->
+                    addAppliedTags(tags.toList())
+                    adapter.removeItems(tags)
+                },
+                Timber::e
             )
         )
     }
@@ -213,22 +211,12 @@ class AddTagFragment: BottomSheetDialogFragment() {
      * Call the backend to create/add a [tag] to the [fileId]. If successful add a new chip to the to tags group.
      */
     private fun addChip(tag: Tag, fileId: Long) {
-        val tagsGroup = binding.tagsGroup
 
         val tagTarget =
             if (args.tagType == TagType.File) viewModel.addTag(fileId, tag) else viewModel.addFolderTag(fileId, tag)
         disposable.add(tagTarget
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({ newTag ->
-                // Creates and adds chip view
-                val chip =  Chip(context)
-                chip.text = newTag.name
-                chip.isCloseIconVisible = true
-                chip.setOnCloseIconClickListener { view ->
-                    removeChip(view, newTag, fileId)
-                }
-                tagsGroup.addView(chip, tagsGroup.childCount - 1)
-
                 // No longer show the tag in the suggestions list
                 adapter.remove(newTag)
             }, {
