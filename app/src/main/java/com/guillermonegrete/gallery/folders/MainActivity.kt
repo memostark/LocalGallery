@@ -58,10 +58,11 @@ class MainActivity : AppCompatActivity() {
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
-            var nv = binding.landscapeLayout
-            if (nv != null) {
-                navigationView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            binding.landscapeLayout?.let {
+                binding.root.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     leftMargin = insets.left
+                }
+                navigationView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     topMargin = insets.top
                 }
             }
@@ -73,7 +74,9 @@ class MainActivity : AppCompatActivity() {
     fun showSnackBar(message: String) {
         val navBar = binding.mainNavView
         val snackBar = Snackbar.make(navBar, message, Snackbar.LENGTH_SHORT)
-        snackBar.setAnchorView(navBar)
-        snackBar.show()
+        if (binding.landscapeLayout == null) snackBar.setAnchorView(navBar)
+        binding.root.post {
+            snackBar.show()
+        }
     }
 }

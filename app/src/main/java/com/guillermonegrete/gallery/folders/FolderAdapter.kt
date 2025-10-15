@@ -25,7 +25,8 @@ class FolderAdapter : PagingDataAdapter<FolderUI, RecyclerView.ViewHolder>(Folde
     val longPressSubject: PublishSubject<Int> = PublishSubject.create()
     val itemSelectedSubject: PublishSubject<Int> = PublishSubject.create()
 
-    private var multiSelect = false
+    var multiSelect = false
+        private set
 
     val selectedItems = mutableSetOf<Int>()
     val selectedIds: MutableSet<Long>
