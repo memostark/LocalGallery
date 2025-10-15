@@ -87,6 +87,14 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
 
     private val disposable = CompositeDisposable()
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        adapter = FolderAdapter()
+        val sorting = preferences.getFolderSort()
+        checkedField = sorting.field
+        checkedOrder = sorting.sort
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -108,18 +116,20 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                 ids.size,
                 ids.size
             )
-            if (act is MainActivity) act.showSnackBar(message)
+            if (act is MainActivity)
+                binding.root.post { act.showSnackBar(message) }
+        }
+
+        if (savedInstanceState != null) {
+            val actionItems = savedInstanceState.getIntegerArrayList(ACTION_MODE_ITEMS_KEY)
+            if (actionItems != null) {
+                adapter.selectedItems.addAll(actionItems)
+                actionMode = (requireActivity() as AppCompatActivity).startSupportActionMode(actionModeCallback)
+                updateActionModeBar(actionItems.size)
+            }
         }
 
         tagIds = viewModel.getTags()
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        adapter = FolderAdapter()
-        val sorting = preferences.getFolderSort()
-        checkedField = sorting.field
-        checkedOrder = sorting.sort
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -232,6 +242,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
                                     // get the folder tags
                                     val action = NavGraphDirections.globalToAddTagFragment(longArrayOf(folderId), arrayOf(), TagType.Folder)
                                     findNavController().navigate(action)
+                                    viewModel.removeFolderMenu()
                                 },
                                 { viewModel.removeFolderMenu() }
                             )
@@ -243,6 +254,13 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
 
         setViewModel()
         loadFoldersData()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        val list = if (adapter.multiSelect) ArrayList(adapter.selectedItems) else null
+        outState.putIntegerArrayList(ACTION_MODE_ITEMS_KEY, list)
+
+        super.onSaveInstanceState(outState)
     }
 
     override fun onDestroyView() {
@@ -440,6 +458,10 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             adapter.setSelectionMode(false)
             actionMode = null
         }
+    }
+
+    companion object {
+        const val ACTION_MODE_ITEMS_KEY = "action_mode_items"
     }
 }
 
