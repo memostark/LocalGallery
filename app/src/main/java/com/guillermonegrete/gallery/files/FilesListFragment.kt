@@ -105,11 +105,21 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
             val folder = BundleCompat.getParcelable(requireArguments(), FOLDER_KEY, Folder::class.java) ?: Folder.NULL_FOLDER
             viewModel.setFolderName(folder)
         }
+
+        if (savedInstanceState != null) {
+            val actionItems = savedInstanceState.getIntegerArrayList(ACTION_MODE_ITEMS_KEY)
+            if (actionItems != null) {
+                adapter.selectedItems.addAll(actionItems)
+                actionMode = (requireActivity() as AppCompatActivity).startSupportActionMode(actionModeCallback)
+                actionMode?.title = "(${actionItems.size})"
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentFilesListBinding.bind(view)
+        setTagsUpdateListener()
         val folder = args.folder ?: Folder.NULL_FOLDER
 
         val id = if(folder == Folder.NULL_FOLDER) SortingDialog.GET_ALL_TAGS else folder.id
@@ -154,6 +164,13 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         }
         binding.filesList.post { bindViewModel(folder) }
         setFileClickEvent()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        val list = if (adapter.multiSelect) ArrayList(adapter.selectedItems) else null
+        outState.putIntegerArrayList(ACTION_MODE_ITEMS_KEY, list)
+
+        super.onSaveInstanceState(outState)
     }
 
     override fun onDestroyView() {
@@ -243,6 +260,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
 
     companion object{
         const val FOLDER_KEY = "folder"
+        const val ACTION_MODE_ITEMS_KEY = "action_mode_items"
     }
 
     private val loadListener  = { loadStates: CombinedLoadStates ->
@@ -267,7 +285,6 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
             return when (item.itemId) {
                 R.id.add_tag -> {
-                    setTagsUpdateListener()
                     val tags = adapter.getSingleSelectedItem()?.tags?.toTypedArray() ?: emptyArray()
                     val action = FilesListFragmentDirections.actionFilesToAddTagFragment(adapter.selectedIds.toLongArray(), tags)
                     findNavController().navigate(action)
@@ -305,8 +322,10 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                 ids.size
             )
             val act = activity
-            if (act is MainActivity) act.showSnackBar(message)
-            else Snackbar.make(binding.filesFragmentRoot, message, Snackbar.LENGTH_SHORT).show()
+            binding.root.post {
+                if (act is MainActivity) act.showSnackBar(message)
+//                else Snackbar.make(binding.filesFragmentRoot, message, Snackbar.LENGTH_SHORT).show()
+            }
         }
     }
 }
