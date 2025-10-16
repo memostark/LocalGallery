@@ -27,7 +27,8 @@ class FilesAdapter(
     val onItemLongPress: PublishSubject<Int> = PublishSubject.create()
     val onItemClick: PublishSubject<Int> = PublishSubject.create()
 
-    private var multiSelect = false
+    var multiSelect = false
+        private set
 
     val selectedItems = mutableSetOf<Int>()
     val selectedIds: MutableSet<Long>
