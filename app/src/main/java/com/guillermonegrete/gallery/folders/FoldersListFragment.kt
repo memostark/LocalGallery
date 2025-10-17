@@ -108,45 +108,16 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             updateFolderItem(newCoverUrl)
         }
 
-        setFragmentResultListener(AddTagFragment.SELECT_TAG_REQUEST_KEY) { _, bundle ->
-            val ids = bundle.getLongArray(AddTagFragment.UPDATED_ITEMS_IDS_KEY) ?: return@setFragmentResultListener
-            val act = activity
-            val message = resources.getQuantityString(
-                R.plurals.folders_updated_text,
-                ids.size,
-                ids.size
-            )
-            if (act is MainActivity)
-                binding.root.post { act.showSnackBar(message) }
-        }
-
-        if (savedInstanceState != null) {
-            val actionItems = savedInstanceState.getIntegerArrayList(ACTION_MODE_ITEMS_KEY)
-            if (actionItems != null) {
-                adapter.selectedItems.addAll(actionItems)
-                actionMode = (requireActivity() as AppCompatActivity).startSupportActionMode(actionModeCallback)
-                updateActionModeBar(actionItems.size)
-            }
-        }
-
         tagIds = viewModel.getTags()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setFragmentResultListener(SortingDialog.RESULT_KEY) { _, bundle ->
-            // We use a String here, but any type that can be put in a Bundle is supported
-            val result = BundleCompat.getParcelable(bundle, SortingDialog.SORT_KEY, SortDialogChecked::class.java) ?: return@setFragmentResultListener
-            checkedField = result.field
-            checkedOrder = result.sort
-            tagIds = result.tags.folderTagIds
-
-            val filter = FoldersViewModel.ListFilter(checkedField.field, checkedOrder.oder)
-            viewModel.updateSort(filter)
-            viewModel.setTag(tagIds)
-        }
 
         _binding = FragmentFoldersListBinding.bind(view)
+
+        setFragmentResultListeners()
+        restoreState(savedInstanceState)
 
         with(binding){
             // Set up toolbar
@@ -266,6 +237,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
     override fun onDestroyView() {
         disposable.clear()
         adapter.removeLoadStateListener(loadListener)
+//        actionMode?.finish()
         binding.foldersList.adapter = null
         dragSelectTouchListener = null
         _binding = null
@@ -413,6 +385,44 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
         val folderMenuItem = actionMode?.menu?.findItem(R.id.show_item_menu)
         if (folderMenuItem != null) {
             folderMenuItem.isVisible = items == 1
+        }
+    }
+
+    private fun setFragmentResultListeners() {
+        setFragmentResultListener(SortingDialog.RESULT_KEY) { _, bundle ->
+            // We use a String here, but any type that can be put in a Bundle is supported
+            val result = BundleCompat.getParcelable(bundle, SortingDialog.SORT_KEY, SortDialogChecked::class.java) ?: return@setFragmentResultListener
+            checkedField = result.field
+            checkedOrder = result.sort
+            tagIds = result.tags.folderTagIds
+
+            val filter = FoldersViewModel.ListFilter(checkedField.field, checkedOrder.oder)
+            viewModel.updateSort(filter)
+            viewModel.setTag(tagIds)
+        }
+
+        setFragmentResultListener(AddTagFragment.SELECT_TAG_REQUEST_KEY) { _, bundle ->
+            val ids = bundle.getLongArray(AddTagFragment.UPDATED_ITEMS_IDS_KEY) ?: return@setFragmentResultListener
+            val act = activity
+            val message = resources.getQuantityString(
+                R.plurals.folders_updated_text,
+                ids.size,
+                ids.size
+            )
+            if (act is MainActivity)
+                binding.root.post { act.showSnackBar(message) }
+        }
+    }
+
+
+    private fun restoreState(savedInstanceState: Bundle?) {
+        if (savedInstanceState != null) {
+            val actionItems = savedInstanceState.getIntegerArrayList(ACTION_MODE_ITEMS_KEY)
+            if (actionItems != null) {
+                adapter.selectedItems.addAll(actionItems)
+                actionMode = (requireActivity() as AppCompatActivity).startSupportActionMode(actionModeCallback)
+                updateActionModeBar(actionItems.size)
+            }
         }
     }
 
