@@ -105,21 +105,13 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
             val folder = BundleCompat.getParcelable(requireArguments(), FOLDER_KEY, Folder::class.java) ?: Folder.NULL_FOLDER
             viewModel.setFolderName(folder)
         }
-
-        if (savedInstanceState != null) {
-            val actionItems = savedInstanceState.getIntegerArrayList(ACTION_MODE_ITEMS_KEY)
-            if (actionItems != null) {
-                adapter.selectedItems.addAll(actionItems)
-                actionMode = (requireActivity() as AppCompatActivity).startSupportActionMode(actionModeCallback)
-                actionMode?.title = "(${actionItems.size})"
-            }
-        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentFilesListBinding.bind(view)
         setTagsUpdateListener()
+        restoreState(savedInstanceState)
         val folder = args.folder ?: Folder.NULL_FOLDER
 
         val id = if(folder == Folder.NULL_FOLDER) SortingDialog.GET_ALL_TAGS else folder.id
@@ -177,6 +169,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         binding.filesList.adapter = null
         dragSelectTouchListener = null
         _binding = null
+        actionMode?.finish()
         disposable.clear()
         adapter.removeLoadStateListener(loadListener)
         super.onDestroyView()
@@ -258,6 +251,17 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         findNavController().navigate(action)
     }
 
+    private fun restoreState(savedInstanceState: Bundle?) {
+        if (savedInstanceState != null) {
+            val actionItems = savedInstanceState.getIntegerArrayList(ACTION_MODE_ITEMS_KEY)
+            if (actionItems != null) {
+                adapter.selectedItems.addAll(actionItems)
+                actionMode = (requireActivity() as AppCompatActivity).startSupportActionMode(actionModeCallback)
+                actionMode?.title = "(${actionItems.size})"
+            }
+        }
+    }
+
     companion object{
         const val FOLDER_KEY = "folder"
         const val ACTION_MODE_ITEMS_KEY = "action_mode_items"
@@ -324,7 +328,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
             val act = activity
             binding.root.post {
                 if (act is MainActivity) act.showSnackBar(message)
-//                else Snackbar.make(binding.filesFragmentRoot, message, Snackbar.LENGTH_SHORT).show()
+                else Snackbar.make(binding.filesFragmentRoot, message, Snackbar.LENGTH_SHORT).show()
             }
         }
     }
