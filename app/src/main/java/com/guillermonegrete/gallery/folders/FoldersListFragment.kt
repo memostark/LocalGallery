@@ -85,6 +85,8 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
     private lateinit var checkedOrder: Order
     private var tagIds = emptyList<Long>()
 
+    private var restoreItemSelections: List<Int>? = null
+
     private val disposable = CompositeDisposable()
 
     override fun onAttach(context: Context) {
@@ -237,7 +239,11 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
     override fun onDestroyView() {
         disposable.clear()
         adapter.removeLoadStateListener(loadListener)
-//        actionMode?.finish()
+        actionMode?.let {
+            // If actionMode wasn't null then most likely it wasn't closed by the user, save the selected items and use them to restore
+            restoreItemSelections = adapter.selectedItems.toList()
+            it.finish()
+        }
         binding.foldersList.adapter = null
         dragSelectTouchListener = null
         _binding = null
@@ -416,14 +422,23 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
 
 
     private fun restoreState(savedInstanceState: Bundle?) {
+
+        // Restore in case of config changes
         if (savedInstanceState != null) {
             val actionItems = savedInstanceState.getIntegerArrayList(ACTION_MODE_ITEMS_KEY)
-            if (actionItems != null) {
-                adapter.selectedItems.addAll(actionItems)
-                actionMode = (requireActivity() as AppCompatActivity).startSupportActionMode(actionModeCallback)
-                updateActionModeBar(actionItems.size)
-            }
+            if (actionItems != null) restoreActionMode(actionItems)
         }
+
+        // Because this fragment is the start destination the savedInstanceState is null when navigating back
+        // Restore when navigating back from another fragment
+        restoreItemSelections?.let(::restoreActionMode)
+    }
+
+    private fun restoreActionMode(items: List<Int>) {
+        adapter.selectedItems.addAll(items)
+        actionMode = (requireActivity() as AppCompatActivity).startSupportActionMode(actionModeCallback)
+        updateActionModeBar(items.size)
+        restoreItemSelections = null
     }
 
     private val loadListener  = { loadStates: CombinedLoadStates ->
