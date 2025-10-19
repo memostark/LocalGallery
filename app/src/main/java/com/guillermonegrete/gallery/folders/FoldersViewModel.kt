@@ -18,7 +18,6 @@ import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
-import io.reactivex.rxjava3.subjects.Subject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import javax.inject.Inject
 
@@ -28,14 +27,14 @@ class FoldersViewModel @Inject constructor(
     private val filesRepository: FilesRepository
 ): ViewModel() {
 
-    private val forceUpdate: Subject<Boolean> = BehaviorSubject.createDefault(true)
+    private val forceUpdate = BehaviorSubject.createDefault(true)
 
-    val urlAvailable: Subject<Boolean> = PublishSubject.create()
+    val urlAvailable = PublishSubject.create<Boolean>()
 
-    private var searchQuery: Subject<String> = BehaviorSubject.createDefault("")
+    private var searchQuery = BehaviorSubject.createDefault("")
 
-    private val sort: Subject<ListFilter> = BehaviorSubject.createDefault(ListFilter())
-    private val tags: BehaviorSubject<List<Long>> = BehaviorSubject.createDefault(emptyList())
+    private val sort = PublishSubject.create<ListFilter>()
+    private val tags = BehaviorSubject.createDefault(emptyList<Long>())
 
     var folderSelection = -1
 

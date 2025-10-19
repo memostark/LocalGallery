@@ -1,5 +1,6 @@
 package com.guillermonegrete.gallery.folders
 
+import android.view.View
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.paging.AsyncPagingDataDiffer
 import androidx.paging.PagingData
@@ -9,6 +10,8 @@ import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.source.FakeFilesRepository
 import com.guillermonegrete.gallery.data.source.FakeSettingsRepository
 import com.guillermonegrete.gallery.folders.models.FolderUI
+import io.mockk.every
+import io.mockk.mockkStatic
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.*
@@ -56,6 +59,8 @@ class FoldersViewModelTest {
 
     @Before
     fun setUp(){
+        mockkStatic(View::class)
+        every { View.generateViewId() } returns 10
         settingsRepository = FakeSettingsRepository()
         filesRepository = FakeFilesRepository()
         viewModel = FoldersViewModel(
@@ -71,11 +76,11 @@ class FoldersViewModelTest {
         settingsRepository.serverUrl = ""
 
         val urlObserver = viewModel.urlAvailable.test()
+        val foldersObserver = viewModel.pagedFolders.test()
 
         viewModel.getFolders()
         // When url is not set. flow shouldn't be emitting
-        viewModel.pagedFolders.test()
-            .assertEmpty()
+        foldersObserver.assertEmpty()
 
         // Url not set
         urlObserver.assertValues(false)
@@ -88,7 +93,7 @@ class FoldersViewModelTest {
 
         // Sets observer, otherwise flow won't emit
         val urlObserver = viewModel.urlAvailable.test()
-        viewModel.pagedFolders.test()
+        val folderObserver = viewModel.pagedFolders.test()
 
         viewModel.getFolders()
 
@@ -96,9 +101,9 @@ class FoldersViewModelTest {
         urlObserver.assertValues(true)
 
         // Assert default items emitted
-        val resultPaging = viewModel.pagedFolders.blockingFirst()
-        val resultItems = getItems(resultPaging)
-        assertEquals(defaultUIFolders, resultItems)
+        folderObserver.assertValue {
+            defaultUIFolders == getItems(it)
+        }
     }
 
     @Test
@@ -116,20 +121,21 @@ class FoldersViewModelTest {
         // save new server address
         val newURL = "new-url"
         viewModel.updateServerUrl(newURL)
-        viewModel.pagedFolders.test()
+        val folderObserver = viewModel.pagedFolders.test()
         viewModel.getFolders()
 
         // Assert new url set
         assertEquals(settingsRepository.serverUrl, newURL)
 
         // Assert default items emitted
-        val items = getItems(viewModel.pagedFolders.blockingFirst())
-        assertEquals(defaultUIFolders, items)
+        folderObserver.assertValue {
+            defaultUIFolders == getItems(it)
+        }
     }
 
     @Test
     fun `Given no folders in root, when load, no folders layout shown`(){
-        viewModel.pagedFolders.test()
+        val folderObserver = viewModel.pagedFolders.test()
 
         // Set folders list as empty
         filesRepository.foldersServiceData = arrayListOf()
@@ -141,8 +147,9 @@ class FoldersViewModelTest {
         // When
         viewModel.getFolders()
 
-        val items = getItems(viewModel.pagedFolders.blockingFirst())
-        assertEquals(emptyList<FolderUI>(), items)
+        folderObserver.assertValue {
+            getItems(it).isEmpty()
+        }
     }
 
     /**

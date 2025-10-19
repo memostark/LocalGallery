@@ -33,7 +33,7 @@ interface FilesServerAPI{
     @POST("folders/{folderId}/files")
     fun getPagedFilesByTag(
         @Path(value="folderId") folderId: Long,
-        @Body fileIds: List<Long>,
+        @Body tagIds: List<Long>,
         @Query("page") page: Int,
         @Query("sort") sort: String? = null,
         @Query("size") size: Int = 30,
@@ -48,7 +48,7 @@ interface FilesServerAPI{
 
     @POST("files")
     fun getAllFilesByTags(
-        @Body fileIds: FilterTags,
+        @Body tags: FilterTags,
         @Query("page") page: Int,
         @Query("sort") sort: String? = null,
         @Query("size") size: Int = 30,
