@@ -14,6 +14,16 @@ class FakeFoldersApi: FoldersAPI {
         TODO("Not yet implemented")
     }
 
+    override fun getPagedFoldersByTags(
+        fileIds: List<Long>,
+        page: Int,
+        query: String?,
+        sort: String?,
+        size: Int
+    ): Single<PagedFolderResponse> {
+        TODO("Not yet implemented")
+    }
+
     override fun updateFolderCover(id: Long, fileId: Long): Single<Folder> {
         TODO("Not yet implemented")
     }

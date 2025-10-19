@@ -1,8 +1,11 @@
 package com.guillermonegrete.gallery.files
 
+import android.view.View
 import com.guillermonegrete.gallery.data.ImageFile
 import com.guillermonegrete.gallery.data.source.FakeFilesRepository
 import com.guillermonegrete.gallery.data.source.FakeSettingsRepository
+import io.mockk.every
+import io.mockk.mockkStatic
 import org.junit.Before
 import org.junit.Test
 
@@ -23,6 +26,9 @@ class FilesViewModelTest {
 
     @Before
     fun setUp(){
+        mockkStatic(View::class)
+        every { View.generateViewId() } returns 10
+
         filesRepository = FakeFilesRepository()
         settings = FakeSettingsRepository()
         viewModel = FilesViewModel(filesRepository, settings)

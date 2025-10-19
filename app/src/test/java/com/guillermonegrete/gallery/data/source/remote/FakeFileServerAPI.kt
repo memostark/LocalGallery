@@ -39,7 +39,7 @@ class FakeFileServerAPI(folderServiceData: LinkedHashMap<Folder, List<FileRespon
 
     override fun getPagedFilesByTag(
         folderId: Long,
-        tagId: Long,
+        tagIds: List<Long>,
         page: Int,
         sort: String?,
         size: Int
@@ -55,8 +55,8 @@ class FakeFileServerAPI(folderServiceData: LinkedHashMap<Folder, List<FileRespon
         TODO("Not yet implemented")
     }
 
-    override fun getAllFilesByTag(
-        tagId: Long,
+    override fun getAllFilesByTags(
+        tags: FilterTags,
         page: Int,
         sort: String?,
         size: Int

@@ -27,10 +27,11 @@ class DefaultFilesRepositoryTest {
         val filesMap = linkedMapOf(
             defaultFolders[0] to defaultFiles[0],
             defaultFolders[1] to defaultFiles[1],
-            defaultFolders[2] to defaultFiles[2]
         )
 
-        repository = DefaultFilesRepository(FakeFileServerAPI(filesMap), FakeFoldersApi())
+        val fileApi = FakeFileServerAPI(filesMap)
+        repository = DefaultFilesRepository(fileApi, FakeFoldersApi())
+        fileApi.addFolder(defaultFolders[2], defaultFiles[2])
     }
 
     @Test
