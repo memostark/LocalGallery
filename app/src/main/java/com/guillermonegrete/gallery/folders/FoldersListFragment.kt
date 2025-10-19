@@ -236,14 +236,18 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
         super.onSaveInstanceState(outState)
     }
 
+    override fun onStop() {
+        super.onStop()
+        // Save the items in this method instead of onDestroyView() because the new fragment can have its onCreateView() method called and re-start the action mode before
+        // this fragment's view is destroyed, this would cause the actionMode variable to be null before onDestroyView() is called.
+        // If actionMode isn't null then most likely it wasn't closed by the user, save the selected items and use them to restore
+        restoreItemSelections = if (actionMode != null) adapter.selectedItems.toList() else null
+    }
+
     override fun onDestroyView() {
         disposable.clear()
         adapter.removeLoadStateListener(loadListener)
-        actionMode?.let {
-            // If actionMode wasn't null then most likely it wasn't closed by the user, save the selected items and use them to restore
-            restoreItemSelections = adapter.selectedItems.toList()
-            it.finish()
-        }
+        actionMode?.finish()
         binding.foldersList.adapter = null
         dragSelectTouchListener = null
         _binding = null
