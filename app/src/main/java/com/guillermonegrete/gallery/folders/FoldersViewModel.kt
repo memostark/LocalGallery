@@ -41,25 +41,29 @@ class FoldersViewModel @Inject constructor(
     var showBottomSheet by mutableStateOf<Long?>(null)
         private set
 
+    var pagedFolders = createPageFlow()
+        private set
+
     @OptIn(ExperimentalCoroutinesApi::class)
-    val pagedFolders = tags.distinctUntilChanged().switchMap { tagIds ->
-        sort.distinctUntilChanged().switchMap { filter ->
-            searchQuery.distinctUntilChanged().switchMap { query ->
-                val finalQuery = query.ifEmpty { null }
-                forceUpdate.switchMap {
-                    filesRepository.getPagedFolders(tagIds, finalQuery, "${filter.sortType},${filter.order}")
-                        .map { pagingData ->
-                            pagingData.map { folder -> FolderUI.Model(folder) }
-                                .insertSeparators { before: FolderUI.Model?, after: FolderUI.Model? ->
-                                    if (before == null && after != null)
-                                        return@insertSeparators FolderUI.HeaderModel(after.title ?: "")
-                                    return@insertSeparators null
-                                }
-                        }.toObservable()
+    fun createPageFlow() =
+        tags.distinctUntilChanged().switchMap { tagIds ->
+            sort.distinctUntilChanged().switchMap { filter ->
+                searchQuery.distinctUntilChanged().switchMap { query ->
+                    val finalQuery = query.ifEmpty { null }
+                    forceUpdate.switchMap {
+                        filesRepository.getPagedFolders(tagIds, finalQuery, "${filter.sortType},${filter.order}")
+                            .map { pagingData ->
+                                pagingData.map { folder -> FolderUI.Model(folder) }
+                                    .insertSeparators { before: FolderUI.Model?, after: FolderUI.Model? ->
+                                        if (before == null && after != null)
+                                            return@insertSeparators FolderUI.HeaderModel(after.title ?: "")
+                                        return@insertSeparators null
+                                    }
+                            }.toObservable()
+                    }
                 }
             }
-        }
-    }.toFlowable(BackpressureStrategy.LATEST).cachedIn(viewModelScope)
+        }.toFlowable(BackpressureStrategy.LATEST).cachedIn(viewModelScope)
 
     fun getDialogData(): Single<String> {
         return settings.getServerUrl()
@@ -68,6 +72,8 @@ class FoldersViewModel @Inject constructor(
     fun updateServerUrl(url: String) {
         settings.saveServerURL(url)
         if(url.isEmpty()) {
+            // The only way to clear the flowable is by creating a new one.
+            pagedFolders = createPageFlow()
             urlAvailable.onNext(false)
         } else {
             urlAvailable.onNext(true)
