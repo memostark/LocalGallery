@@ -45,12 +45,12 @@ import com.guillermonegrete.gallery.data.TagType
 import com.guillermonegrete.gallery.data.source.remote.FilterTags
 import com.guillermonegrete.gallery.databinding.ChoiceChipBinding
 import com.guillermonegrete.gallery.databinding.DialogFileOrderByBinding
-import com.guillermonegrete.gallery.databinding.FragmentFoldersListBinding
 import com.guillermonegrete.gallery.files.SortField
 import com.guillermonegrete.gallery.files.details.AddTagFragment
 import com.guillermonegrete.gallery.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.withCreationCallback
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.parcelize.Parcelize
 import timber.log.Timber
@@ -134,6 +134,7 @@ class SortingDialog: BottomSheetDialogFragment() {
             var hasFolderTag = false
 
             disposable.add(viewModel.tags
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                     { tags ->
                         chipScroll.isVisible = true

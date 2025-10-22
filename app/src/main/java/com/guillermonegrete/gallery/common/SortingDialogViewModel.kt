@@ -8,7 +8,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import timber.log.Timber
@@ -34,14 +33,12 @@ class SortingDialogViewModel @AssistedInject constructor(
     private fun loadTags(folderId: Long) {
         val tagSource = if(folderId == GET_ALL_TAGS) tagRepository.getTags() else tagRepository.getTags(folderId)
         disposable.add(tagSource
-            .observeOn(AndroidSchedulers.mainThread())
             .subscribe(this.tags::onNext, Timber::e)
         )
     }
 
     fun loadFolderTags() {
         disposable.add(tagRepository.getFolderTags()
-            .observeOn(AndroidSchedulers.mainThread())
             .subscribe(this.tags::onNext, Timber::e)
         )
     }
