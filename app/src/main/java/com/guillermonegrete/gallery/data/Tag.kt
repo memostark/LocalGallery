@@ -10,8 +10,8 @@ import java.util.*
 @Parcelize
 data class Tag(
     val name: String,
-    val creationDate: Date,
-    val id: Long,
+    val creationDate: Date = Date(),
+    val id: Long = 0L,
 ): Parcelable {
 
     @Json(name = "tag_type") var type: TagType? = null
