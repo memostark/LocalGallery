@@ -1,7 +1,6 @@
 package com.guillermonegrete.gallery.common
 
 import com.guillermonegrete.gallery.data.source.SettingsRepository
-import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.Interceptor
 import okhttp3.Response
@@ -19,17 +18,16 @@ class HostSelectionInterceptor(private val settings: SettingsRepository): Interc
         val urlString = settings.getServerURL()
         val parsedUrl = "http://$urlString".toHttpUrlOrNull()
 
-        val newUrl = if(parsedUrl != null) {
-            request.url.newBuilder()
+        if(parsedUrl != null) {
+            val newUrl = request.url.newBuilder()
                 .host(parsedUrl.host)
                 .port(parsedUrl.port)
                 .build()
-        } else {
-            HttpUrl.Builder().build()
+
+            request = request.newBuilder()
+                .url(newUrl)
+                .build()
         }
-        request = request.newBuilder()
-            .url(newUrl)
-            .build()
 
         return chain.proceed(request)
     }
