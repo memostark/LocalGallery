@@ -42,7 +42,7 @@ class AddTagViewModel @AssistedInject constructor(
 
     private fun loadTags() {
         val tagSource = if(tagType == TagType.File) tagRepository.getFileTags() else tagRepository.getFolderTags()
-        disposable.add(tagSource.subscribe(this.tags::onNext, Timber::e))
+        disposable.add(tagSource.subscribe(tags::onNext, ::handleLoadTagsError))
     }
 
     private fun loadAppliedFolderTags(folderId: Long) {
@@ -73,6 +73,14 @@ class AddTagViewModel @AssistedInject constructor(
         tags.value?.let {
             val newTags = it.toMutableSet()
             tags.onNext(newTags)
+        }
+    }
+
+    private fun handleLoadTagsError(throwable: Throwable) {
+        if (throwable is NoSuchElementException) { // Server returns this when no tags exist
+            tags.onNext(emptySet())
+        } else {
+            Timber.e(throwable)
         }
     }
 
