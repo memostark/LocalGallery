@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.core.os.bundleOf
 import androidx.core.widget.doAfterTextChanged
+import androidx.fragment.app.clearFragmentResult
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
@@ -177,6 +178,8 @@ class AddTagFragment: BottomSheetDialogFragment() {
                 REQUEST_KEY,
                 Bundle().apply { putParcelableArrayList(TAGS_KEY, ArrayList(viewModel.appliedTags)) }
             )
+            // This makes sure only the current listening fragments get the result, avoids other fragments getting it later when the result is no longer valid
+            clearFragmentResult(REQUEST_KEY)
         }
     }
 
