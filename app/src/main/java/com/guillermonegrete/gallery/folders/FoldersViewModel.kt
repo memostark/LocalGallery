@@ -33,7 +33,7 @@ class FoldersViewModel @Inject constructor(
 
     private var searchQuery = BehaviorSubject.createDefault("")
 
-    private val sort = PublishSubject.create<ListFilter>()
+    private val sort = BehaviorSubject.create<ListFilter>()
     private val tags = BehaviorSubject.createDefault(emptyList<Long>())
 
     var folderSelection = -1
