@@ -102,6 +102,13 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        index = savedInstanceState?.getInt(SAVED_INDEX_KEY) ?: args.fileIndex
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        _binding = FragmentFileDetailsBinding.bind(view)
+
         setFragmentResultListener(AddTagFragment.REQUEST_KEY) { _, result ->
             // Instead of using the snapshot list, the recommended approach to update an item is updating a cache source
             // and reloading from there (like a database) as explained here: https://stackoverflow.com/a/63139535/10244759
@@ -111,12 +118,6 @@ class FileDetailsFragment : Fragment(R.layout.fragment_file_details) {
             adapter.snapshot().items[pos].tags = newTags
             adapter.notifyItemChanged(pos)
         }
-        index = savedInstanceState?.getInt(SAVED_INDEX_KEY) ?: args.fileIndex
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        _binding = FragmentFileDetailsBinding.bind(view)
 
         shouldSetIndex = true
 
