@@ -8,12 +8,17 @@ import android.view.ViewGroup
 import android.widget.RadioButton
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Surface
@@ -24,7 +29,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,7 +50,6 @@ import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.data.TagType
 import com.guillermonegrete.gallery.data.source.remote.FilterTags
-import com.guillermonegrete.gallery.databinding.ChoiceChipBinding
 import com.guillermonegrete.gallery.databinding.DialogFileOrderByBinding
 import com.guillermonegrete.gallery.files.SortField
 import com.guillermonegrete.gallery.files.details.AddTagFragment
@@ -75,6 +81,7 @@ class SortingDialog: BottomSheetDialogFragment() {
     private var checkedFolderTagIds = mutableSetOf<Long>()
 
     private val tagsState = mutableStateListOf<Tag>()
+    private val fileTagsState = mutableStateListOf<Tag>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -130,42 +137,23 @@ class SortingDialog: BottomSheetDialogFragment() {
             val folderList = folderId == FOLDER_TAGS
             val isSingleFolder = !folderList && folderId != GET_ALL_TAGS
 
-            var hasFileTag = false
-            var hasFolderTag = false
-
             disposable.add(viewModel.tags
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                     { tags ->
-                        chipScroll.isVisible = true
-                        folderChipScroll.isVisible = true
+                        val fileTags = mutableListOf<Tag>()
                         val folderTags = mutableListOf<Tag>()
                         tags.forEach { tag ->
-                            val chip =  ChoiceChipBinding.inflate(LayoutInflater.from(context)).root
-                            val isFileTag = tag.type == TagType.File
-                            if (isFileTag) {
-                                hasFileTag = true
-                                val text = "${tag.name} (${tag.count})"
-                                chip.id = tag.id.toInt()
-                                chip.text = text
-                                if (tag.id in args.selections.tags.fileTagIds) {
-                                    checkedFileTagIds.add(tag.id)
-                                    chip.isChecked = true
-                                    clearTagsButton.isVisible = true
-                                }
-                                chip.setOnCheckedChangeListener { _, isChecked ->
-                                    if (isChecked) checkedFileTagIds.add(tag.id) else checkedFileTagIds.remove(tag.id)
-                                    updateClearButton()
-                                }
-                                tagsGroup.addView(chip)
+                            if (tag.type == TagType.File) {
+                                fileTags.add(tag)
                             } else {
-                                hasFolderTag = true
                                 folderTags.add(tag)
                             }
                         }
                         tagsState.clear()
                         tagsState.addAll(folderTags)
-                        tagsSeparator.isVisible = hasFileTag && (hasFolderTag || isSingleFolder) // single folder always has the add tag chip
+                        fileTagsState.clear()
+                        fileTagsState.addAll(fileTags)
                     },
                     Timber::e
                 )
@@ -175,38 +163,63 @@ class SortingDialog: BottomSheetDialogFragment() {
                 setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
                 setContent {
                     val selectedTags = rememberSaveable { args.selections.tags.folderTagIds.toMutableStateList() }
+                    val selectedFileTags = rememberSaveable { args.selections.tags.fileTagIds.toMutableStateList() }
 
                     clearTagsButton.setOnClickListener {
-                        tagsGroup.clearCheck()
                         checkedFileTagIds.clear()
                         checkedFolderTagIds.clear()
                         selectedTags.clear()
+                        selectedFileTags.clear()
                         clearTagsButton.isVisible = false
                     }
+                    checkedFileTagIds.addAll(selectedFileTags.toList())
                     checkedFolderTagIds.addAll(selectedTags.toList())
                     updateClearButton()
 
                     AppTheme {
-                        TagGroup(
-                            tagsState.toList(),
-                            selectedTags.toList(),
-                            isSingleFolder,
-                            folderList,
-                            onAddClicked = {
-                                val action = NavGraphDirections.globalToAddTagFragment(longArrayOf(folderId), tagsState.toTypedArray(), TagType.Folder)
-                                findNavController().navigate(action)
-                            },
-                            onCheckedStateChange = { id, isChecked ->
-                                if (isChecked) {
-                                    checkedFolderTagIds.add(id)
-                                    selectedTags.add(id)
-                                } else {
-                                    checkedFolderTagIds.remove(id)
-                                    selectedTags.remove(id)
+                        Column {
+                            TagGroup(
+                                fileTagsState.toList(),
+                                selectedFileTags.toList(),
+                                canAddTag = false,
+                                showCount = true,
+                                onCheckedStateChange = { id, isChecked ->
+                                    if (isChecked) {
+                                        checkedFileTagIds.add(id)
+                                        selectedFileTags.add(id)
+                                    } else {
+                                        checkedFileTagIds.remove(id)
+                                        selectedFileTags.remove(id)
+                                    }
+                                    updateClearButton()
                                 }
-                                updateClearButton()
-                            }
-                        )
+                            )
+
+                            if (fileTagsState.isNotEmpty() &&
+                                (tagsState.isNotEmpty() || isSingleFolder)) HorizontalDivider()
+
+                            TagGroup(
+                                tagsState.toList(),
+                                selectedTags.toList(),
+                                isSingleFolder,
+                                folderList,
+                                onAddClicked = {
+                                    val action = NavGraphDirections.globalToAddTagFragment(longArrayOf(folderId), tagsState.toTypedArray(), TagType.Folder)
+                                    findNavController().navigate(action)
+                                },
+                                onCheckedStateChange = { id, isChecked ->
+                                    if (isChecked) {
+                                        checkedFolderTagIds.add(id)
+                                        selectedTags.add(id)
+                                    } else {
+                                        checkedFolderTagIds.remove(id)
+                                        selectedTags.remove(id)
+                                    }
+                                    updateClearButton()
+                                }
+                            )
+                        }
+
                     }
                 }
             }
@@ -291,7 +304,13 @@ fun TagGroup(
 ) {
     val selectedTags = remember(selectedTags) { selectedTags.toMutableStateList() }
 
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .heightIn(0.dp, 200.dp)
+            .nestedScroll(rememberNestedScrollInteropConnection())
+            .verticalScroll(rememberScrollState())
+    ) {
         if (canAddTag) {
             val icon = tags.isNotEmpty()
             AssistChip(
