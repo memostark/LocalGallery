@@ -304,6 +304,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
     }
 
     private fun setTagsUpdateListener() {
+        // Handle tag applied to many files
         setFragmentResultListener(AddTagFragment.SELECT_TAG_REQUEST_KEY) { _, bundle ->
             val newTag = BundleCompat.getParcelable(bundle, AddTagFragment.SELECTED_TAG_KEY, Tag::class.java) ?: return@setFragmentResultListener
             val ids = bundle.getLongArray(AddTagFragment.UPDATED_ITEMS_IDS_KEY) ?: return@setFragmentResultListener
@@ -330,6 +331,17 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                 if (act is MainActivity) act.showSnackBar(message)
                 else Snackbar.make(binding.filesFragmentRoot, message, Snackbar.LENGTH_SHORT).show()
             }
+        }
+
+        // Handles tag changes to a single file
+        setFragmentResultListener(AddTagFragment.REQUEST_KEY) { _, result ->
+            // Instead of using the snapshot list, the recommended approach to update an item is updating a cache source
+            // and reloading from there (like a database) as explained here: https://stackoverflow.com/a/63139535/10244759
+            // However this reload may force to reload the images which may be more wasteful
+            val newTags = BundleCompat.getParcelableArrayList(result, AddTagFragment.TAGS_KEY, Tag::class.java) ?: return@setFragmentResultListener
+            val pos = adapter.getSingleSelectionPos() ?: return@setFragmentResultListener
+            adapter.snapshot().items[pos].tags = newTags
+            adapter.notifyItemChanged(pos)
         }
     }
 }
