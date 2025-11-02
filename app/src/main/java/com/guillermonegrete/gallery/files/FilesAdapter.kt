@@ -143,6 +143,8 @@ class FilesAdapter(
         }
     }
 
+    fun getSingleSelectionPos() = if (selectedItems.size == 1) selectedItems.first() else null
+
     fun getSingleSelectedItem() = if (selectedItems.size == 1) peek(selectedItems.first()) else null
 }
 
