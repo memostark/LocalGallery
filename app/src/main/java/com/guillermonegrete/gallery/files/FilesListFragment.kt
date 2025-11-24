@@ -20,6 +20,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
+import androidx.paging.map
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.guillermonegrete.gallery.NavGraphDirections
@@ -27,7 +28,10 @@ import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.common.Order
 import com.guillermonegrete.gallery.common.SortDialogChecked
 import com.guillermonegrete.gallery.common.SortingDialog
+import com.guillermonegrete.gallery.data.File
+import com.guillermonegrete.gallery.data.FileInfoResponse
 import com.guillermonegrete.gallery.data.Folder
+import com.guillermonegrete.gallery.data.ImageFile
 import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.data.source.SettingsRepository
 import com.guillermonegrete.gallery.data.source.remote.FilterTags
@@ -143,7 +147,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                 }
 
             }
-            ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { v, viewInsets ->
+            ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { _, viewInsets ->
                 val insets = viewInsets.getInsets(WindowInsetsCompat.Type.systemBars())
                 binding.toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin = insets.top }
                 filesList.updatePadding(left = insets.left, right = insets.right, bottom = insets.bottom)
@@ -192,11 +196,15 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         list.adapter = adapter
 
         disposable.addAll(
-            viewModel.cachedFileList
+            viewModel.imageInfo
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                    { adapter.submitData(lifecycle, it) },
-                    { error -> Timber.e(error,"Error loading files") }
+                    { infoResponse ->
+                        setFileFlowable(infoResponse, folder)
+                        if (viewModel.width != width) viewModel.setListWidth(width)
+                        viewModel.setFolderName(folder)
+                    },
+                    { error -> Timber.e(error,"Error updating rows") }
                 ),
             viewModel.updateRows
                 .observeOn(AndroidSchedulers.mainThread())
@@ -227,7 +235,7 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         )
 
         if (viewModel.width != width) viewModel.setListWidth(width)
-        viewModel.setFolderName(folder)
+//        viewModel.setFolderName(folder)
         // When navigating back to files list, reset the details sheet to hidden
         viewModel.setSheet(false)
     }
@@ -260,6 +268,38 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                 actionMode?.title = "(${actionItems.size})"
             }
         }
+    }
+
+    private fun setFileFlowable(fileInfo: FileInfoResponse, folder: Folder) {
+        val url = viewModel.getURL()
+        val thumbnailSizes = fileInfo.thumbnailSizes
+        val sizes = thumbnailSizes.values
+        val originalSize = thumbnailSizes.entries.find { it.value == 0 }?.key ?: ""
+
+        disposable.add(
+            viewModel.cachedFileList
+                .map { data -> data.map { file ->
+                    val size = getThumbnailSize(file, sizes, thumbnailSizes) ?: originalSize
+                    val thumbnailUrl =
+                        if (!(size == originalSize && file is ImageFile))
+                            "http://$url/thumbnails/${file.folder?.name ?: folder.name}/${file.filename}?size=$size"
+                        else
+                            null
+                    file.apply { thumbnail = thumbnailUrl }
+                } }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    { adapter.submitData(lifecycle, it) },
+                    { error -> Timber.e(error,"Error loading files") }
+                )
+        )
+    }
+
+    private fun getThumbnailSize(file: File, sizes: Collection<Int>, info: Map<String, Int>): String? {
+        val size = sizes.find { it >= file.displayWidth && it < file.width }
+        return if (size != null) {
+            info.entries.find { size == it.value }?.key
+        } else null
     }
 
     companion object{

@@ -103,7 +103,7 @@ class FilesAdapter(
             selectedIcon.isVisible = multiSelect
 
             Glide.with(itemView)
-                .load(item.name)
+                .load(item.thumbnail ?: item.name)
                 .placeholder(R.drawable.ic_image_24dp)
                 .override(item.displayWidth, item.displayHeight)
                 .centerCrop() // stretch the image to fit the view to avoid showing gaps

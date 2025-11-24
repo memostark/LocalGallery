@@ -7,6 +7,7 @@ import androidx.paging.map
 import androidx.paging.rxjava3.cachedIn
 import com.guillermonegrete.gallery.common.Order
 import com.guillermonegrete.gallery.data.File
+import com.guillermonegrete.gallery.data.FileInfoResponse
 import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.source.FilesRepository
 import com.guillermonegrete.gallery.data.source.SettingsRepository
@@ -17,14 +18,17 @@ import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
 import io.reactivex.rxjava3.subjects.Subject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import javax.inject.Inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class FilesViewModel @Inject constructor(
     private val filesRepository: FilesRepository,
     private val settings: SettingsRepository
 ): ViewModel() {
 
+    val imageInfo: BehaviorSubject<FileInfoResponse> = BehaviorSubject.create()
     val openDetails: Subject<Int> = PublishSubject.create()
     val updateRows: Subject<List<UpdatedRow>> = PublishSubject.create()
 
@@ -55,6 +59,10 @@ class FilesViewModel @Inject constructor(
     private val arMax = 3.0f
 
     var width = 0
+
+    init {
+        imageInfo.onNext(FileInfoResponse(mapOf("original" to 0, "small" to 100, "medium" to 350, "large" to 600, "extralarge" to 850)))
+    }
 
     private val filesFlow = tags.distinctUntilChanged().switchMap { tagIds ->
         filter.distinctUntilChanged().switchMap { filter ->
@@ -169,6 +177,8 @@ class FilesViewModel @Inject constructor(
     fun setListWidth(width: Int){
         widthSubject.onNext(width)
     }
+
+    fun getURL() = settings.getServerURL()
 
     fun isAutoplayEnabled() = settings.getAutoPlayMode()
 
