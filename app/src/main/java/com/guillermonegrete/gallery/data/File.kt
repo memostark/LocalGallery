@@ -1,12 +1,10 @@
 package com.guillermonegrete.gallery.data
 
-import java.lang.Exception
-import java.net.URL
 import java.util.*
-import java.io.File as JavaFile
 
 sealed class File(
     val name: String, // actually an URL with name of the file
+    val filename: String,
     val width: Int,
     val height: Int,
     /**
@@ -24,12 +22,14 @@ sealed class File(
     val folder: Folder?,
     val id: Long,
 ) {
-    val filename: String =  try { JavaFile(URL(name).path).name ?: name } catch (e: Exception) { name } // Maybe it will be better if backend gives the filename
-    val sizeText: String = "${width}x$height"
+    val sizeText by lazy { "${width}x$height" }
+
+    var thumbnail: String? = null
 }
 
 class ImageFile(
     name: String,
+    filename: String = "",
     width: Int = 0,
     height: Int = 0,
     displayWidth: Int = 0,
@@ -39,7 +39,7 @@ class ImageFile(
     tags: List<Tag> = listOf(),
     folder: Folder? = null,
     id: Long,
-): File(name, width, height, displayWidth, displayHeight, creationDate, lastModified, tags, folder, id){
+): File(name, filename, width, height, displayWidth, displayHeight, creationDate, lastModified, tags, folder, id){
     // To make testing easier when comparing and simulate a data class
     override fun equals(other: Any?) =
         if(other is ImageFile) name == other.name && displayWidth == other.displayWidth && displayHeight == other.displayHeight else false
@@ -48,6 +48,7 @@ class ImageFile(
 }
 class VideoFile(
     name: String,
+    filename: String = "",
     width: Int = 0,
     height: Int = 0,
     displayWidth: Int = 0,
@@ -58,4 +59,4 @@ class VideoFile(
     tags: List<Tag> = listOf(),
     folder: Folder? = null,
     id: Long,
-): File(name, width, height, displayWidth, displayHeight, creationDate, lastModified, tags, folder, id)
+): File(name, filename, width, height, displayWidth, displayHeight, creationDate, lastModified, tags, folder, id)

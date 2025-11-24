@@ -5,6 +5,7 @@ import java.util.*
 
 sealed class FileResponse(
     val url: String,
+    val filename: String,
     val width: Int,
     val height: Int,
     val creationDate: Date,
@@ -12,7 +13,7 @@ sealed class FileResponse(
     val tags: List<Tag> = listOf(),
     val folder: Folder? = null,
     val id: Long,
-    @Json(name = "file_type") val type: FileType
+    @get:Json(name = "file_type") val type: FileType
 ){
     abstract fun toFile(): File
 
@@ -23,6 +24,7 @@ sealed class FileResponse(
 
 class ImageFileResponse(
     url: String,
+    filename: String,
     width: Int,
     height: Int,
     creationDate: Date,
@@ -30,15 +32,17 @@ class ImageFileResponse(
     tags: List<Tag>,
     folder: Folder?,
     id: Long,
-): FileResponse(url, width, height, creationDate, lastModified, tags, folder, id, FileType.Image){
+): FileResponse(url, filename, width, height, creationDate, lastModified, tags, folder, id, FileType.Image){
 
-    constructor(url: String, width: Int, height: Int): this(url, width, height, Date(), Date(), listOf(), null, 0)
+    // Constructor for testing
+    constructor(url: String, width: Int, height: Int): this(url, "", width, height, Date(), Date(), listOf(), null, 0)
 
-    override fun toFile() = ImageFile(url, width, height, 0, 0, creationDate, lastModified, tags, folder, id)
+    override fun toFile() = ImageFile(url, filename, width, height, 0, 0, creationDate, lastModified, tags, folder, id)
 }
 
 class VideoFileResponse(
     url: String,
+    filename: String,
     width: Int,
     height: Int,
     creationDate: Date,
@@ -47,12 +51,18 @@ class VideoFileResponse(
     folder: Folder?,
     private val duration: Int,
     id: Long,
-): FileResponse(url, width, height, creationDate, lastModified, tags, folder, id, FileType.Video){
-    constructor(url: String, width: Int, height: Int, duration: Int): this(url, width, height, Date(), Date(), listOf(), null, duration, 0)
-    override fun toFile() = VideoFile(url, width, height, 0, 0, creationDate, lastModified, duration, tags, folder, id)
+): FileResponse(url, filename, width, height, creationDate, lastModified, tags, folder, id, FileType.Video){
+    // Constructor for testing
+    constructor(url: String, width: Int, height: Int, duration: Int): this(url, "", width, height, Date(), Date(), listOf(), null, duration, 0)
+    override fun toFile() = VideoFile(url, filename, width, height, 0, 0, creationDate, lastModified, duration, tags, folder, id)
 }
 
 enum class FileType{
     Image,
     Video
 }
+
+data class FileInfoResponse(
+    @get:Json(name = "thumbnail_sizes")
+    val thumbnailSizes: Map<String, Int>
+)
