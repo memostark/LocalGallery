@@ -1,6 +1,7 @@
 package com.guillermonegrete.gallery.data.source.remote
 
 import android.os.Parcelable
+import com.guillermonegrete.gallery.data.FileInfoResponse
 import com.guillermonegrete.gallery.data.FileResponse
 import com.guillermonegrete.gallery.data.GetFolderResponse
 import com.guillermonegrete.gallery.data.PagedFileResponse
@@ -53,6 +54,9 @@ interface FilesServerAPI{
         @Query("sort") sort: String? = null,
         @Query("size") size: Int = 30,
     ): Single<PagedFileResponse>
+
+    @GET("files/info")
+    fun getFilesInfo(): Single<FileInfoResponse>
 }
 
 @Parcelize

@@ -15,6 +15,7 @@ import com.guillermonegrete.gallery.data.source.remote.FilterTags
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
 import io.reactivex.rxjava3.subjects.Subject
@@ -50,6 +51,8 @@ class FilesViewModel @Inject constructor(
     var audioOn = true
     val detailsState: BehaviorSubject<DetailsUIState> = BehaviorSubject.createDefault(DetailsUIState())
 
+    private val disposable = CompositeDisposable()
+
     var folderId = -1L
         private set
 
@@ -61,7 +64,14 @@ class FilesViewModel @Inject constructor(
     var width = 0
 
     init {
-        imageInfo.onNext(FileInfoResponse(mapOf("original" to 0, "small" to 100, "medium" to 350, "large" to 600, "extralarge" to 850)))
+        getFilesInfo()
+    }
+
+    private fun getFilesInfo() {
+        disposable.add(
+            filesRepository.getFilesInfo()
+                .subscribe(imageInfo::onNext)
+        )
     }
 
     private val filesFlow = tags.distinctUntilChanged().switchMap { tagIds ->
@@ -77,7 +87,7 @@ class FilesViewModel @Inject constructor(
     }.cachedIn(viewModelScope)
 
     // The order in combineLatest() is important here, widthSubject must be first so every time it changes all the emissions of files get reprocessed with the new width
-    var cachedFileList = Observable.combineLatest(widthSubject, filesFlow) { width, pagingData ->
+    val cachedFileList = Observable.combineLatest(widthSubject, filesFlow) { width, pagingData ->
         this.width = width
         pagingData
     }.map { pagingData ->
@@ -144,6 +154,11 @@ class FilesViewModel @Inject constructor(
             }
         }
     }.toFlowable(BackpressureStrategy.LATEST).cachedIn(viewModelScope)
+
+    override fun onCleared() {
+        super.onCleared()
+        disposable.clear()
+    }
 
     fun openFilesDetails(index: Int){
         openDetails.onNext(index)

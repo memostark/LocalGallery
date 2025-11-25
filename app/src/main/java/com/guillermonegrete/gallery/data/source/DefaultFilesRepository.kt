@@ -44,4 +44,6 @@ class DefaultFilesRepository @Inject constructor(
 
     override fun updateFolderCover(id: Long, fileId: Long) = foldersAPI.updateFolderCover(id, fileId)
 
+    override fun getFilesInfo() = fileAPI.getFilesInfo()
+
 }
