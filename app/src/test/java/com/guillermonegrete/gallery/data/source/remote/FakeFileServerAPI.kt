@@ -1,6 +1,7 @@
 package com.guillermonegrete.gallery.data.source.remote
 
 import androidx.annotation.VisibleForTesting
+import com.guillermonegrete.gallery.data.FileInfoResponse
 import com.guillermonegrete.gallery.data.FileResponse
 import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.GetFolderResponse
@@ -61,6 +62,10 @@ class FakeFileServerAPI(folderServiceData: LinkedHashMap<Folder, List<FileRespon
         sort: String?,
         size: Int
     ): Single<PagedFileResponse> {
+        TODO("Not yet implemented")
+    }
+
+    override fun getFilesInfo(): Single<FileInfoResponse> {
         TODO("Not yet implemented")
     }
 

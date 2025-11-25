@@ -3,6 +3,7 @@ package com.guillermonegrete.gallery.data.source
 import androidx.annotation.VisibleForTesting
 import androidx.paging.PagingData
 import com.guillermonegrete.gallery.data.File
+import com.guillermonegrete.gallery.data.FileInfoResponse
 import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.GetFolderResponse
 import com.guillermonegrete.gallery.data.source.remote.FilterTags
@@ -48,6 +49,8 @@ class FakeFilesRepository: FilesRepository {
     override fun updateFolderCover(id: Long, fileId: Long): Single<Folder> {
         TODO("Not yet implemented")
     }
+
+    override fun getFilesInfo() = Single.just(FileInfoResponse(mapOf()))
 
     @VisibleForTesting
     fun addFolders(vararg folders: Folder) {
