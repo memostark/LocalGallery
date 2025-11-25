@@ -1,6 +1,5 @@
 package com.guillermonegrete.gallery.folders
 
-import androidx.annotation.StringRes
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso
@@ -71,7 +70,7 @@ class MainActivityTest {
         onView(withId(R.id.message_icon)).check(matches(isDisplayed()))
 
         // Add new  url
-        clickHiddenMenuItem(R.string.set_server_menu_title)
+        clickSetServerMenuItem()
         val fullUrl = server.url("/")
         val url = "127.0.0.1:" + fullUrl.port
         onView(withId(R.id.server_address_edit)).perform(typeText(url))
@@ -84,7 +83,7 @@ class MainActivityTest {
             .check(matches(atPosition(1, hasDescendant(withText("test item"))))) // First item
 
         // Delete url
-        clickHiddenMenuItem(R.string.set_server_menu_title)
+        clickSetServerMenuItem()
         onView(withId(R.id.server_address_edit)).perform(replaceText("")) // Use replaceText because typeText doesn't work a 2nd time
         clickOkDialog()
 
@@ -102,6 +101,7 @@ class MainActivityTest {
         val activityScenario = ActivityScenario.launch(MainActivity::class.java)
 
         // Navigate to files list of first folder
+        server.enqueue(MockResponse().setBody(FILES_INFO_RESPONSE))
         server.enqueue(MockResponse().setBody(FILES_RESPONSE))
         onView(withId(R.id.folders_list))
             .perform(
@@ -124,11 +124,11 @@ class MainActivityTest {
         activityScenario.close()
     }
 
-    private fun clickHiddenMenuItem(@StringRes stringId: Int) {
+    private fun clickSetServerMenuItem() {
         val context = getInstrumentation().targetContext
         openActionBarOverflowOrOptionsMenu(context)
 
-        val setServerText = context.getString(stringId)
+        val setServerText = context.getString(R.string.set_server_menu_title)
         onView(withText(setServerText)).perform(click())
     }
 
@@ -182,11 +182,24 @@ class MainActivityTest {
             }
         """.trimIndent()
 
+        val FILES_INFO_RESPONSE = """
+            {
+                "thumbnail_sizes": {
+                    "original": 0,
+                    "small": 100,
+                    "medium": 350,
+                    "large": 600,
+                    "extralarge": 850
+                }
+            }
+        """.trimIndent()
+
         val FILES_RESPONSE = """
             {
               "items": [
                   {
                     "url": "dummy-url",
+                    "filename": "file_1.jpg",
                     "width": 200,
                     "height": 300,
                     "creationDate": "2020-08-25T08:49:31Z",
