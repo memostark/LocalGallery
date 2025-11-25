@@ -2,6 +2,7 @@ package com.guillermonegrete.gallery.data.source
 
 import androidx.paging.PagingData
 import com.guillermonegrete.gallery.data.File
+import com.guillermonegrete.gallery.data.FileInfoResponse
 import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.GetFolderResponse
 import com.guillermonegrete.gallery.data.source.remote.FilterTags
@@ -19,4 +20,6 @@ interface FilesRepository {
     fun getPagedFiles(folder: Folder, tagIds: FilterTags, sort: String?): Flowable<PagingData<File>>
 
     fun updateFolderCover(id: Long, fileId: Long): Single<Folder>
+
+    fun getFilesInfo(): Single<FileInfoResponse>
 }

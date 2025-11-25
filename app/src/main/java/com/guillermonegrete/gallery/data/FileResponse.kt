@@ -13,7 +13,7 @@ sealed class FileResponse(
     val tags: List<Tag> = listOf(),
     val folder: Folder? = null,
     val id: Long,
-    @get:Json(name = "file_type") val type: FileType
+    @property:Json(name = "file_type") val type: FileType
 ){
     abstract fun toFile(): File
 
@@ -63,6 +63,6 @@ enum class FileType{
 }
 
 data class FileInfoResponse(
-    @get:Json(name = "thumbnail_sizes")
+    @property:Json(name = "thumbnail_sizes")
     val thumbnailSizes: Map<String, Int>
 )
