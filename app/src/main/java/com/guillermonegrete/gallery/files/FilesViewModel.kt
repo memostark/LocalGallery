@@ -70,7 +70,7 @@ class FilesViewModel @Inject constructor(
     private fun getFilesInfo() {
         disposable.add(
             filesRepository.getFilesInfo()
-                .subscribe(imageInfo::onNext)
+                .subscribe(imageInfo::onNext, imageInfo::onError)
         )
     }
 
