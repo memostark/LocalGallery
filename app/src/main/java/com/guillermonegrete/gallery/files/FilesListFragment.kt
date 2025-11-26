@@ -200,11 +200,12 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                     { infoResponse ->
-                        setFileFlowable(infoResponse, folder)
-                        if (viewModel.width != width) viewModel.setListWidth(width)
-                        viewModel.setFolderName(folder)
+                        setFileFlowable(infoResponse, folder, width)
                     },
-                    { error -> Timber.e(error,"Error updating rows") }
+                    { error ->
+                        Timber.e(error)
+                        setFileFlowable(null, folder, width)
+                    }
                 ),
             viewModel.updateRows
                 .observeOn(AndroidSchedulers.mainThread())
@@ -270,15 +271,17 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         }
     }
 
-    private fun setFileFlowable(fileInfo: FileInfoResponse, folder: Folder) {
-        val url = viewModel.getURL()
-        val thumbnailSizes = fileInfo.thumbnailSizes
-        val sizes = thumbnailSizes.values
-        val originalSize = thumbnailSizes.entries.find { it.value == 0 }?.key ?: ""
+    private fun setFileFlowable(fileInfo: FileInfoResponse?, folder: Folder, width: Int) {
+        var files = viewModel.cachedFileList
 
-        disposable.add(
-            viewModel.cachedFileList
-                .map { data -> data.map { file ->
+        if (fileInfo != null) {
+            val url = viewModel.getURL()
+            val thumbnailSizes = fileInfo.thumbnailSizes
+            val sizes = thumbnailSizes.values
+            val originalSize = thumbnailSizes.entries.find { it.value == 0 }?.key ?: ""
+
+            files = files.map { data ->
+                data.map { file ->
                     val size = getThumbnailSize(file, sizes, thumbnailSizes) ?: originalSize
                     val thumbnailUrl =
                         if (!(size == originalSize && file is ImageFile))
@@ -286,13 +289,21 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
                         else
                             null
                     file.apply { thumbnail = thumbnailUrl }
-                } }
+                }
+            }
+        }
+
+        disposable.add(
+            files
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                     { adapter.submitData(lifecycle, it) },
                     { error -> Timber.e(error,"Error loading files") }
                 )
         )
+
+        if (viewModel.width != width) viewModel.setListWidth(width)
+        viewModel.setFolderName(folder)
     }
 
     private fun getThumbnailSize(file: File, sizes: Collection<Int>, info: Map<String, Int>): String? {

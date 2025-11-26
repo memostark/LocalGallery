@@ -1,11 +1,12 @@
 package com.guillermonegrete.gallery.data
 
 import com.squareup.moshi.Json
+import java.net.URL
 import java.util.*
 
 sealed class FileResponse(
     val url: String,
-    val filename: String,
+    val filename: String?,
     val width: Int,
     val height: Int,
     val creationDate: Date,
@@ -17,6 +18,15 @@ sealed class FileResponse(
 ){
     abstract fun toFile(): File
 
+    protected fun generateFilename() : String {
+        return filename ?:
+            try {
+                java.io.File(URL(url).path).name ?: url
+            } catch (_: Exception) {
+                url
+            }
+    }
+
     override fun toString(): String {
         return "{url: $url, tags: $tags}"
     }
@@ -24,7 +34,7 @@ sealed class FileResponse(
 
 class ImageFileResponse(
     url: String,
-    filename: String,
+    filename: String?,
     width: Int,
     height: Int,
     creationDate: Date,
@@ -37,12 +47,12 @@ class ImageFileResponse(
     // Constructor for testing
     constructor(url: String, width: Int, height: Int): this(url, "", width, height, Date(), Date(), listOf(), null, 0)
 
-    override fun toFile() = ImageFile(url, filename, width, height, 0, 0, creationDate, lastModified, tags, folder, id)
+    override fun toFile() = ImageFile(url, generateFilename(), width, height, 0, 0, creationDate, lastModified, tags, folder, id)
 }
 
 class VideoFileResponse(
     url: String,
-    filename: String,
+    filename: String?,
     width: Int,
     height: Int,
     creationDate: Date,
@@ -54,7 +64,7 @@ class VideoFileResponse(
 ): FileResponse(url, filename, width, height, creationDate, lastModified, tags, folder, id, FileType.Video){
     // Constructor for testing
     constructor(url: String, width: Int, height: Int, duration: Int): this(url, "", width, height, Date(), Date(), listOf(), null, duration, 0)
-    override fun toFile() = VideoFile(url, filename, width, height, 0, 0, creationDate, lastModified, duration, tags, folder, id)
+    override fun toFile() = VideoFile(url, generateFilename(), width, height, 0, 0, creationDate, lastModified, duration, tags, folder, id)
 }
 
 enum class FileType{
