@@ -104,6 +104,7 @@ class FilesAdapter(
 
             Glide.with(itemView)
                 .load(item.thumbnail ?: item.name)
+                .timeout(5000) // double the default timeout, it was too short when the server needed to create thumbnails
                 .placeholder(R.drawable.ic_image_24dp)
                 .override(item.displayWidth, item.displayHeight)
                 .centerCrop() // stretch the image to fit the view to avoid showing gaps
