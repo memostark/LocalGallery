@@ -43,10 +43,11 @@ class FolderAdapter : PagingDataAdapter<FolderUI, RecyclerView.ViewHolder>(Folde
         super.onAttachedToRecyclerView(recyclerView)
         val context = recyclerView.context
         val currentNightMode = recyclerView.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        cardDefaultBackgroundColor = ContextCompat.getColor(context, if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) R.color.cardview_dark_background else R.color.cardview_light_background)
-        cardDefaultTextColor =  MaterialColors.getColor(context, R.attr.colorOnSurface, Color.BLACK)
-        selectedContainerColor = MaterialColors.getColor(context, R.attr.colorPrimaryContainer, Color.WHITE)
-        selectedTextColor =  MaterialColors.getColor(context, R.attr.colorOnPrimaryContainer, Color.BLACK)
+        val cardBackgroundColor = if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) com.google.android.material.R.color.cardview_dark_background else com.google.android.material.R.color.cardview_light_background
+        cardDefaultBackgroundColor = ContextCompat.getColor(context, cardBackgroundColor)
+        cardDefaultTextColor =  MaterialColors.getColor(context, com.google.android.material.R.attr.colorOnSurface, Color.BLACK)
+        selectedContainerColor = MaterialColors.getColor(context, com.google.android.material.R.attr.colorPrimaryContainer, Color.WHITE)
+        selectedTextColor =  MaterialColors.getColor(context, com.google.android.material.R.attr.colorOnPrimaryContainer, Color.BLACK)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
