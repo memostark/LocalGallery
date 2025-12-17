@@ -12,6 +12,7 @@ import androidx.fragment.app.clearFragmentResult
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
+import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.chip.Chip
 import com.google.android.material.snackbar.Snackbar
@@ -24,7 +25,8 @@ import dagger.hilt.android.lifecycle.withCreationCallback
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import timber.log.Timber
-import java.util.*
+import java.util.Date
+
 
 @AndroidEntryPoint
 class AddTagFragment: BottomSheetDialogFragment() {
@@ -80,6 +82,8 @@ class AddTagFragment: BottomSheetDialogFragment() {
                 setEditKeyListener(fileId)
             }
 
+            val layoutManager = FlexboxLayoutManager(context)
+            savedTagsList.layoutManager = layoutManager
             savedTagsList.adapter = adapter
 
             newTagEdit.doAfterTextChanged {
@@ -154,7 +158,7 @@ class AddTagFragment: BottomSheetDialogFragment() {
         val tagsGroup = binding.tagsGroup
         tagsGroup.removeViews(0, tagsGroup.childCount - 1)
         tags.forEach { tag ->
-            val chip = Chip(context)
+            val chip = Chip(context, null,  com.google.android.material.R.style.Widget_Material3_Chip_Input)
             chip.text = tag.name
             chip.isCloseIconVisible = true
             chip.setOnCloseIconClickListener {
