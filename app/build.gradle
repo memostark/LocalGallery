@@ -66,6 +66,7 @@ dependencies {
     implementation "androidx.core:core-ktx:1.8.0"
 
     implementation 'com.google.android.material:material:1.12.0'
+    implementation 'com.google.android.flexbox:flexbox:3.0.0'
 
     // Multi dex
     implementation 'androidx.multidex:multidex:2.0.1'
