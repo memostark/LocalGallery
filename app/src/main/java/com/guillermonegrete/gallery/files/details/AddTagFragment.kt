@@ -1,5 +1,6 @@
 package com.guillermonegrete.gallery.files.details
 
+import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,12 +8,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.core.os.bundleOf
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.clearFragmentResult
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import com.google.android.flexbox.FlexboxLayoutManager
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.chip.Chip
 import com.google.android.material.snackbar.Snackbar
@@ -94,6 +99,28 @@ class AddTagFragment: BottomSheetDialogFragment() {
 
         return binding.root
     }
+
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog =
+        object : BottomSheetDialog(requireContext(), theme) {
+            override fun onAttachedToWindow() {
+                super.onAttachedToWindow()
+
+                ViewCompat.setOnApplyWindowInsetsListener(binding.savedTagsList) { view, insets ->
+                    val sysInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+                    view.updatePadding(bottom = sysInsets.bottom)
+                    // Remove the default padding added to a material sheet, the padding is handled by the tag list instead
+                    findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)?.let {
+                        it.post {
+                            // Don't modify padding when the keyboard is visible, otherwise it doesn't align properly
+                            val keyboardVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
+                            if (!keyboardVisible) it.updatePadding(bottom = 0)
+                        }
+                    }
+                    insets
+                }
+            }
+        }
 
     private fun addTagToItems(tag: Tag, ids: LongArray) {
         if (args.tagType == TagType.File) {
