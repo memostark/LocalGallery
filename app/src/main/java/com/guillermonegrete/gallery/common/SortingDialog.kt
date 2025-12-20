@@ -1,5 +1,6 @@
 package com.guillermonegrete.gallery.common
 
+import android.app.Dialog
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.LayoutInflater
@@ -10,7 +11,10 @@ import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -38,12 +42,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
+import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.guillermonegrete.gallery.NavGraphDirections
 import com.guillermonegrete.gallery.R
@@ -178,11 +185,14 @@ class SortingDialog: BottomSheetDialogFragment() {
 
                     AppTheme {
                         Column {
+                            val folderGroupVisible = tagsState.isNotEmpty() || isSingleFolder
+
                             TagGroup(
                                 fileTagsState.toList(),
                                 selectedFileTags.toList(),
                                 canAddTag = false,
                                 showCount = true,
+                                hasBottomInset = !folderGroupVisible,
                                 onCheckedStateChange = { id, isChecked ->
                                     if (isChecked) {
                                         checkedFileTagIds.add(id)
@@ -195,14 +205,15 @@ class SortingDialog: BottomSheetDialogFragment() {
                                 }
                             )
 
-                            if (fileTagsState.isNotEmpty() &&
-                                (tagsState.isNotEmpty() || isSingleFolder)) HorizontalDivider()
+                            if (fileTagsState.isNotEmpty() && folderGroupVisible)
+                                HorizontalDivider()
 
                             TagGroup(
                                 tagsState.toList(),
                                 selectedTags.toList(),
                                 isSingleFolder,
                                 folderList,
+                                folderGroupVisible,
                                 onAddClicked = {
                                     val action = NavGraphDirections.globalToAddTagFragment(longArrayOf(folderId), tagsState.toTypedArray(), TagType.Folder)
                                     findNavController().navigate(action)
@@ -228,6 +239,23 @@ class SortingDialog: BottomSheetDialogFragment() {
 
         return binding.root
     }
+
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog =
+        object : BottomSheetDialog(requireContext(), theme) {
+            override fun onAttachedToWindow() {
+                super.onAttachedToWindow()
+
+                ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
+                    // Remove the default padding added to a material sheet, the padding is handled by the tag group composables
+                    findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)?.let {
+                        it.post {
+                            it.updatePadding(bottom = 0)
+                        }
+                    }
+                    insets
+                }
+            }
+        }
 
     fun updateClearButton() {
         binding.clearTagsButton.isVisible = checkedFileTagIds.isNotEmpty() || checkedFolderTagIds.isNotEmpty()
@@ -298,6 +326,7 @@ fun TagGroup(
     selectedTags: List<Long>,
     canAddTag: Boolean,
     showCount: Boolean = false,
+    hasBottomInset: Boolean = false,
     onAddClicked: () -> Unit = {},
     onSelectionChanged: (List<Long>) -> Unit = {},
     onCheckedStateChange: (id: Long, isChecked: Boolean) -> Unit = {_, _ -> },
@@ -359,6 +388,9 @@ fun TagGroup(
                 )
             }
         }
+
+        if (hasBottomInset)
+            Spacer(modifier = Modifier.fillMaxWidth().navigationBarsPadding())
     }
 }
 
