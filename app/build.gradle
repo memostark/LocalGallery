@@ -11,11 +11,11 @@ plugins {
 }
 
 android {
-    compileSdk = 35
+    compileSdk = 36
     defaultConfig {
         applicationId "com.guillermonegrete.gallery"
         minSdkVersion 21
-        targetSdkVersion 35
+        targetSdkVersion 36
         versionCode 3
         versionName "1.2.0"
         testInstrumentationRunner "com.guillermonegrete.gallery.CustomTestRunner"
