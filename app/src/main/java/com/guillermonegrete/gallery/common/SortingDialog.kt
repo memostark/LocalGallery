@@ -10,7 +10,8 @@ import android.widget.RadioButton
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ContextualFlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -320,6 +321,7 @@ data class SortDialogChecked(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TagGroup(
     tags: List<Tag>,
@@ -333,14 +335,18 @@ fun TagGroup(
 ) {
     val selectedTags = remember(selectedTags) { selectedTags.toMutableStateList() }
 
-    FlowRow(
+    // Add extra item if the add button is visible
+    val itemCount = tags.size + if (canAddTag) 1 else 0
+    @Suppress("DEPRECATION")
+    ContextualFlowRow(
+        itemCount,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .heightIn(0.dp, 200.dp)
             .nestedScroll(rememberNestedScrollInteropConnection())
-            .verticalScroll(rememberScrollState())
-    ) {
-        if (canAddTag) {
+            .verticalScroll(rememberScrollState()),
+    ) { i ->
+        if (canAddTag && i == 0) {
             val icon = tags.isNotEmpty()
             AssistChip(
                 onClick = onAddClicked,
@@ -360,36 +366,37 @@ fun TagGroup(
                         .size(AssistChipDefaults.Height)
                 else Modifier
             )
+            return@ContextualFlowRow
         }
 
-        tags.forEach { tag ->
-            val isSelected = selectedTags.contains(tag.id)
-            if (canAddTag) {
-                SuggestionChip(
-                    onClick = {},
-                    label = { Text(tag.name) }
-                )
-            } else {
-                FilterChip(
-                    onClick = {
-                        if (isSelected) {
-                            selectedTags.remove(tag.id)
-                        } else {
-                            selectedTags.add(tag.id)
-                        }
-                        onSelectionChanged(selectedTags.toList())
-                        onCheckedStateChange(tag.id, !isSelected)
-                    },
-                    label = {
-                        val text = if (showCount) "${tag.name} (${tag.count})" else tag.name
-                        Text(text)
-                    },
-                    selected = isSelected,
-                )
-            }
+        // Handle index offset if the add button exists
+        val tag = tags[i - if (canAddTag) 1 else 0]
+        val isSelected = selectedTags.contains(tag.id)
+        if (canAddTag) {
+            SuggestionChip(
+                onClick = {},
+                label = { Text(tag.name) }
+            )
+        } else {
+            FilterChip(
+                onClick = {
+                    if (isSelected) {
+                        selectedTags.remove(tag.id)
+                    } else {
+                        selectedTags.add(tag.id)
+                    }
+                    onSelectionChanged(selectedTags.toList())
+                    onCheckedStateChange(tag.id, !isSelected)
+                },
+                label = {
+                    val text = if (showCount) "${tag.name} (${tag.count})" else tag.name
+                    Text(text)
+                },
+                selected = isSelected,
+            )
         }
 
-        if (hasBottomInset)
+        if (hasBottomInset && i == itemCount - 1)
             Spacer(modifier = Modifier.fillMaxWidth().navigationBarsPadding())
     }
 }
