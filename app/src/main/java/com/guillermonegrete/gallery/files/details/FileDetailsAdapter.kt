@@ -191,6 +191,7 @@ class FileDetailsAdapter: PagingDataAdapter<File, FileDetailsAdapter.ViewHolder>
 
             setTags(file.tags)
             updateLayout()
+            nameText.isSelected = true // Necessary for the Horizontal Marquee
         }
 
         abstract fun updateLayout()
