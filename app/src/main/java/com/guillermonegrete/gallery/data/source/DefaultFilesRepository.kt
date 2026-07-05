@@ -1,5 +1,6 @@
 package com.guillermonegrete.gallery.data.source
 
+import android.net.Uri
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -38,8 +39,10 @@ class DefaultFilesRepository @Inject constructor(
 
     override fun getPagedFiles(folder: Folder, tagIds: FilterTags, sort: String?)
         = Pager(PagingConfig(pageSize = 20)) {
+            // This encoding method uses standard RFC 3986 (unlike retrofit or java.net.URLEncoder) which is what the backend expects
+            val encodedName = Uri.encode(folder.name)
             val tags = if (tagIds.folderTagIds.isEmpty() && tagIds.fileTagIds.isEmpty()) null else tagIds
-            FilesPageSource(fileAPI, folder, sort, tags)
+            FilesPageSource(fileAPI, folder.copy(name = encodedName), sort, tags)
         }.flowable
 
     override fun updateFolderCover(id: Long, fileId: Long) = foldersAPI.updateFolderCover(id, fileId)
