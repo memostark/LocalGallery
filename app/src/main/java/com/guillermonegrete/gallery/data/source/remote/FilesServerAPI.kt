@@ -20,12 +20,12 @@ interface FilesServerAPI{
 
     @GET("folders/{folderName}")
     fun getFiles(
-        @Path(value="folderName", encoded = false) folderName: String
+        @Path(value="folderName", encoded = true) folderName: String
     ): Single<List<FileResponse>>
 
     @GET("folders/{folderName}")
     fun getPagedFiles(
-        @Path(value="folderName", encoded = false) folderName: String,
+        @Path(value="folderName", encoded = true) folderName: String,
         @Query("page") page: Int,
         @Query("sort") sort: String? = null,
         @Query("size") size: Int = 30,
