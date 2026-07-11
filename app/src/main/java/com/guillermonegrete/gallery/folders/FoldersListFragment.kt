@@ -172,7 +172,8 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             // Set up list
             val layoutManager = GridLayoutManager(requireContext(), 2)
             layoutManager.spanSizeLookup = object: GridLayoutManager.SpanSizeLookup(){
-                override fun getSpanSize(position: Int) = if(position == 0) 2 else 1
+                override fun getSpanSize(position: Int)
+                    = if(position == 0 || position == adapter.itemCount) 2 else 1 // position is the item count, that means the footer is visible (last item's position is count - 1 and footer's is count)
             }
             foldersList.layoutManager = layoutManager
 
@@ -268,7 +269,8 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
 
     private fun loadFoldersData(){
         adapter.addLoadStateListener(loadListener)
-        binding.foldersList.adapter = adapter
+        val footerAdapter = NetworkStateAdapter { adapter.retry() }
+        binding.foldersList.adapter = adapter.withLoadStateFooter(footer = footerAdapter)
         disposable.add(viewModel.pagedFolders
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
