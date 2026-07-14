@@ -25,6 +25,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.guillermonegrete.gallery.NavGraphDirections
 import com.guillermonegrete.gallery.R
+import com.guillermonegrete.gallery.common.NetworkStateAdapter
 import com.guillermonegrete.gallery.common.Order
 import com.guillermonegrete.gallery.common.SortDialogChecked
 import com.guillermonegrete.gallery.common.SortingDialog
@@ -38,7 +39,6 @@ import com.guillermonegrete.gallery.data.source.remote.FilterTags
 import com.guillermonegrete.gallery.databinding.FragmentFilesListBinding
 import com.guillermonegrete.gallery.files.details.AddTagFragment
 import com.guillermonegrete.gallery.folders.MainActivity
-import com.guillermonegrete.gallery.folders.NetworkStateAdapter
 import com.guillermonegrete.gallery.utils.hiltNavGraphViewModels
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
