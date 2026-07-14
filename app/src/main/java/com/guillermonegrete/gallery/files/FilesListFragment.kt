@@ -38,6 +38,7 @@ import com.guillermonegrete.gallery.data.source.remote.FilterTags
 import com.guillermonegrete.gallery.databinding.FragmentFilesListBinding
 import com.guillermonegrete.gallery.files.details.AddTagFragment
 import com.guillermonegrete.gallery.folders.MainActivity
+import com.guillermonegrete.gallery.folders.NetworkStateAdapter
 import com.guillermonegrete.gallery.utils.hiltNavGraphViewModels
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -189,11 +190,13 @@ class FilesListFragment: Fragment(R.layout.fragment_files_list) {
         list.layoutManager = layoutManager
         layoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
             override fun getSpanSize(position: Int): Int {
+                if (position == adapter.itemCount) return viewModel.width
                 val file = adapter.snapshot()[position]
                 return file?.displayWidth ?: 1
             }
         }
-        list.adapter = adapter
+        val footerAdapter = NetworkStateAdapter { adapter.retry() }
+        list.adapter = adapter.withLoadStateFooter(footer = footerAdapter)
 
         disposable.addAll(
             viewModel.imageInfo
