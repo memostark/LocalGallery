@@ -43,6 +43,7 @@ import androidx.paging.LoadState
 import androidx.recyclerview.widget.GridLayoutManager
 import com.guillermonegrete.gallery.NavGraphDirections
 import com.guillermonegrete.gallery.R
+import com.guillermonegrete.gallery.common.NetworkStateAdapter
 import com.guillermonegrete.gallery.common.Order
 import com.guillermonegrete.gallery.common.SortDialogChecked
 import com.guillermonegrete.gallery.common.SortingDialog
@@ -196,7 +197,7 @@ class FoldersListFragment: Fragment(R.layout.fragment_folders_list){
             dragSelectTouchListener = listener
 
 
-            ViewCompat.setOnApplyWindowInsetsListener(toolbar) { v, viewInsets ->
+            ViewCompat.setOnApplyWindowInsetsListener(toolbar) { _, viewInsets ->
                 val insets = viewInsets.getInsets(WindowInsetsCompat.Type.systemBars())
                 toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin = insets.top }
                 foldersList.updatePadding(left = insets.left, right = insets.right, bottom = insets.bottom)
