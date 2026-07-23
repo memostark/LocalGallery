@@ -11,6 +11,7 @@ import com.guillermonegrete.gallery.data.source.remote.FilesServerAPI
 import com.guillermonegrete.gallery.data.source.remote.FilterTags
 import com.guillermonegrete.gallery.folders.source.FoldersAPI
 import com.guillermonegrete.gallery.folders.source.FoldersPageSource
+import com.guillermonegrete.gallery.folders.source.FOLDER_PAGE_SIZE
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
 import javax.inject.Inject
@@ -25,7 +26,7 @@ class DefaultFilesRepository @Inject constructor(
     }
 
     override fun getPagedFolders(tagIds: List<Long>, query: String?, sort: String?): Flowable<PagingData<Folder>> {
-        return Pager(PagingConfig(pageSize = 20)) {
+        return Pager(PagingConfig(pageSize = FOLDER_PAGE_SIZE)) {
             FoldersPageSource(foldersAPI, query, sort, tagIds.ifEmpty { null })
         }.flowable
     }

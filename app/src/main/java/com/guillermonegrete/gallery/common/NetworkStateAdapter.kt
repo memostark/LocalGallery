@@ -7,6 +7,7 @@ import androidx.paging.LoadState
 import androidx.paging.LoadStateAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.guillermonegrete.gallery.databinding.ItemNetworkStateBinding
+import timber.log.Timber
 
 class NetworkStateAdapter(private val retry: () -> Unit) : LoadStateAdapter<NetworkStateAdapter.ViewHolder>() {
 
@@ -26,6 +27,7 @@ class NetworkStateAdapter(private val retry: () -> Unit) : LoadStateAdapter<Netw
         }
 
         fun bind(loadState: LoadState) = with(binding) {
+            Timber.d("$absoluteAdapterPosition, $bindingAdapterPosition: $loadState")
             progressBar.isVisible = loadState is LoadState.Loading
 
             // Error views

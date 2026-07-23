@@ -32,7 +32,7 @@ class FoldersPageSource(
         return LoadResult.Page(
             data = items,
             prevKey = if (nextPageNumber > 0) nextPageNumber - 1 else null,
-            nextKey = if (nextPageNumber < response.page.totalItems - 1) nextPageNumber + 1 else null
+            nextKey = if (nextPageNumber < response.page.totalPages - 1) nextPageNumber + 1 else null
         )
     }
 
@@ -43,3 +43,5 @@ class FoldersPageSource(
         }
     }
 }
+
+const val FOLDER_PAGE_SIZE = 30
