@@ -11,7 +11,7 @@ interface FoldersAPI {
         @Query("page") page: Int,
         @Query("query") query: String? = null,
         @Query("sort") sort: String? = null,
-        @Query("size") size: Int = 30,
+        @Query("size") size: Int = FOLDER_PAGE_SIZE,
     ): Single<PagedFolderResponse>
 
     @POST("folders")
@@ -20,7 +20,7 @@ interface FoldersAPI {
         @Query("page") page: Int,
         @Query("query") query: String? = null,
         @Query("sort") sort: String? = null,
-        @Query("size") size: Int = 30,
+        @Query("size") size: Int = FOLDER_PAGE_SIZE,
     ): Single<PagedFolderResponse>
 
     @PATCH("folder/{id}/cover/{fileId}")
