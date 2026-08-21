@@ -7,6 +7,7 @@ import androidx.room3.Insert
 import androidx.room3.OnConflictStrategy
 import androidx.room3.PrimaryKey
 import androidx.room3.Query
+import com.guillermonegrete.gallery.data.Folder
 
 @Entity(tableName = "folder")
 data class FolderEntity(
@@ -14,7 +15,9 @@ data class FolderEntity(
     val coverUrl: String,
     val count: Int,
     @PrimaryKey val id: Int,
-)
+) {
+    fun toDomainModel() = Folder(name, coverUrl, count, id.toLong())
+}
 
 @Dao
 interface FolderDao {
@@ -23,7 +26,7 @@ interface FolderDao {
 
     // Paging 3 monitors this query automatically to stream data updates to your UI.
     // Order it by whatever attribute makes sense for your listing (e.g., name, ID, or index)
-    @Query("SELECT * FROM folders ORDER BY name ASC")
+    @Query("SELECT * FROM folder ORDER BY name ASC")
     fun getFoldersPagingSource(): PagingSource<Int, FolderEntity>
 
     @Query("DELETE FROM folders")

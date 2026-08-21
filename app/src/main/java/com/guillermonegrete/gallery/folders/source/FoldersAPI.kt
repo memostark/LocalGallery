@@ -2,6 +2,7 @@ package com.guillermonegrete.gallery.folders.source
 
 import com.guillermonegrete.gallery.data.Folder
 import io.reactivex.rxjava3.core.Single
+import retrofit2.Response
 import retrofit2.http.*
 
 interface FoldersAPI {
@@ -13,6 +14,15 @@ interface FoldersAPI {
         @Query("sort") sort: String? = null,
         @Query("size") size: Int = FOLDER_PAGE_SIZE,
     ): Single<PagedFolderResponse>
+
+    @GET("folders")
+    fun getFoldersResponse(
+        @Query("page") page: Int,
+        @Header("If-None-Match") ifNoneMatch: String?,
+        @Query("query") query: String? = null,
+        @Query("sort") sort: String? = null,
+        @Query("size") size: Int = FOLDER_PAGE_SIZE,
+    ): Single<Response<PagedFolderResponse>>
 
     @POST("folders")
     fun getPagedFoldersByTags(
