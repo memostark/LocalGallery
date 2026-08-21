@@ -2,6 +2,7 @@ package com.guillermonegrete.gallery.data
 
 import android.os.Parcelable
 import com.guillermonegrete.gallery.folders.models.FolderUI
+import com.guillermonegrete.gallery.folders.source.local.FolderEntity
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
@@ -12,6 +13,8 @@ data class Folder(
     val count: Int,
     val id: Long = 0L,
 ): Parcelable {
+    fun toEntity() = FolderEntity(name, coverUrl, count, id.toInt())
+
     constructor(folder: FolderUI.Model) : this(folder.name, folder.coverUrl, folder.count, folder.id){
         title = folder.title
     }

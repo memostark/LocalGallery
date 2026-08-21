@@ -4,13 +4,14 @@ import android.net.Uri
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.map
 import androidx.paging.rxjava3.flowable
 import com.guillermonegrete.gallery.data.*
+import com.guillermonegrete.gallery.data.source.local.AppDatabase
 import com.guillermonegrete.gallery.data.source.remote.FilesPageSource
 import com.guillermonegrete.gallery.data.source.remote.FilesServerAPI
 import com.guillermonegrete.gallery.data.source.remote.FilterTags
 import com.guillermonegrete.gallery.folders.source.FoldersAPI
-import com.guillermonegrete.gallery.folders.source.FoldersPageSource
 import com.guillermonegrete.gallery.folders.source.FOLDER_PAGE_SIZE
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
@@ -18,7 +19,8 @@ import javax.inject.Inject
 
 class DefaultFilesRepository @Inject constructor(
     private val fileAPI: FilesServerAPI,
-    private val foldersAPI: FoldersAPI
+    private val foldersAPI: FoldersAPI,
+    private val database: AppDatabase,
 ): FilesRepository {
 
     override fun getFolders(): Single<GetFolderResponse> {
@@ -27,8 +29,14 @@ class DefaultFilesRepository @Inject constructor(
 
     override fun getPagedFolders(tagIds: List<Long>, query: String?, sort: String?): Flowable<PagingData<Folder>> {
         return Pager(PagingConfig(pageSize = FOLDER_PAGE_SIZE)) {
-            FoldersPageSource(foldersAPI, query, sort, tagIds.ifEmpty { null })
+            //FoldersPageSource(foldersAPI, query, sort, tagIds.ifEmpty { null })
+            database.folderDao().getFoldersPagingSource()
         }.flowable
+            .map { pagingData ->
+                pagingData.map { folderEntity ->
+                    folderEntity.toDomainModel()
+                }
+            }
     }
 
     override fun getFiles(folder: String): Single<List<File>> {
