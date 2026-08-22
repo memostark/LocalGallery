@@ -4,7 +4,7 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
-import androidx.room3.withWriteTransaction
+import androidx.room.withTransaction
 import com.guillermonegrete.gallery.data.source.local.AppDatabase
 import com.guillermonegrete.gallery.folders.source.local.FolderEntity
 import com.guillermonegrete.gallery.folders.source.local.FolderRemoteKey
@@ -64,7 +64,7 @@ class FolderRemoteMediator(
             val items = body.page.items
             val endOfPaginationReached = items.isEmpty()
 
-            database.withWriteTransaction {
+            database.withTransaction {
                 // If refreshing the whole feed, clear out page index paths
                 if (loadType == LoadType.REFRESH) {
                     database.folderRemoteKeyDao().clearRemoteKeys()

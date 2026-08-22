@@ -3,6 +3,8 @@ package com.guillermonegrete.gallery.di
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
+import androidx.room.Room
+import androidx.sqlite.driver.AndroidSQLiteDriver
 import com.guillermonegrete.gallery.BuildConfig
 import com.guillermonegrete.gallery.common.HostSelectionInterceptor
 import com.guillermonegrete.gallery.data.*
@@ -10,6 +12,7 @@ import com.guillermonegrete.gallery.data.source.DefaultFilesRepository
 import com.guillermonegrete.gallery.data.source.DefaultSettingsRepository
 import com.guillermonegrete.gallery.data.source.FilesRepository
 import com.guillermonegrete.gallery.data.source.SettingsRepository
+import com.guillermonegrete.gallery.data.source.local.AppDatabase
 import com.guillermonegrete.gallery.data.source.remote.FilesServerAPI
 import com.guillermonegrete.gallery.folders.source.FoldersAPI
 import com.guillermonegrete.gallery.tags.DefaultTagRepository
@@ -75,6 +78,13 @@ object RepositoryModule {
 
     @Provides
     fun provideTagService(retrofit: Retrofit): TagService = retrofit.create(TagService::class.java)
+
+    @Singleton
+    @Provides
+    fun provideWordsDatabase(@ApplicationContext context: Context)
+        = Room.databaseBuilder<AppDatabase>(context, "app-database")
+            .setDriver(AndroidSQLiteDriver())
+            .build()
 
 }
 
