@@ -1,12 +1,12 @@
 package com.guillermonegrete.gallery.folders.source.local
 
 import androidx.paging.PagingSource
-import androidx.room3.Dao
-import androidx.room3.Entity
-import androidx.room3.Insert
-import androidx.room3.OnConflictStrategy
-import androidx.room3.PrimaryKey
-import androidx.room3.Query
+import androidx.room.Dao
+import androidx.room.Entity
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.PrimaryKey
+import androidx.room.Query
 import com.guillermonegrete.gallery.data.Folder
 
 @Entity(tableName = "folder")
@@ -29,6 +29,6 @@ interface FolderDao {
     @Query("SELECT * FROM folder ORDER BY name ASC")
     fun getFoldersPagingSource(): PagingSource<Int, FolderEntity>
 
-    @Query("DELETE FROM folders")
+    @Query("DELETE FROM folder")
     suspend fun clearAllFolders()
 }

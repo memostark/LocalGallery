@@ -144,9 +144,10 @@ dependencies {
     implementation 'androidx.activity:activity-compose:1.10.1'
 
     // Room database
-    def room_version = "3.0.1"
-    implementation "androidx.room3:room3-runtime:$room_version"
-    ksp "androidx.room3:room3-compiler:$room_version"
+    def room_version = "2.7.2"
+    implementation "androidx.room:room-runtime:$room_version"
+    implementation "androidx.room:room-paging:$room_version"
+    ksp "androidx.room:room-compiler:$room_version"
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-rx3:1.11.0")
 
