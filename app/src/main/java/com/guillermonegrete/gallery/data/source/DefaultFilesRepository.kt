@@ -1,6 +1,7 @@
 package com.guillermonegrete.gallery.data.source
 
 import android.net.Uri
+import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -13,6 +14,7 @@ import com.guillermonegrete.gallery.data.source.remote.FilesServerAPI
 import com.guillermonegrete.gallery.data.source.remote.FilterTags
 import com.guillermonegrete.gallery.folders.source.FoldersAPI
 import com.guillermonegrete.gallery.folders.source.FOLDER_PAGE_SIZE
+import com.guillermonegrete.gallery.folders.source.FolderRemoteMediator
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
 import javax.inject.Inject
@@ -27,9 +29,12 @@ class DefaultFilesRepository @Inject constructor(
         return fileAPI.getFolders()
     }
 
+    @OptIn(ExperimentalPagingApi::class)
     override fun getPagedFolders(tagIds: List<Long>, query: String?, sort: String?): Flowable<PagingData<Folder>> {
-        return Pager(PagingConfig(pageSize = FOLDER_PAGE_SIZE)) {
-            //FoldersPageSource(foldersAPI, query, sort, tagIds.ifEmpty { null })
+        return Pager(
+            PagingConfig(pageSize = FOLDER_PAGE_SIZE),
+            remoteMediator = FolderRemoteMediator(database, foldersAPI)
+        ) {
             database.folderDao().getFoldersPagingSource()
         }.flowable
             .map { pagingData ->

@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import androidx.room.Room
-import androidx.sqlite.driver.AndroidSQLiteDriver
 import com.guillermonegrete.gallery.BuildConfig
 import com.guillermonegrete.gallery.common.HostSelectionInterceptor
 import com.guillermonegrete.gallery.data.*
@@ -83,7 +82,6 @@ object RepositoryModule {
     @Provides
     fun provideWordsDatabase(@ApplicationContext context: Context)
         = Room.databaseBuilder<AppDatabase>(context, "app-database")
-            .setDriver(AndroidSQLiteDriver())
             .build()
 
 }
