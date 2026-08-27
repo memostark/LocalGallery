@@ -9,9 +9,9 @@ import androidx.room.Query
 
 @Entity(tableName = "folder_remote_keys")
 data class FolderRemoteKey(
-    @PrimaryKey val pageNumber: Int, // The specific page index (0, 1, 2...)
     val eTag: String?,               // The page-specific ETag returned by the backend
-    val nextKey: Int?                // The next page number to fetch
+    val nextKey: Int?,               // The next page number to fetch
+    @PrimaryKey val id: String = "global_folder_key",
 )
 
 @Dao
@@ -19,8 +19,8 @@ interface FolderRemoteKeyDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertKey(key: FolderRemoteKey)
 
-    @Query("SELECT * FROM folder_remote_keys WHERE pageNumber = :page")
-    suspend fun getRemoteKeyForPage(page: Int): FolderRemoteKey?
+    @Query("SELECT * FROM folder_remote_keys WHERE id = 'global_folder_key' LIMIT 1")
+    suspend fun getGlobalRemoteKey(): FolderRemoteKey?
 
     @Query("DELETE FROM folder_remote_keys")
     suspend fun clearRemoteKeys()

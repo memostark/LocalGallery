@@ -11,5 +11,6 @@ data class PagedFolderResponse(
 data class FolderPage(
     val items: List<Folder>,
     val totalPages: Int,
-    val totalItems: Int
+    val totalItems: Int,
+    val nextPage: Int?,
 )
