@@ -27,30 +27,24 @@ class FolderRemoteMediator(
                 LoadType.REFRESH -> 0
                 LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
                 LoadType.APPEND -> {
-                    // Count only items currently loaded into memory right now
-                    val itemsLoadedSoFar = state.pages.sumOf { it.data.size }
-
-                    if (itemsLoadedSoFar == 0) {
+                    val remoteKey = database.folderRemoteKeyDao().getGlobalRemoteKey()
+                    if (remoteKey != null && remoteKey.nextKey == null) {
                         return MediatorResult.Success(endOfPaginationReached = true)
                     }
 
-                    // Calculate current active screen page chunk
-                    val currentPageLoaded = itemsLoadedSoFar / state.config.pageSize
-
-                    // Look up next key from your existing table design
-                    val remoteKey = database.folderRemoteKeyDao().getRemoteKeyForPage(currentPageLoaded)
-                    remoteKey?.nextKey ?: return MediatorResult.Success(endOfPaginationReached = true)
+                    val nextKey = remoteKey?.nextKey ?: 0
+                    nextKey
                 }
             }
 
-            // 2. Fetch the ETag saved explicitly for THIS target page
-            val targetPageEtag = database.folderRemoteKeyDao().getRemoteKeyForPage(page)?.eTag
+            // 2. Fetch the ETag only when refreshing, otherwise send null so the backend actually return data instead of a 304 response
+            val targetPageEtag = if (loadType == LoadType.REFRESH) database.folderRemoteKeyDao().getGlobalRemoteKey()?.eTag else null
 
             // 3. Fire API Call passing the page-specific ETag
             val response = apiService.getFoldersResponse(
                 page = page,
                 size = state.config.pageSize,
-                ifNoneMatch = targetPageEtag // Sends e.g., "v2-p1-s20" if it exists
+                ifNoneMatch = targetPageEtag
             ).await()
 
             // 4. Handle HTTP 304 Not Modified (This specific page slice is untouched)
@@ -60,9 +54,9 @@ class FolderRemoteMediator(
 
             // 5. Handle HTTP 200 OK (New data payload)
             val body = response.body() ?: return MediatorResult.Error(Exception("Empty body"))
-            val newEtag = response.headers()["ETag"] // Extract the updated page-specific ETag
+            val newEtag = response.headers()["ETag"]
             val items = body.page.items
-            val endOfPaginationReached = items.isEmpty()
+            val serverNextPage = body.page.nextPage
 
             database.withTransaction {
                 // If refreshing the whole feed, clear out page index paths
@@ -71,18 +65,15 @@ class FolderRemoteMediator(
                     database.folderDao().clearAllFolders()
                 }
 
-                val nextKey = if (endOfPaginationReached) null else page + 1
-
                 // Save the new token tied strictly to this page index row
                 database.folderRemoteKeyDao().insertKey(
-                    FolderRemoteKey(pageNumber = page, eTag = newEtag, nextKey = nextKey)
+                    FolderRemoteKey(eTag = newEtag, nextKey = serverNextPage)
                 )
 
                 database.folderDao().insertAll(items.map { it.toEntity() })
-                Unit
             }
 
-            MediatorResult.Success(endOfPaginationReached = endOfPaginationReached)
+            MediatorResult.Success(endOfPaginationReached = serverNextPage == null)
 
         } catch (exception: Exception) {
             MediatorResult.Error(exception)
