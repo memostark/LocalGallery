@@ -13,7 +13,7 @@ data class Folder(
     val count: Int,
     val id: Long = 0L,
 ): Parcelable {
-    fun toEntity() = FolderEntity(name, coverUrl, count, id.toInt())
+    fun toEntity(scopeId: String) = FolderEntity(name, coverUrl, count, scopeId, id.toInt())
 
     constructor(folder: FolderUI.Model) : this(folder.name, folder.coverUrl, folder.count, folder.id){
         title = folder.title

@@ -14,6 +14,7 @@ data class FolderEntity(
     val name:String,
     val coverUrl: String,
     val count: Int,
+    val scopeId: String,
     @PrimaryKey val id: Int,
 ) {
     fun toDomainModel() = Folder(name, coverUrl, count, id.toLong())
@@ -24,10 +25,18 @@ interface FolderDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(folders: List<FolderEntity>)
 
-    // Paging 3 monitors this query automatically to stream data updates to your UI.
-    // Order it by whatever attribute makes sense for your listing (e.g., name, ID, or index)
-    @Query("SELECT * FROM folder ORDER BY name ASC")
-    fun getFoldersPagingSource(): PagingSource<Int, FolderEntity>
+    // Paging 3 monitors these queries automatically to stream data updates to your UI.
+    @Query("SELECT * FROM folder WHERE scopeId = :scopeId ORDER BY name ASC")
+    fun getFoldersSortedByNameAsc(scopeId: String): PagingSource<Int, FolderEntity>
+
+    @Query("SELECT * FROM folder WHERE scopeId = :scopeId ORDER BY name DESC")
+    fun getFoldersSortedByNameDesc(scopeId: String): PagingSource<Int, FolderEntity>
+
+    @Query("SELECT * FROM folder WHERE scopeId = :scopeId ORDER BY count ASC")
+    fun getFoldersSortedByCountAsc(scopeId: String): PagingSource<Int, FolderEntity>
+
+    @Query("SELECT * FROM folder WHERE scopeId = :scopeId ORDER BY count DESC")
+    fun getFoldersSortedByCountDesc(scopeId: String): PagingSource<Int, FolderEntity>
 
     @Query("DELETE FROM folder")
     suspend fun clearAllFolders()

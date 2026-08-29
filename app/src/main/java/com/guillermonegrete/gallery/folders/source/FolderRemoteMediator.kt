@@ -5,16 +5,23 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
+import com.guillermonegrete.gallery.data.source.CachePreferenceManager
 import com.guillermonegrete.gallery.data.source.local.AppDatabase
 import com.guillermonegrete.gallery.folders.source.local.FolderEntity
 import com.guillermonegrete.gallery.folders.source.local.FolderRemoteKey
 import kotlinx.coroutines.rx3.await
+import retrofit2.HttpException
 
 @OptIn(ExperimentalPagingApi::class)
 class FolderRemoteMediator(
     private val database: AppDatabase,
     private val apiService: FoldersAPI,
+    private val cachePrefs: CachePreferenceManager,
+    private val query: String?,
+    private val sort: String,
 ) : RemoteMediator<Int, FolderEntity>() {
+
+    private val remoteKeyId = FolderRemoteKey.generateId(query, sort)
 
     override suspend fun load(
         loadType: LoadType,
@@ -27,7 +34,7 @@ class FolderRemoteMediator(
                 LoadType.REFRESH -> 0
                 LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
                 LoadType.APPEND -> {
-                    val remoteKey = database.folderRemoteKeyDao().getGlobalRemoteKey()
+                    val remoteKey = database.folderRemoteKeyDao().getRemoteKeyById(remoteKeyId)
                     if (remoteKey != null && remoteKey.nextKey == null) {
                         return MediatorResult.Success(endOfPaginationReached = true)
                     }
@@ -38,18 +45,26 @@ class FolderRemoteMediator(
             }
 
             // 2. Fetch the ETag only when refreshing, otherwise send null so the backend actually return data instead of a 304 response
-            val targetPageEtag = if (loadType == LoadType.REFRESH) database.folderRemoteKeyDao().getGlobalRemoteKey()?.eTag else null
+            val targetPageEtag = if (loadType == LoadType.REFRESH)
+                cachePrefs.getGlobalFolderEtag()
+            else null
 
             // 3. Fire API Call passing the page-specific ETag
             val response = apiService.getFoldersResponse(
                 page = page,
                 size = state.config.pageSize,
+                query = query,
+                sort = sort,
                 ifNoneMatch = targetPageEtag
             ).await()
 
             // 4. Handle HTTP 304 Not Modified (This specific page slice is untouched)
             if (response.code() == 304) {
                 return MediatorResult.Success(endOfPaginationReached = false)
+            }
+
+            if (!response.isSuccessful) {
+                return MediatorResult.Error(HttpException(response))
             }
 
             // 5. Handle HTTP 200 OK (New data payload)
@@ -67,10 +82,14 @@ class FolderRemoteMediator(
 
                 // Save the new token tied strictly to this page index row
                 database.folderRemoteKeyDao().insertKey(
-                    FolderRemoteKey(eTag = newEtag, nextKey = serverNextPage)
+                    FolderRemoteKey(id = remoteKeyId, nextKey = serverNextPage)
                 )
 
-                database.folderDao().insertAll(items.map { it.toEntity() })
+                database.folderDao().insertAll(items.map { it.toEntity(remoteKeyId) })
+            }
+
+            if (loadType == LoadType.REFRESH) {
+                cachePrefs.saveGlobalFolderEtag(newEtag)
             }
 
             MediatorResult.Success(endOfPaginationReached = serverNextPage == null)
