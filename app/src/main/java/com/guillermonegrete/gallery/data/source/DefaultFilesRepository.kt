@@ -15,6 +15,7 @@ import com.guillermonegrete.gallery.data.source.remote.FilterTags
 import com.guillermonegrete.gallery.folders.source.FoldersAPI
 import com.guillermonegrete.gallery.folders.source.FOLDER_PAGE_SIZE
 import com.guillermonegrete.gallery.folders.source.FolderRemoteMediator
+import com.guillermonegrete.gallery.folders.source.local.FolderRemoteKey
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
 import javax.inject.Inject
@@ -23,6 +24,7 @@ class DefaultFilesRepository @Inject constructor(
     private val fileAPI: FilesServerAPI,
     private val foldersAPI: FoldersAPI,
     private val database: AppDatabase,
+    private val cachePrefs: CachePreferenceManager,
 ): FilesRepository {
 
     override fun getFolders(): Single<GetFolderResponse> {
@@ -30,12 +32,19 @@ class DefaultFilesRepository @Inject constructor(
     }
 
     @OptIn(ExperimentalPagingApi::class)
-    override fun getPagedFolders(tagIds: List<Long>, query: String?, sort: String?): Flowable<PagingData<Folder>> {
+    override fun getPagedFolders(tagIds: List<Long>, query: String?, sort: String): Flowable<PagingData<Folder>> {
         return Pager(
             PagingConfig(pageSize = FOLDER_PAGE_SIZE),
-            remoteMediator = FolderRemoteMediator(database, foldersAPI)
+            remoteMediator = FolderRemoteMediator(database, foldersAPI, cachePrefs, query, sort)
         ) {
-            database.folderDao().getFoldersPagingSource()
+            val currentScopeId = FolderRemoteKey.generateId(query, sort)
+
+            when (sort) {
+                "name,desc"  -> database.folderDao().getFoldersSortedByNameDesc(currentScopeId)
+                "count,asc"  -> database.folderDao().getFoldersSortedByCountAsc(currentScopeId)
+                "count,desc" -> database.folderDao().getFoldersSortedByCountDesc(currentScopeId)
+                else         -> database.folderDao().getFoldersSortedByNameAsc(currentScopeId)
+            }
         }.flowable
             .map { pagingData ->
                 pagingData.map { folderEntity ->
