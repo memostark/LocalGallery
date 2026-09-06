@@ -33,6 +33,16 @@ interface FoldersAPI {
         @Query("size") size: Int = FOLDER_PAGE_SIZE,
     ): Single<PagedFolderResponse>
 
+    @POST("folders")
+    fun getPagedFoldersByTags(
+        @Body tagIds: List<Long>,
+        @Query("page") page: Int,
+        @Header("If-None-Match") ifNoneMatch: String?,
+        @Query("query") query: String? = null,
+        @Query("sort") sort: String? = null,
+        @Query("size") size: Int = FOLDER_PAGE_SIZE,
+    ): Single<Response<PagedFolderResponse>>
+
     @PATCH("folder/{id}/cover/{fileId}")
     fun updateFolderCover(
         @Path(value="id") id: Long,

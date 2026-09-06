@@ -16,6 +16,7 @@ import com.guillermonegrete.gallery.folders.source.FoldersAPI
 import com.guillermonegrete.gallery.folders.source.FOLDER_PAGE_SIZE
 import com.guillermonegrete.gallery.folders.source.FolderRemoteMediator
 import com.guillermonegrete.gallery.folders.source.local.FolderRemoteKey
+import com.guillermonegrete.gallery.folders.source.local.FolderScopeHelper
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
 import javax.inject.Inject
@@ -35,9 +36,9 @@ class DefaultFilesRepository @Inject constructor(
     override fun getPagedFolders(tagIds: List<Long>, query: String?, sort: String): Flowable<PagingData<Folder>> {
         return Pager(
             PagingConfig(pageSize = FOLDER_PAGE_SIZE),
-            remoteMediator = FolderRemoteMediator(database, foldersAPI, cachePrefs, query, sort)
+            remoteMediator = FolderRemoteMediator(database, foldersAPI, cachePrefs, query, sort, tagIds)
         ) {
-            val currentScopeId = FolderRemoteKey.generateId(query, sort)
+            val currentScopeId = FolderScopeHelper.generateId(query, sort, tagIds)
 
             when (sort) {
                 "name,desc"  -> database.folderDao().getFoldersSortedByNameDesc(currentScopeId)
