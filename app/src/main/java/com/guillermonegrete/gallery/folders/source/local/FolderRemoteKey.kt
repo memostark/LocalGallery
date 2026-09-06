@@ -11,11 +11,17 @@ import androidx.room.Query
 data class FolderRemoteKey(
     val nextKey: Int?,
     @PrimaryKey val id: String,
-) {
-    companion object {
-        fun generateId(query: String?, sort: String): String {
-            val sanitizedQuery = if (query.isNullOrBlank()) "default" else "query_${query.trim()}"
-            return "folders_${sanitizedQuery}_sort_${sort}"
+)
+
+object FolderScopeHelper {
+    fun generateId(query: String?, sort: String, tagsIds: List<Long>?): String {
+        val sanitizedQuery = if (query.isNullOrBlank()) "default" else "query_${query.trim()}"
+
+        return if (tagsIds.isNullOrEmpty()) {
+            "folders_regular_${sanitizedQuery}_sort_${sort}"
+        } else {
+            val sortedAttributes = tagsIds.sorted().joinToString(",")
+            "folders_tags_[${sortedAttributes}]_${sanitizedQuery}_sort_${sort}"
         }
     }
 }
