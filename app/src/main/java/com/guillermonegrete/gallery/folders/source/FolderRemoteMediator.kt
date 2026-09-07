@@ -5,7 +5,6 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
-import com.guillermonegrete.gallery.data.source.CachePreferenceManager
 import com.guillermonegrete.gallery.data.source.local.AppDatabase
 import com.guillermonegrete.gallery.folders.source.local.FolderEntity
 import com.guillermonegrete.gallery.folders.source.local.FolderRemoteKey
@@ -17,7 +16,6 @@ import retrofit2.HttpException
 class FolderRemoteMediator(
     private val database: AppDatabase,
     private val apiService: FoldersAPI,
-    private val cachePrefs: CachePreferenceManager,
     private val query: String?,
     private val sort: String,
     private val tagIds: List<Long>?,
@@ -46,18 +44,25 @@ class FolderRemoteMediator(
                 }
             }
 
-            // 2. Fetch the ETag only when refreshing, otherwise send null so the backend actually return data instead of a 304 response
-            val targetPageEtag = if (loadType == LoadType.REFRESH)
-                cachePrefs.getGlobalFolderEtag()
-            else null
+            // 2. Select the correct ETag based on which endpoint we are calling
+            val mainEndpoint = tagIds.isNullOrEmpty()
+            val etagToSend = if (loadType == LoadType.REFRESH) {
+                if (mainEndpoint) {
+                    // Endpoint 1 uses the same tag
+                    database.folderRemoteKeyDao().getRemoteKeyById("global_folder_version")?.etag
+                } else {
+                    // Endpoint 2 uses a different etag depending on the ids
+                    database.folderRemoteKeyDao().getRemoteKeyById(remoteKeyId)?.etag
+                }
+            } else null
 
-            val networkSingle = if (tagIds == null) {
+            val networkSingle = if (mainEndpoint) {
                 apiService.getFoldersResponse(
                     page = page,
                     size = state.config.pageSize,
                     query = query,
                     sort = sort,
-                    ifNoneMatch = targetPageEtag
+                    ifNoneMatch = etagToSend
                 )
             } else {
                 apiService.getPagedFoldersByTags(
@@ -66,7 +71,7 @@ class FolderRemoteMediator(
                     size = state.config.pageSize,
                     query = query,
                     sort = sort,
-                    ifNoneMatch = targetPageEtag
+                    ifNoneMatch = etagToSend
                 )
             }
 
@@ -91,20 +96,31 @@ class FolderRemoteMediator(
             database.withTransaction {
                 // If refreshing the whole feed, clear out page index paths
                 if (loadType == LoadType.REFRESH) {
-                    database.folderRemoteKeyDao().clearRemoteKeys()
-                    database.folderDao().clearAllFolders()
+                    val shouldWipeDatabase = if (mainEndpoint) {
+                        true
+                    } else {
+                        // For the tags endpoint: the first time loading, the etag is always null therefore the server will return 200 instead of 304
+                        // but this doesn't mean the cache is stale so don't wipe it
+                        etagToSend != null
+                    }
+                    if (shouldWipeDatabase) {
+                        database.folderRemoteKeyDao().clearRemoteKeys()
+                        database.folderDao().clearAllFolders()
+                    }
                 }
 
                 // Save the new token tied strictly to this page index row
                 database.folderRemoteKeyDao().insertKey(
-                    FolderRemoteKey(id = remoteKeyId, nextKey = serverNextPage)
+                    FolderRemoteKey(id = remoteKeyId, nextKey = serverNextPage, etag = newEtag)
                 )
 
-                database.folderDao().insertAll(items.map { it.toEntity(remoteKeyId) })
-            }
+                if (mainEndpoint) {
+                    database.folderRemoteKeyDao().insertKey(
+                        FolderRemoteKey(id = "global_folder_version", nextKey = null, etag = newEtag)
+                    )
+                }
 
-            if (loadType == LoadType.REFRESH) {
-                cachePrefs.saveGlobalFolderEtag(newEtag)
+                database.folderDao().insertAll(items.map { it.toEntity(remoteKeyId) })
             }
 
             MediatorResult.Success(endOfPaginationReached = serverNextPage == null)
@@ -114,3 +130,5 @@ class FolderRemoteMediator(
         }
     }
 }
+
+const val FOLDER_PAGE_SIZE = 30
