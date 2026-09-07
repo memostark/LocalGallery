@@ -9,6 +9,7 @@ import androidx.room.Query
 
 @Entity(tableName = "folder_remote_keys")
 data class FolderRemoteKey(
+    val etag: String?,
     val nextKey: Int?,
     @PrimaryKey val id: String,
 )
