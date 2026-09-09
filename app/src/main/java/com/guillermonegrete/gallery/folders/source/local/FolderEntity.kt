@@ -14,7 +14,6 @@ data class FolderEntity(
     val name:String,
     val coverUrl: String,
     val count: Int,
-    val scopeId: String,
     @PrimaryKey val id: Int,
 ) {
     fun toDomainModel() = Folder(name, coverUrl, count, id.toLong())
@@ -25,22 +24,30 @@ interface FolderDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(folders: List<FolderEntity>)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCrossRefs(refs: List<FolderScopeCrossRef>)
+
     // Paging 3 monitors these queries automatically to stream data updates to your UI.
-    @Query("SELECT * FROM folder WHERE scopeId = :scopeId ORDER BY name ASC")
+    @Query("SELECT * FROM folder f INNER JOIN folder_scope_cross_ref r ON f.id = r.folderId WHERE r.scopeId = :scopeId ORDER BY name ASC")
     fun getFoldersSortedByNameAsc(scopeId: String): PagingSource<Int, FolderEntity>
 
-    @Query("SELECT * FROM folder WHERE scopeId = :scopeId ORDER BY name DESC")
+    @Query("SELECT * FROM folder f INNER JOIN folder_scope_cross_ref r ON f.id = r.folderId WHERE r.scopeId = :scopeId ORDER BY name DESC")
     fun getFoldersSortedByNameDesc(scopeId: String): PagingSource<Int, FolderEntity>
 
-    @Query("SELECT * FROM folder WHERE scopeId = :scopeId ORDER BY count ASC")
+    @Query("SELECT * FROM folder f INNER JOIN folder_scope_cross_ref r ON f.id = r.folderId WHERE r.scopeId = :scopeId ORDER BY count ASC")
     fun getFoldersSortedByCountAsc(scopeId: String): PagingSource<Int, FolderEntity>
 
-    @Query("SELECT * FROM folder WHERE scopeId = :scopeId ORDER BY count DESC")
+    @Query("SELECT * FROM folder f INNER JOIN folder_scope_cross_ref r ON f.id = r.folderId WHERE r.scopeId = :scopeId ORDER BY count DESC")
     fun getFoldersSortedByCountDesc(scopeId: String): PagingSource<Int, FolderEntity>
 
-    @Query("DELETE FROM folder WHERE scopeId = :scopeId")
-    suspend fun clearFoldersByScope(scopeId: String)
+    @Query("DELETE FROM folder_scope_cross_ref WHERE scopeId = :scopeId")
+    suspend fun clearCrossRefsByScope(scopeId: String)
 
-    @Query("DELETE FROM folder WHERE scopeId LIKE 'folders_regular_%'")
-    suspend fun clearAllRegularFeedFolders()
+    @Query("""
+        DELETE FROM folder_scope_cross_ref 
+        WHERE scopeId IN (
+            SELECT id FROM folder_remote_keys WHERE etag = :etag
+        )
+    """)
+    suspend fun clearCrossRefsByEtag(etag: String)
 }
