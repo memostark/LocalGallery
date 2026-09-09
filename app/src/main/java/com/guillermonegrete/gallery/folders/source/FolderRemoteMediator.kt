@@ -8,6 +8,7 @@ import androidx.room.withTransaction
 import com.guillermonegrete.gallery.data.source.local.AppDatabase
 import com.guillermonegrete.gallery.folders.source.local.FolderEntity
 import com.guillermonegrete.gallery.folders.source.local.FolderRemoteKey
+import com.guillermonegrete.gallery.folders.source.local.FolderScopeCrossRef
 import com.guillermonegrete.gallery.folders.source.local.FolderScopeHelper
 import kotlinx.coroutines.rx3.await
 import retrofit2.HttpException
@@ -96,16 +97,9 @@ class FolderRemoteMediator(
             database.withTransaction {
                 // If refreshing the whole feed, clear out page index paths
                 if (loadType == LoadType.REFRESH) {
-                    if (mainEndpoint) {
-                        database.folderRemoteKeyDao().clearAllRegularFeedKeys()
-                        database.folderDao().clearAllRegularFeedFolders()
-                    } else {
-                        // For the tags endpoint: the first time loading, the etag is always null therefore the server will return 200 instead of 304
-                        // but this doesn't mean the cache is stale so don't wipe it
-                        if (etagToSend != null) {
-                            database.folderRemoteKeyDao().deleteKeyById(remoteKeyId)
-                            database.folderDao().clearFoldersByScope(remoteKeyId)
-                        }
+                    if (etagToSend != null) {
+                        database.folderDao().clearCrossRefsByEtag(etagToSend)
+                        database.folderRemoteKeyDao().deleteKeysByEtag(etagToSend)
                     }
                 }
 
@@ -120,7 +114,8 @@ class FolderRemoteMediator(
                     )
                 }
 
-                database.folderDao().insertAll(items.map { it.toEntity(remoteKeyId) })
+                database.folderDao().insertAll(items.map { it.toEntity() })
+                database.folderDao().insertCrossRefs(items.map { FolderScopeCrossRef(remoteKeyId, it.id.toInt()) })
             }
 
             MediatorResult.Success(endOfPaginationReached = serverNextPage == null)
