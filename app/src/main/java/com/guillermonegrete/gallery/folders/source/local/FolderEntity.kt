@@ -38,6 +38,9 @@ interface FolderDao {
     @Query("SELECT * FROM folder WHERE scopeId = :scopeId ORDER BY count DESC")
     fun getFoldersSortedByCountDesc(scopeId: String): PagingSource<Int, FolderEntity>
 
-    @Query("DELETE FROM folder")
-    suspend fun clearAllFolders()
+    @Query("DELETE FROM folder WHERE scopeId = :scopeId")
+    suspend fun clearFoldersByScope(scopeId: String)
+
+    @Query("DELETE FROM folder WHERE scopeId LIKE 'folders_regular_%'")
+    suspend fun clearAllRegularFeedFolders()
 }

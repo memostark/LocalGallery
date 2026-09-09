@@ -38,6 +38,6 @@ interface FolderRemoteKeyDao {
     @Query("DELETE FROM folder_remote_keys WHERE id = :id")
     suspend fun deleteKeyById(id: String)
 
-    @Query("DELETE FROM folder_remote_keys")
-    suspend fun clearRemoteKeys()
+    @Query("DELETE FROM folder_remote_keys WHERE id LIKE 'folders_regular_%'")
+    suspend fun clearAllRegularFeedKeys()
 }

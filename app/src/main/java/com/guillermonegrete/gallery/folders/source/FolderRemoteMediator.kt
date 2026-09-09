@@ -96,16 +96,16 @@ class FolderRemoteMediator(
             database.withTransaction {
                 // If refreshing the whole feed, clear out page index paths
                 if (loadType == LoadType.REFRESH) {
-                    val shouldWipeDatabase = if (mainEndpoint) {
-                        true
+                    if (mainEndpoint) {
+                        database.folderRemoteKeyDao().clearAllRegularFeedKeys()
+                        database.folderDao().clearAllRegularFeedFolders()
                     } else {
                         // For the tags endpoint: the first time loading, the etag is always null therefore the server will return 200 instead of 304
                         // but this doesn't mean the cache is stale so don't wipe it
-                        etagToSend != null
-                    }
-                    if (shouldWipeDatabase) {
-                        database.folderRemoteKeyDao().clearRemoteKeys()
-                        database.folderDao().clearAllFolders()
+                        if (etagToSend != null) {
+                            database.folderRemoteKeyDao().deleteKeyById(remoteKeyId)
+                            database.folderDao().clearFoldersByScope(remoteKeyId)
+                        }
                     }
                 }
 
