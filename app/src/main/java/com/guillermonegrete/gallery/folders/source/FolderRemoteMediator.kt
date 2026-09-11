@@ -100,6 +100,7 @@ class FolderRemoteMediator(
                     if (etagToSend != null) {
                         database.folderDao().clearCrossRefsByEtag(etagToSend)
                         database.folderRemoteKeyDao().deleteKeysByEtag(etagToSend)
+                        database.folderDao().cleanupOrphanedFolders()
                     }
                 }
 
