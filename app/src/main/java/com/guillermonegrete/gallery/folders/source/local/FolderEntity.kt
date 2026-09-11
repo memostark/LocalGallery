@@ -50,4 +50,14 @@ interface FolderDao {
         )
     """)
     suspend fun clearCrossRefsByEtag(etag: String)
+
+    @Query("""
+        DELETE FROM folder 
+        WHERE NOT EXISTS (
+            SELECT 1 
+            FROM folder_scope_cross_ref 
+            WHERE folder_scope_cross_ref.folderId = folder.id
+        )
+    """)
+    suspend fun cleanupOrphanedFolders()
 }
