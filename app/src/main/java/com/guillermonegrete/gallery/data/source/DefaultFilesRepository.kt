@@ -24,6 +24,7 @@ class DefaultFilesRepository @Inject constructor(
     private val fileAPI: FilesServerAPI,
     private val foldersAPI: FoldersAPI,
     private val database: AppDatabase,
+    private val cachePref: CachePreferenceManager,
 ): FilesRepository {
 
     override fun getFolders(): Single<GetFolderResponse> {
@@ -32,11 +33,14 @@ class DefaultFilesRepository @Inject constructor(
 
     @OptIn(ExperimentalPagingApi::class)
     override fun getPagedFolders(tagIds: List<Long>, query: String?, sort: String): Flowable<PagingData<Folder>> {
+        var titleAssigned = false
+        var title: String? = null
         return Pager(
             PagingConfig(pageSize = FOLDER_PAGE_SIZE),
-            remoteMediator = FolderRemoteMediator(database, foldersAPI, query, sort, tagIds)
+            remoteMediator = FolderRemoteMediator(database, foldersAPI, cachePref, query, sort, tagIds)
         ) {
             val currentScopeId = FolderScopeHelper.generateId(query, sort, tagIds)
+            title = cachePref.getFolderName()
 
             when (sort) {
                 "name,desc"  -> database.folderDao().getFoldersSortedByNameDesc(currentScopeId)
@@ -47,7 +51,12 @@ class DefaultFilesRepository @Inject constructor(
         }.flowable
             .map { pagingData ->
                 pagingData.map { folderEntity ->
-                    folderEntity.toDomainModel()
+                    folderEntity.toDomainModel().apply {
+                        if (!titleAssigned) {
+                            this.title = title
+                            titleAssigned = true
+                        }
+                    }
                 }
             }
     }
