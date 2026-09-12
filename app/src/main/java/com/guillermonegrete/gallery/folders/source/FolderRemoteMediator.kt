@@ -5,6 +5,7 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
+import com.guillermonegrete.gallery.data.source.CachePreferenceManager
 import com.guillermonegrete.gallery.data.source.local.AppDatabase
 import com.guillermonegrete.gallery.folders.source.local.FolderEntity
 import com.guillermonegrete.gallery.folders.source.local.FolderRemoteKey
@@ -17,6 +18,7 @@ import retrofit2.HttpException
 class FolderRemoteMediator(
     private val database: AppDatabase,
     private val apiService: FoldersAPI,
+    private val cachePref: CachePreferenceManager,
     private val query: String?,
     private val sort: String,
     private val tagIds: List<Long>?,
@@ -102,6 +104,7 @@ class FolderRemoteMediator(
                         database.folderRemoteKeyDao().deleteKeysByEtag(etagToSend)
                         database.folderDao().cleanupOrphanedFolders()
                     }
+                    cachePref.saveFolderName(body.name)
                 }
 
                 // Save the new token tied strictly to this page index row
