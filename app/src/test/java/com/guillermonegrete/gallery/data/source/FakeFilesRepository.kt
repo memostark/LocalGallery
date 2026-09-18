@@ -28,9 +28,8 @@ class FakeFilesRepository: FilesRepository {
         return Single.just(GetFolderResponse("Name", foldersServiceData))
     }
 
-    override fun getPagedFolders(tagIds: List<Long>, query: String?, sort: String?): Flowable<PagingData<Folder>> {
-        return Flowable.just(PagingData.from(foldersServiceData))
-    }
+    override fun getPagedFolders(tagIds: List<Long>, query: String?, sort: String)
+        = Flowable.just(PagingData.from(foldersServiceData))
 
     override fun getFiles(folder: String): Single<List<File>> {
         if(shouldReturnError) return Single.error(RuntimeException())

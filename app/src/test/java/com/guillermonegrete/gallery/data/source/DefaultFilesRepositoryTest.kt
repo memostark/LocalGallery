@@ -3,6 +3,7 @@ package com.guillermonegrete.gallery.data.source
 import com.guillermonegrete.gallery.data.*
 import com.guillermonegrete.gallery.data.source.remote.FakeFileServerAPI
 import com.guillermonegrete.gallery.folders.source.FakeFoldersApi
+import io.mockk.mockk
 import org.junit.Before
 import org.junit.Test
 import java.util.*
@@ -30,7 +31,7 @@ class DefaultFilesRepositoryTest {
         )
 
         val fileApi = FakeFileServerAPI(filesMap)
-        repository = DefaultFilesRepository(fileApi, FakeFoldersApi())
+        repository = DefaultFilesRepository(fileApi, FakeFoldersApi(), mockk(), mockk())
         fileApi.addFolder(defaultFolders[2], defaultFiles[2])
     }
 

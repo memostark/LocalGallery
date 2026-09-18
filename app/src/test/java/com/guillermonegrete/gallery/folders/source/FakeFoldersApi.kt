@@ -2,6 +2,7 @@ package com.guillermonegrete.gallery.folders.source
 
 import com.guillermonegrete.gallery.data.Folder
 import io.reactivex.rxjava3.core.Single
+import retrofit2.Response
 
 class FakeFoldersApi: FoldersAPI {
 
@@ -14,6 +15,16 @@ class FakeFoldersApi: FoldersAPI {
         TODO("Not yet implemented")
     }
 
+    override fun getFoldersResponse(
+        page: Int,
+        ifNoneMatch: String?,
+        query: String?,
+        sort: String?,
+        size: Int
+    ): Single<Response<PagedFolderResponse>> {
+        TODO("Not yet implemented")
+    }
+
     override fun getPagedFoldersByTags(
         fileIds: List<Long>,
         page: Int,
@@ -21,6 +32,17 @@ class FakeFoldersApi: FoldersAPI {
         sort: String?,
         size: Int
     ): Single<PagedFolderResponse> {
+        TODO("Not yet implemented")
+    }
+
+    override fun getPagedFoldersByTags(
+        tagIds: List<Long>,
+        page: Int,
+        ifNoneMatch: String?,
+        query: String?,
+        sort: String?,
+        size: Int
+    ): Single<Response<PagedFolderResponse>> {
         TODO("Not yet implemented")
     }
 
