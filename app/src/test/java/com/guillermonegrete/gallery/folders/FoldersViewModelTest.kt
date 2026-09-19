@@ -1,20 +1,24 @@
 package com.guillermonegrete.gallery.folders
 
+import android.util.Log
 import android.view.View
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.paging.AsyncPagingDataDiffer
-import androidx.paging.PagingData
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListUpdateCallback
+import androidx.paging.testing.asSnapshot
 import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.source.FakeFilesRepository
 import com.guillermonegrete.gallery.data.source.FakeSettingsRepository
 import com.guillermonegrete.gallery.folders.models.FolderUI
 import io.mockk.every
 import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.*
+import kotlinx.coroutines.reactive.asFlow
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -50,11 +54,15 @@ class FoldersViewModelTest {
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
+        // Paging data now uses this class which depends on the Android framework
+        mockkStatic(Log::class)
+        every { Log.isLoggable(any(), any()) } returns false
     }
 
     @After
     fun tearDown() {
         Dispatchers.resetMain()
+        unmockkStatic(Log::class)
     }
 
     @Before
@@ -87,13 +95,13 @@ class FoldersViewModelTest {
     }
 
     @Test
-    fun `Given url set, when loading folders, emit url available and folders`() {
+    fun `Given url set, when loading folders, emit url available and folders`() = runTest {
         // Has url set
         settingsRepository.serverUrl = "url"
 
         // Sets observer, otherwise flow won't emit
         val urlObserver = viewModel.urlAvailable.test()
-        val folderObserver = viewModel.pagedFolders.test()
+        val folderObserver = viewModel.pagedFolders.take(1)
 
         viewModel.getFolders()
 
@@ -101,9 +109,7 @@ class FoldersViewModelTest {
         urlObserver.assertValues(true)
 
         // Assert default items emitted
-        folderObserver.assertValue {
-            defaultUIFolders == getItems(it)
-        }
+        assertEquals(defaultUIFolders, folderObserver.asFlow().asSnapshot())
     }
 
     @Test
@@ -117,25 +123,23 @@ class FoldersViewModelTest {
     }
 
     @Test
-    fun `Given empty url, when url changed, then folders reload`(){
+    fun `Given empty url, when url changed, then folders reload`() = runTest {
         // save new server address
         val newURL = "new-url"
         viewModel.updateServerUrl(newURL)
-        val folderObserver = viewModel.pagedFolders.test()
+        val folderObserver = viewModel.pagedFolders.take(1)
         viewModel.getFolders()
 
         // Assert new url set
         assertEquals(settingsRepository.serverUrl, newURL)
 
         // Assert default items emitted
-        folderObserver.assertValue {
-            defaultUIFolders == getItems(it)
-        }
+        assertEquals(defaultUIFolders, folderObserver.asFlow().asSnapshot())
     }
 
     @Test
-    fun `Given no folders in root, when load, no folders layout shown`(){
-        val folderObserver = viewModel.pagedFolders.test()
+    fun `Given no folders in root, when load, no folders layout shown`() = runTest {
+        val folderObserver = viewModel.pagedFolders.take(1)
 
         // Set folders list as empty
         filesRepository.foldersServiceData = arrayListOf()
@@ -147,40 +151,7 @@ class FoldersViewModelTest {
         // When
         viewModel.getFolders()
 
-        folderObserver.assertValue {
-            getItems(it).isEmpty()
-        }
-    }
-
-    /**
-     * This is the only way to extract items from PagingData as explained here:
-     * https://developer.android.com/topic/libraries/architecture/paging/test#transformation-tests
-     */
-    private fun getItems(folders: PagingData<FolderUI>): List<FolderUI> {
-        val differ = AsyncPagingDataDiffer(
-            diffCallback = MyDiffCallback(),
-            updateCallback = NoopListCallback(),
-            workerDispatcher = Dispatchers.Main
-        )
-        testScope.runTest {
-            differ.submitData(folders)
-            advanceUntilIdle()
-        }
-
-        return differ.snapshot().items
-    }
-
-    class NoopListCallback : ListUpdateCallback {
-        override fun onChanged(position: Int, count: Int, payload: Any?) {}
-        override fun onMoved(fromPosition: Int, toPosition: Int) {}
-        override fun onInserted(position: Int, count: Int) {}
-        override fun onRemoved(position: Int, count: Int) {}
-    }
-
-    class MyDiffCallback : DiffUtil.ItemCallback<FolderUI>() {
-        override fun areItemsTheSame(oldItem: FolderUI, newItem: FolderUI) = oldItem == newItem
-
-        override fun areContentsTheSame(oldItem: FolderUI, newItem: FolderUI) = oldItem == newItem
+        folderObserver.asFlow().asSnapshot().isEmpty()
     }
 
 }
