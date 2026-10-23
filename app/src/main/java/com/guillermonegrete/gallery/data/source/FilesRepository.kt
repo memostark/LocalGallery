@@ -17,7 +17,7 @@ interface FilesRepository {
 
     fun getFiles(folder: String): Single<List<File>>
 
-    fun getPagedFiles(folder: Folder, tagIds: FilterTags, sort: String?): Flowable<PagingData<File>>
+    fun getPagedFiles(folder: Folder, tagIds: FilterTags, sort: String): Flowable<PagingData<File>>
 
     fun updateFolderCover(id: Long, fileId: Long): Single<Folder>
 

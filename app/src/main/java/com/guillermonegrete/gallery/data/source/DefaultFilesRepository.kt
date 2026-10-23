@@ -1,20 +1,23 @@
 package com.guillermonegrete.gallery.data.source
 
-import android.net.Uri
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
 import androidx.paging.rxjava3.flowable
-import com.guillermonegrete.gallery.data.*
+import com.guillermonegrete.gallery.data.File
+import com.guillermonegrete.gallery.data.Folder
+import com.guillermonegrete.gallery.data.GetFolderResponse
 import com.guillermonegrete.gallery.data.source.local.AppDatabase
-import com.guillermonegrete.gallery.data.source.remote.FilesPageSource
 import com.guillermonegrete.gallery.data.source.remote.FilesServerAPI
 import com.guillermonegrete.gallery.data.source.remote.FilterTags
-import com.guillermonegrete.gallery.folders.source.FoldersAPI
+import com.guillermonegrete.gallery.files.source.FileRemoteMediator
+import com.guillermonegrete.gallery.files.source.local.FileScopeHelper
+import com.guillermonegrete.gallery.files.source.local.FileWithFolder
 import com.guillermonegrete.gallery.folders.source.FOLDER_PAGE_SIZE
 import com.guillermonegrete.gallery.folders.source.FolderRemoteMediator
+import com.guillermonegrete.gallery.folders.source.FoldersAPI
 import com.guillermonegrete.gallery.folders.source.local.FolderScopeHelper
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
@@ -68,13 +71,34 @@ class DefaultFilesRepository @Inject constructor(
         }
     }
 
-    override fun getPagedFiles(folder: Folder, tagIds: FilterTags, sort: String?)
-        = Pager(PagingConfig(pageSize = 20)) {
-            // This encoding method uses standard RFC 3986 (unlike retrofit or java.net.URLEncoder) which is what the backend expects
-            val encodedName = Uri.encode(folder.name)
-            val tags = if (tagIds.folderTagIds.isEmpty() && tagIds.fileTagIds.isEmpty()) null else tagIds
-            FilesPageSource(fileAPI, folder.copy(name = encodedName), sort, tags)
+    @OptIn(ExperimentalPagingApi::class)
+    override fun getPagedFiles(folder: Folder, tagIds: FilterTags, sort: String): Flowable<PagingData<File>> {
+        val folderId = if (folder == Folder.NULL_FOLDER) null else folder.id
+        return Pager(
+            PagingConfig(pageSize = 20),
+            remoteMediator = FileRemoteMediator(database, fileAPI, folderId, sort, tagIds.fileTagIds)
+        ) {
+            val currentScopeId = FileScopeHelper.generateScopeId(
+                folderId,
+                sort,
+                tagIds.folderTagIds,
+                tagIds.fileTagIds
+            )
+
+            val fileDao = database.fileDao()
+            when (sort) {
+                "filename,desc" -> fileDao.getFilesByNameDesc(currentScopeId)
+                "filename,asc" -> fileDao.getFilesByNameAsc(currentScopeId)
+                "creationDate,desc" -> fileDao.getFilesByCreatedDesc(currentScopeId)
+                "creationDate,asc" -> fileDao.getFilesByCreatedAsc(currentScopeId)
+                "lastModified,asc" -> fileDao.getFilesByModifiedAsc(currentScopeId)
+                else -> fileDao.getFilesByModifiedDesc(currentScopeId)
+            }
         }.flowable
+            .map { pagingData ->
+                pagingData.map(FileWithFolder::toDomainModel)
+            }
+    }
 
     override fun updateFolderCover(id: Long, fileId: Long) = foldersAPI.updateFolderCover(id, fileId)
 
