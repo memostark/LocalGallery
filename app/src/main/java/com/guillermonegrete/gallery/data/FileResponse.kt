@@ -1,5 +1,6 @@
 package com.guillermonegrete.gallery.data
 
+import com.guillermonegrete.gallery.files.source.local.FileEntity
 import com.squareup.moshi.Json
 import java.net.URL
 import java.util.*
@@ -30,6 +31,11 @@ sealed class FileResponse(
     override fun toString(): String {
         return "{url: $url, tags: $tags}"
     }
+
+    fun toEntity() = when(this) {
+        is ImageFileResponse -> FileEntity(id, url, generateFilename(), width, height, creationDate.time, lastModified.time, folder?.id, type.name, null)
+        is VideoFileResponse -> FileEntity(id, url, generateFilename(), width, height, creationDate.time, lastModified.time, folder?.id, type.name, duration)
+    }
 }
 
 class ImageFileResponse(
@@ -59,7 +65,7 @@ class VideoFileResponse(
     lastModified: Date,
     tags: List<Tag>,
     folder: Folder?,
-    private val duration: Int,
+    val duration: Int,
     id: Long,
 ): FileResponse(url, filename, width, height, creationDate, lastModified, tags, folder, id, FileType.Video){
     // Constructor for testing

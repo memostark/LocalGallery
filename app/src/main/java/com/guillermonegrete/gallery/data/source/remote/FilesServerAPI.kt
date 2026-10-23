@@ -7,9 +7,9 @@ import com.guillermonegrete.gallery.data.GetFolderResponse
 import com.guillermonegrete.gallery.data.PagedFileResponse
 import io.reactivex.rxjava3.core.Single
 import kotlinx.parcelize.Parcelize
-import retrofit2.http.Body
+import retrofit2.Response
 import retrofit2.http.GET
-import retrofit2.http.POST
+import retrofit2.http.Header
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -23,37 +23,25 @@ interface FilesServerAPI{
         @Path(value="folderName", encoded = true) folderName: String
     ): Single<List<FileResponse>>
 
-    @GET("folders/{folderName}")
-    fun getPagedFiles(
-        @Path(value="folderName", encoded = true) folderName: String,
-        @Query("page") page: Int,
-        @Query("sort") sort: String? = null,
-        @Query("size") size: Int = 30,
-    ): Single<PagedFileResponse>
-
-    @POST("folders/{folderId}/files")
-    fun getPagedFilesByTag(
+    @GET("folders/{folderId}/files")
+    fun getFolderFiles(
         @Path(value="folderId") folderId: Long,
-        @Body tagIds: List<Long>,
+        @Header("If-None-Match") ifNoneMatch: String?,
+        @Query("tagIds") tagIds: List<Long>?,
         @Query("page") page: Int,
         @Query("sort") sort: String? = null,
         @Query("size") size: Int = 30,
-    ): Single<PagedFileResponse>
+    ): Single<Response<PagedFileResponse>>
 
     @GET("files")
     fun getAllFiles(
+        @Header("If-None-Match") ifNoneMatch: String?,
+        @Query("fileTagIds") fileTags: List<Long>?,
+        @Query("folderTagIds") folderTags: List<Long>?,
         @Query("page") page: Int,
         @Query("sort") sort: String? = null,
         @Query("size") size: Int = 30,
-    ): Single<PagedFileResponse>
-
-    @POST("files")
-    fun getAllFilesByTags(
-        @Body tags: FilterTags,
-        @Query("page") page: Int,
-        @Query("sort") sort: String? = null,
-        @Query("size") size: Int = 30,
-    ): Single<PagedFileResponse>
+    ): Single<Response<PagedFileResponse>>
 
     @GET("files/info")
     fun getFilesInfo(): Single<FileInfoResponse>
