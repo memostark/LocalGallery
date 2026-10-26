@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.Insert
+import androidx.room.Junction
 import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
@@ -14,6 +15,7 @@ import com.guillermonegrete.gallery.data.FileType
 import com.guillermonegrete.gallery.data.ImageFile
 import com.guillermonegrete.gallery.data.VideoFile
 import com.guillermonegrete.gallery.folders.source.local.FolderEntity
+import com.guillermonegrete.gallery.tags.source.local.TagEntity
 import java.util.Date
 
 @Entity(tableName = "files")
@@ -66,6 +68,9 @@ interface FileDao {
         """
     )
     suspend fun clearCrossRefsByEtag(etag: String)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTagRefs(tags: List<FileTagCrossRef>)
 }
 
 data class FileWithFolder(
@@ -75,12 +80,32 @@ data class FileWithFolder(
         parentColumn = "folderId",
         entityColumn = "id"
     )
-    val folder: FolderEntity? // Will be null for folder-specific feeds, populated for overall feeds
+    val folder: FolderEntity?, // Will be null for folder-specific feeds, populated for overall feeds
+
+    @Relation(
+        parentColumn = "id", // Primary key of the media entity
+        entityColumn = "id", // Primary key of TagEntity
+        associateBy = Junction(
+            value = FileTagCrossRef::class,
+            parentColumn = "fileId",
+            entityColumn = "tagId",
+        )
+    )
+    val tags: List<TagEntity>
 ) {
     fun toDomainModel(): File = with(file) {
         when (FileType.valueOf(file.fileType)) {
-            FileType.Image -> ImageFile(url, filename, width, height, 0, 0, Date(creationDate), Date(lastModified), emptyList(), folder?.toDomainModel(), id)
-            FileType.Video -> VideoFile(url, filename, width, height, 0, 0, Date(creationDate), Date(lastModified), duration ?: 0, emptyList(), folder?.toDomainModel(), id)
+            FileType.Image -> ImageFile(url, filename, width, height, 0, 0, Date(creationDate), Date(lastModified), tags.map(TagEntity::toDomainModel), folder?.toDomainModel(), id)
+            FileType.Video -> VideoFile(url, filename, width, height, 0, 0, Date(creationDate), Date(lastModified), duration ?: 0, tags.map(TagEntity::toDomainModel), folder?.toDomainModel(), id)
         }
     }
 }
+
+@Entity(
+    tableName = "file_tags_cross_ref",
+    primaryKeys = ["fileId", "tagId"]
+)
+data class FileTagCrossRef(
+    val fileId: Long,
+    val tagId: Long
+)

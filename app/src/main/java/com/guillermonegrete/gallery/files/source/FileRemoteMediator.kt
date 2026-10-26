@@ -6,13 +6,16 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import com.guillermonegrete.gallery.data.FileResponse
+import com.guillermonegrete.gallery.data.Tag
 import com.guillermonegrete.gallery.data.source.local.AppDatabase
 import com.guillermonegrete.gallery.data.source.remote.FilesServerAPI
 import com.guillermonegrete.gallery.files.source.local.FileRemoteKey
 import com.guillermonegrete.gallery.files.source.local.FileScopeCrossRef
 import com.guillermonegrete.gallery.files.source.local.FileScopeHelper
 import com.guillermonegrete.gallery.files.source.local.FileWithFolder
+import com.guillermonegrete.gallery.files.source.local.FileTagCrossRef
 import com.guillermonegrete.gallery.folders.source.local.FolderEntity
+import com.guillermonegrete.gallery.tags.source.local.toFileEntity
 import kotlinx.coroutines.rx3.await
 import retrofit2.HttpException
 
@@ -132,6 +135,19 @@ FileRemoteMediator(
                 database.fileDao().insertAll(items.map(FileResponse::toEntity))
                 database.fileDao()
                     .insertCrossRefs(items.map { FileScopeCrossRef(remoteKeyId, it.id) })
+
+                // Tags
+                val tags = items.flatMap { file -> file.tags }.map(Tag::toFileEntity)
+                if (tags.isNotEmpty()) {
+                    database.tagDao().insertAllTags(tags)
+                }
+                database.fileDao().insertAll(items.map(FileResponse::toEntity))
+                val tagRefs = items.flatMap { fileDto ->
+                    fileDto.tags.map { tagDto ->
+                        FileTagCrossRef(fileId = fileDto.id, tagId = tagDto.id)
+                    }
+                }
+                database.fileDao().insertTagRefs(tagRefs)
             }
 
             MediatorResult.Success(endOfPaginationReached = serverNextPage == null)
