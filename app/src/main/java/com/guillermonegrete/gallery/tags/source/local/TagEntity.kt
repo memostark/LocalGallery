@@ -31,4 +31,7 @@ enum class TagType(val value: Int) {
 interface TagDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAllTags(tags: List<TagEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTag(tag: TagEntity)
 }

@@ -71,6 +71,12 @@ interface FileDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTagRefs(tags: List<FileTagCrossRef>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTagRef(link: FileTagCrossRef)
+
+    @Query("DELETE FROM file_tags_cross_ref WHERE fileId = :fileId AND tagId = :tagId")
+    suspend fun removeTagRef(fileId: Long, tagId: Long)
 }
 
 data class FileWithFolder(
