@@ -7,6 +7,7 @@ import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.GetFolderResponse
 import com.guillermonegrete.gallery.data.PagedFileResponse
 import io.reactivex.rxjava3.core.Single
+import retrofit2.Response
 import retrofit2.http.Path
 import java.lang.RuntimeException
 
@@ -29,39 +30,25 @@ class FakeFileServerAPI(folderServiceData: LinkedHashMap<Folder, List<FileRespon
         else Single.just(files)
     }
 
-    override fun getPagedFiles(
-        folderName: String,
-        page: Int,
-        sort: String?,
-        size: Int
-    ): Single<PagedFileResponse> {
-        TODO("Not yet implemented")
-    }
-
-    override fun getPagedFilesByTag(
+    override fun getFolderFiles(
         folderId: Long,
-        tagIds: List<Long>,
+        ifNoneMatch: String?,
+        tagIds: List<Long>?,
         page: Int,
         sort: String?,
         size: Int
-    ): Single<PagedFileResponse> {
+    ): Single<Response<PagedFileResponse>> {
         TODO("Not yet implemented")
     }
 
     override fun getAllFiles(
+        ifNoneMatch: String?,
+        fileTags: List<Long>?,
+        folderTags: List<Long>?,
         page: Int,
         sort: String?,
         size: Int
-    ): Single<PagedFileResponse> {
-        TODO("Not yet implemented")
-    }
-
-    override fun getAllFilesByTags(
-        tags: FilterTags,
-        page: Int,
-        sort: String?,
-        size: Int
-    ): Single<PagedFileResponse> {
+    ): Single<Response<PagedFileResponse>> {
         TODO("Not yet implemented")
     }
 

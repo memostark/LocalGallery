@@ -19,10 +19,6 @@ class FakeFilesRepository: FilesRepository {
 
     private var shouldReturnError = false
 
-    fun setReturnError(value: Boolean) {
-        shouldReturnError = value
-    }
-
     override fun getFolders(): Single<GetFolderResponse> {
         if(shouldReturnError) return Single.error(RuntimeException())
         return Single.just(GetFolderResponse("Name", foldersServiceData))
@@ -40,7 +36,7 @@ class FakeFilesRepository: FilesRepository {
     override fun getPagedFiles(
         folder: Folder,
         tagIds: FilterTags,
-        sort: String?
+        sort: String,
     ): Flowable<PagingData<File>> {
         TODO("Not yet implemented")
     }

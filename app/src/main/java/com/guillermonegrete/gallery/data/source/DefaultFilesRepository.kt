@@ -36,7 +36,7 @@ class DefaultFilesRepository @Inject constructor(
 
     @OptIn(ExperimentalPagingApi::class)
     override fun getPagedFolders(tagIds: List<Long>, query: String?, sort: String): Flowable<PagingData<Folder>> {
-        var titleAssigned = false
+        var titleAssigned: Boolean
         var title: String? = null
         return Pager(
             PagingConfig(pageSize = FOLDER_PAGE_SIZE),
@@ -54,6 +54,7 @@ class DefaultFilesRepository @Inject constructor(
         }.flowable
             .map { pagingData ->
                 pagingData.map { folderEntity ->
+                    titleAssigned = false
                     folderEntity.toDomainModel().apply {
                         if (!titleAssigned) {
                             this.title = title

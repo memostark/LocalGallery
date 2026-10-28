@@ -19,9 +19,15 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.guillermonegrete.gallery.R
+import com.guillermonegrete.gallery.data.FileInfoResponse
+import com.guillermonegrete.gallery.data.Folder
 import com.guillermonegrete.gallery.data.source.SettingsRepository
 import com.guillermonegrete.gallery.di.SettingsModule
+import com.guillermonegrete.gallery.folders.source.FolderPage
+import com.guillermonegrete.gallery.folders.source.PagedFolderResponse
 import com.guillermonegrete.gallery.utils.atPosition
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.UninstallModules
@@ -45,6 +51,10 @@ class MainActivityTest {
 
     @Inject
     lateinit var settingsRepository: SettingsRepository
+    private val moshi = Moshi.Builder()
+        .addLast(KotlinJsonAdapterFactory())
+        .build()
+    private val folderAdapter = moshi.adapter(PagedFolderResponse::class.java)
 
     private lateinit var server: MockWebServer
 
@@ -64,7 +74,7 @@ class MainActivityTest {
 
     @Test
     fun given_no_url_when_new_url_then_list_loaded() {
-        server.enqueue(MockResponse().setBody(FOLDER_RESPONSE))
+        server.enqueue(MockResponse().setBody(folderAdapter.toJson(FOLDER_RESPONSE)))
 
         val activityScenario = ActivityScenario.launch(MainActivity::class.java)
         onView(withId(R.id.message_icon)).check(matches(isDisplayed()))
@@ -97,12 +107,14 @@ class MainActivityTest {
     fun when_navigate_to_files_and_back_then_list_not_updated() {
         setMockServerUrl()
 
-        server.enqueue(MockResponse().setBody(FOLDER_RESPONSE))
+        server.enqueue(MockResponse().setBody(folderAdapter.toJson(FOLDER_RESPONSE)))
         val activityScenario = ActivityScenario.launch(MainActivity::class.java)
 
         // Navigate to files list of first folder
-        server.enqueue(MockResponse().setBody(FILES_INFO_RESPONSE))
+        val fileInfoAdapter = moshi.adapter(FileInfoResponse::class.java)
+        server.enqueue(MockResponse().setBody(fileInfoAdapter.toJson(FILES_INFO_RESPONSE)))
         server.enqueue(MockResponse().setBody(FILES_RESPONSE))
+        Thread.sleep(500)
         onView(withId(R.id.folders_list))
             .perform(
                 RecyclerViewActions.actionOnItemAtPosition<ViewHolder>(1, click()) // index 0 is header
@@ -112,7 +124,7 @@ class MainActivityTest {
             .check(matches(atPosition(0, isDisplayed())))
 
         // Navigate back
-        server.enqueue(MockResponse().setBody(FOUR_FOLDER_RESPONSE))
+        server.enqueue(MockResponse().setBody(folderAdapter.toJson(FOUR_FOLDER_RESPONSE)))
         Espresso.pressBack()
 
         // Verify list didn't change
@@ -145,54 +157,17 @@ class MainActivityTest {
     }
 
     companion object {
-        val FOLDER_RESPONSE = """
-            {
-              "name": "root_folder",
-              "page": {
-                "items": [
-                  {
-                    "name": "test item",
-                    "coverUrl": "doesn't matter",
-                    "count": 10,
-                    "id": 0
-                  }
-                ],
-                "totalPages": 1,
-                "totalItems": 1
-              }
-            }
-        """.trimIndent()
+        val FOLDER_RESPONSE = PagedFolderResponse(
+            "root_folder",
+            FolderPage(listOf(Folder("test item", "doesn't matter", 10, 0)), 1, 1, null),
+        )
 
-        val FOUR_FOLDER_RESPONSE = """
-            {
-              "name": "root_folder",
-              "page": {
-                "items": [
-                  ${(1..4).joinToString(",") {"""
-                    {
-                    "name": "folder $it",
-                    "coverUrl": "doesn't matter",
-                    "count": 10,
-                    "id": 0
-                    }"""}}
-                ],
-                "totalPages": 1,
-                "totalItems": 4
-              }
-            }
-        """.trimIndent()
+        val FOUR_FOLDER_RESPONSE = PagedFolderResponse(
+            "root_folder",
+            FolderPage( List(4) { Folder("folder $it", "doesn't matter", 10, 0) }, 1, 1, null),
+        )
 
-        val FILES_INFO_RESPONSE = """
-            {
-                "thumbnail_sizes": {
-                    "original": 0,
-                    "small": 100,
-                    "medium": 350,
-                    "large": 600,
-                    "extralarge": 850
-                }
-            }
-        """.trimIndent()
+        val FILES_INFO_RESPONSE = FileInfoResponse(mapOf("original" to 0, "small" to 100, "medium" to 350, "large" to 600, "extralarge" to 850))
 
         val FILES_RESPONSE = """
             {
