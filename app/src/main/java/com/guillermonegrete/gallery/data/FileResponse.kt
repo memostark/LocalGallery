@@ -2,6 +2,7 @@ package com.guillermonegrete.gallery.data
 
 import com.guillermonegrete.gallery.files.source.local.FileEntity
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import java.net.URL
 import java.util.*
 
@@ -38,6 +39,7 @@ sealed class FileResponse(
     }
 }
 
+@JsonClass(generateAdapter = true)
 class ImageFileResponse(
     url: String,
     filename: String?,
@@ -56,6 +58,7 @@ class ImageFileResponse(
     override fun toFile() = ImageFile(url, generateFilename(), width, height, 0, 0, creationDate, lastModified, tags, folder, id)
 }
 
+@JsonClass(generateAdapter = true)
 class VideoFileResponse(
     url: String,
     filename: String?,
@@ -78,6 +81,7 @@ enum class FileType{
     Video
 }
 
+@JsonClass(generateAdapter = true)
 data class FileInfoResponse(
     @property:Json(name = "thumbnail_sizes")
     val thumbnailSizes: Map<String, Int>

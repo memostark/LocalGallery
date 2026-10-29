@@ -21,13 +21,14 @@ import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.guillermonegrete.gallery.R
 import com.guillermonegrete.gallery.data.FileInfoResponse
 import com.guillermonegrete.gallery.data.Folder
+import com.guillermonegrete.gallery.data.ImageFileResponse
+import com.guillermonegrete.gallery.data.PagedFileResponse
 import com.guillermonegrete.gallery.data.source.SettingsRepository
 import com.guillermonegrete.gallery.di.SettingsModule
 import com.guillermonegrete.gallery.folders.source.FolderPage
 import com.guillermonegrete.gallery.folders.source.PagedFolderResponse
 import com.guillermonegrete.gallery.utils.atPosition
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.UninstallModules
@@ -38,6 +39,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.Date
 import javax.inject.Inject
 
 @RunWith(AndroidJUnit4::class)
@@ -51,10 +53,8 @@ class MainActivityTest {
 
     @Inject
     lateinit var settingsRepository: SettingsRepository
-    private val moshi = Moshi.Builder()
-        .addLast(KotlinJsonAdapterFactory())
-        .build()
-    private val folderAdapter = moshi.adapter(PagedFolderResponse::class.java)
+    @Inject lateinit var moshi: Moshi
+    private val folderAdapter by lazy { moshi.adapter(PagedFolderResponse::class.java) }
 
     private lateinit var server: MockWebServer
 
@@ -113,7 +113,8 @@ class MainActivityTest {
         // Navigate to files list of first folder
         val fileInfoAdapter = moshi.adapter(FileInfoResponse::class.java)
         server.enqueue(MockResponse().setBody(fileInfoAdapter.toJson(FILES_INFO_RESPONSE)))
-        server.enqueue(MockResponse().setBody(FILES_RESPONSE))
+        val fileAdapter = moshi.adapter(PagedFileResponse::class.java)
+        server.enqueue(MockResponse().setBody(fileAdapter.toJson(FILES_RESPONSE)))
         Thread.sleep(500)
         onView(withId(R.id.folders_list))
             .perform(
@@ -169,25 +170,12 @@ class MainActivityTest {
 
         val FILES_INFO_RESPONSE = FileInfoResponse(mapOf("original" to 0, "small" to 100, "medium" to 350, "large" to 600, "extralarge" to 850))
 
-        val FILES_RESPONSE = """
-            {
-              "items": [
-                  {
-                    "url": "dummy-url",
-                    "filename": "file_1.jpg",
-                    "width": 200,
-                    "height": 300,
-                    "creationDate": "2020-08-25T08:49:31Z",
-                    "lastModified": "2021-10-27T19:56:10Z",
-                    "tags": [],
-                    "id": 0,
-                    "file_type":"Image"
-                  }
-                ],
-                "totalPages": 1,
-                "totalItems": 1
-            }
-        """.trimIndent()
+        val FILES_RESPONSE = PagedFileResponse(
+            listOf(ImageFileResponse("dummy-url", "file_1.jpg", 200, 300, Date(1598345371000), Date(1635364570000), listOf(), null, 0)),
+            1,
+            1,
+            null,
+        )
     }
 
 }

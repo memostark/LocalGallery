@@ -3,10 +3,12 @@ package com.guillermonegrete.gallery.data
 import android.os.Parcel
 import android.os.Parcelable
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import kotlinx.parcelize.Parceler
 import kotlinx.parcelize.Parcelize
 import java.util.*
 
+@JsonClass(generateAdapter = true)
 @Parcelize
 data class Tag(
     val name: String,

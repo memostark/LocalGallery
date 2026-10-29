@@ -22,7 +22,7 @@ buildscript {
 
 plugins {
     id("com.google.dagger.hilt.android") version "$dagger_version" apply false
-    id 'com.google.devtools.ksp' version '2.3.9' apply false
+    id 'com.google.devtools.ksp' version '2.3.12' apply false
 }
 
 allprojects {

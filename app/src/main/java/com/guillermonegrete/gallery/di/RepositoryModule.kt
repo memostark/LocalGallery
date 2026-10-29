@@ -40,14 +40,15 @@ import javax.inject.Singleton
 object RepositoryModule {
 
     @Provides
-    fun provideRetrofit(client: OkHttpClient): Retrofit{
-        val moshi = Moshi.Builder()
-            .add(Date::class.java, Rfc3339DateJsonAdapter())
-            .add(PolymorphicJsonAdapterFactory.of(FileResponse::class.java, "file_type")
-                .withSubtype(ImageFileResponse::class.java, FileType.Image.name)
-                .withSubtype(VideoFileResponse::class.java, FileType.Video.name))
-            .add(KotlinJsonAdapterFactory())
-            .build()
+    fun provideMoshi(): Moshi = Moshi.Builder()
+        .add(Date::class.java, Rfc3339DateJsonAdapter())
+        .add(PolymorphicJsonAdapterFactory.of(FileResponse::class.java, "file_type")
+            .withSubtype(ImageFileResponse::class.java, FileType.Image.name)
+            .withSubtype(VideoFileResponse::class.java, FileType.Video.name))
+        .build()
+
+    @Provides
+    fun provideRetrofit(client: OkHttpClient, moshi: Moshi): Retrofit{
         return Retrofit.Builder()
             .baseUrl("http://localhost/")
             .client(client)
