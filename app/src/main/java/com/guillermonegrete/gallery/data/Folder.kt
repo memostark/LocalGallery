@@ -3,9 +3,11 @@ package com.guillermonegrete.gallery.data
 import android.os.Parcelable
 import com.guillermonegrete.gallery.folders.models.FolderUI
 import com.guillermonegrete.gallery.folders.source.local.FolderEntity
+import com.squareup.moshi.JsonClass
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
+@JsonClass(generateAdapter = true)
 @Parcelize
 data class Folder(
     val name:String,
